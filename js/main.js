@@ -10,8 +10,8 @@ var ViewPort = function ViewPort(isFirst) {
   if(isFirst){
      w = document.getElementById('img_slide_1').offsetWidth;
      h = document.getElementById('img_slide_1').offsetHeight;
-     w = w !== 0 ? w : 308.8;
-     h = h !== 0 ? h : 605.6;
+     w = w !== 0 ? w : 386;
+     h = h !== 0 ? h : 760;
   }
   
   document.getElementById("row").style.height = (offset * h) + "px";
