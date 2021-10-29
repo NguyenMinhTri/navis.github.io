@@ -192,212 +192,212 @@
     <svg width="100%" height="100%" version="1.0" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="21.92 207.394 955.82 501.053" style="shape-rendering: geometricprecision;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
       <defs>
         <script>
-            //
-        function reRenderHMI(RS485DataStr){
-          RS485DataStr.RS485Data.forEach(element =&gt; {
-            if(element.MemoryType === 0){ // FILL COIL STATE TO SVG
-              let idElementON =
-              'ON-' + `${element.SlaveId}` + '-' + `${element.Address}`;
-              let idElementOFF =
-              'OFF-' + `${element.SlaveId}` + '-' + `${element.Address}`;
-              let strHiddenOrVisibleOFF =
-                element.CoilValue ? 'hidden' : 'visible';
-              let strHiddenOrVisibleON = element.CoilValue ? 'visible' : 'hidden';
-              Array.prototype.forEach.call(document.getElementsByClassName(`${idElementON}`), function(item) {item.style.visibility = `${strHiddenOrVisibleON}`;});
-              Array.prototype.forEach.call(document.getElementsByClassName(`${idElementOFF}`), function(item) {item.style.visibility = `${strHiddenOrVisibleOFF}`;});
-            } else if (element.MemoryType == 1) { //FILL VALUE TO TEXT
-              let idTXT =
-                  'TXT-' + `${element.SlaveId}` + '-' + `${element.Address}`;
-                  let valueTXT =element.Value.toFixed(1);
-              Array.prototype.forEach.call(document.getElementsByClassName(`${idTXT}`), function(item) {item.textContent = `${valueTXT}`;});
-            }
-            //
-          });
-          // example class name: MULTI ON-2-47 &amp;&amp; ON-2-48 
-          // SET STATE FOR COIL THAT HAS MULTI CONDITIONS
-          Array.prototype.forEach.call( document.getElementsByClassName("MULTI"), function(itemClass) {
-            let fullClassesName = itemClass.className.animVal;
-            let valuesWithConditions = fullClassesName.replaceAll('MULTI ','');
-            let arrayValues = [];
-            // SPLIT VALUE NAME FROM STRING
-            valuesWithConditions.split(' ').forEach(item =&gt; {
-              if(item.includes('ON')){
-                let splitClassON = item.split('-');
-                console.log(splitClassON.toString());
-                console.log(RS485DataStr.RS485Data.find(rs485=&gt; rs485.SlaveId==splitClassON[1] &amp;&amp; rs485.Address==splitClassON[2]));
-                let conditionValue = (RS485DataStr.RS485Data.find(rs485=&gt; rs485.SlaveId==splitClassON[1] &amp;&amp; rs485.Address==splitClassON[2])).CoilValue;
-                console.log(item +conditionValue);
-                arrayValues.push(conditionValue);
-              }
-              else if (item.includes('OFF')){
-                let splitClassON = item.split('-');
-                let conditionValue = !(RS485DataStr.RS485Data.find(rs485=&gt; rs485.SlaveId==splitClassON[1] &amp;&amp; rs485.Address==splitClassON[2]).CoilValue);
-                console.log(item +conditionValue);
-                arrayValues.push(conditionValue);
-              }
-              else if (item.includes('TXT')){
-                let splitClassON = item.split('-');
-                let conditionValue = (RS485DataStr.RS485Data.find(rs485=&gt; rs485.SlaveId==splitClassON[1] &amp;&amp; rs485.Address==splitClassON[2]).value);
-                console.log(item +conditionValue);
-                arrayValues.push(conditionValue);
-              } else {
-                arrayValues.push(item);
-              }
-             
-            });
-            // FULL CONDITION 
-            let conditionsStr = arrayValues.toString().split(',').join(' ');
-            console.log('Condition String: ', conditionsStr);
-            if(eval(conditionsStr)){
-              console.log('Final result: ', true);
-              //Answer
-             }else {
-              console.log('Final result: ', false);
-             };
-             let strHiddenOrVisibleON = eval(conditionsStr) ? 'visible' : 'hidden';
-             Array.prototype.forEach.call(document.getElementsByClassName(`${fullClassesName}`), function(item) {item.style.visibility = `${strHiddenOrVisibleON}`;});
-        
-          });
-          return RS485DataStr.WifiInfo;
-        }
-        //
-          </script>
-        <style type="text/css">
-        
-         .spin{
-          transform-box: fill-box;
-          transform-origin: center;
-         
-          animation-name: spin;
-          animation-duration: 5000ms;
-          animation-iteration-count: infinite;
-          animation-timing-function: linear; 
-          /* transform: rotate(3deg); */
-           /* transform: rotate(0.3rad);/ */
-           /* transform: rotate(3grad); */ 
-           /* transform: rotate(.03turn);  */
-        }
-        .spin-fast{
-          transform-box: fill-box;
-          transform-origin: center;
-         
-          animation-name: spin;
-          animation-duration: 500ms;
-          animation-iteration-count: infinite;
-          animation-timing-function: linear; 
-          /* transform: rotate(3deg); */
-           /* transform: rotate(0.3rad);/ */
-           /* transform: rotate(3grad); */ 
-           /* transform: rotate(.03turn);  */
-        }
-        
-        .right-to-left {
-        
-          animation: movearrows 2s linear infinite;
-        
-        }
-        .right-top-bottom {
-        
-          animation: moveTopBottom 2s linear infinite;
-        
-        }
-        @keyframes moveTopBottom {
-          0% {
-            transform: translateY(0);
-          }
-          100% {
-            transform: translateY(33%);
-          }
-        
-        }
-        
-        .right-to-left {
-        
-          animation: movearrows 2s linear infinite;
-        
-        }
-        
-        @keyframes movearrows {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(60%);
-          }
-        
-        }
-        
-        @keyframes spin {
-            from {
-                transform:rotate(0deg);
-            }
-            to {
-                transform:rotate(360deg);
-            }
-        }
-        
-        @keyframes rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        @keyframes run_forward_normal {
-          0%{
-            stroke-dashoffset: 0px;
-          }
-          100%{
-            stroke-dashoffset: -600px;
-          }
-        }
-        @keyframes run_backward_normal {
-          0%{
-            stroke-dashoffset: 0px;
-          }
-          100%{
-            stroke-dashoffset: 600px;
-          }
-        }
-        @keyframes run_forward_fast {
-          0%{
-            stroke-dashoffset: 0px;
-          }
-          100%{
-            stroke-dashoffset: -1200px;
-          }
-        }
-        @keyframes run_backward_fast_1 {
-          0%{
-            stroke-dashoffset: 0px;
-          }
-          100%{
-            stroke-dashoffset: 100px;
-          }
-        }
-        @keyframes run_backward_super_fast {
-          0%{
-            stroke-dashoffset: 0px;
-          }
-          100%{
-            stroke-dashoffset: 8000px;
-          }
-        }
-        @keyframes run_forward_slow {
-          0%{
-            stroke-dashoffset: 0px;
-          }
-          100%{  stroke-dashoffset: -300px;
-          }
-        }
-        @keyframes run_backward_slow {
-          0%{
-            stroke-dashoffset: 0px;
-          }
-          100%{
-            stroke-dashoffset: 300px;
-          }
-        }
+                //
+            function reRenderHMI(RS485DataStr){
+              RS485DataStr.RS485Data.forEach(element =&gt; {
+                if(element.MemoryType === 0){ // FILL COIL STATE TO SVG
+                  let idElementON =
+                  'ON-' + `${element.SlaveId}` + '-' + `${element.Address}`;
+                  let idElementOFF =
+                  'OFF-' + `${element.SlaveId}` + '-' + `${element.Address}`;
+                  let strHiddenOrVisibleOFF =
+                    element.CoilValue ? 'hidden' : 'visible';
+                  let strHiddenOrVisibleON = element.CoilValue ? 'visible' : 'hidden';
+                  Array.prototype.forEach.call(document.getElementsByClassName(`${idElementON}`), function(item) {item.style.visibility = `${strHiddenOrVisibleON}`;});
+                  Array.prototype.forEach.call(document.getElementsByClassName(`${idElementOFF}`), function(item) {item.style.visibility = `${strHiddenOrVisibleOFF}`;});
+                } else if (element.MemoryType == 1) { //FILL VALUE TO TEXT
+                  let idTXT =
+                      'TXT-' + `${element.SlaveId}` + '-' + `${element.Address}`;
+                      let valueTXT =element.Value.toFixed(1);
+                  Array.prototype.forEach.call(document.getElementsByClassName(`${idTXT}`), function(item) {item.textContent = `${valueTXT}`;});
+                }
+                //
+              });
+              // example class name: MULTI ON-2-47 &amp;&amp; ON-2-48 
+              // SET STATE FOR COIL THAT HAS MULTI CONDITIONS
+              Array.prototype.forEach.call( document.getElementsByClassName("MULTI"), function(itemClass) {
+                let fullClassesName = itemClass.className.animVal;
+                let valuesWithConditions = fullClassesName.replaceAll('MULTI ','');
+                let arrayValues = [];
+                // SPLIT VALUE NAME FROM STRING
+                valuesWithConditions.split(' ').forEach(item =&gt; {
+                  if(item.includes('ON')){
+                    let splitClassON = item.split('-');
+                    console.log(splitClassON.toString());
+                    console.log(RS485DataStr.RS485Data.find(rs485=&gt; rs485.SlaveId==splitClassON[1] &amp;&amp; rs485.Address==splitClassON[2]));
+                    let conditionValue = (RS485DataStr.RS485Data.find(rs485=&gt; rs485.SlaveId==splitClassON[1] &amp;&amp; rs485.Address==splitClassON[2])).CoilValue;
+                    console.log(item +conditionValue);
+                    arrayValues.push(conditionValue);
+                  }
+                  else if (item.includes('OFF')){
+                    let splitClassON = item.split('-');
+                    let conditionValue = !(RS485DataStr.RS485Data.find(rs485=&gt; rs485.SlaveId==splitClassON[1] &amp;&amp; rs485.Address==splitClassON[2]).CoilValue);
+                    console.log(item +conditionValue);
+                    arrayValues.push(conditionValue);
+                  }
+                  else if (item.includes('TXT')){
+                    let splitClassON = item.split('-');
+                    let conditionValue = (RS485DataStr.RS485Data.find(rs485=&gt; rs485.SlaveId==splitClassON[1] &amp;&amp; rs485.Address==splitClassON[2]).value);
+                    console.log(item +conditionValue);
+                    arrayValues.push(conditionValue);
+                  } else {
+                    arrayValues.push(item);
+                  }
+                 
+                });
+                // FULL CONDITION 
+                let conditionsStr = arrayValues.toString().split(',').join(' ');
+                console.log('Condition String: ', conditionsStr);
+                if(eval(conditionsStr)){
+                  console.log('Final result: ', true);
+                  //Answer
+                 }else {
+                  console.log('Final result: ', false);
+                 };
+                 let strHiddenOrVisibleON = eval(conditionsStr) ? 'visible' : 'hidden';
+                 Array.prototype.forEach.call(document.getElementsByClassName(`${fullClassesName}`), function(item) {item.style.visibility = `${strHiddenOrVisibleON}`;});
             
-            </style>
+              });
+              return RS485DataStr.WifiInfo;
+            }
+            //
+              </script>
+        <style type="text/css">
+            
+             .spin{
+              transform-box: fill-box;
+              transform-origin: center;
+             
+              animation-name: spin;
+              animation-duration: 5000ms;
+              animation-iteration-count: infinite;
+              animation-timing-function: linear; 
+              /* transform: rotate(3deg); */
+               /* transform: rotate(0.3rad);/ */
+               /* transform: rotate(3grad); */ 
+               /* transform: rotate(.03turn);  */
+            }
+            .spin-fast{
+              transform-box: fill-box;
+              transform-origin: center;
+             
+              animation-name: spin;
+              animation-duration: 500ms;
+              animation-iteration-count: infinite;
+              animation-timing-function: linear; 
+              /* transform: rotate(3deg); */
+               /* transform: rotate(0.3rad);/ */
+               /* transform: rotate(3grad); */ 
+               /* transform: rotate(.03turn);  */
+            }
+            
+            .right-to-left {
+            
+              animation: movearrows 2s linear infinite;
+            
+            }
+            .right-top-bottom {
+            
+              animation: moveTopBottom 2s linear infinite;
+            
+            }
+            @keyframes moveTopBottom {
+              0% {
+                transform: translateY(0);
+              }
+              100% {
+                transform: translateY(33%);
+              }
+            
+            }
+            
+            .right-to-left {
+            
+              animation: movearrows 2s linear infinite;
+            
+            }
+            
+            @keyframes movearrows {
+              0% {
+                transform: translateX(0);
+              }
+              100% {
+                transform: translateX(60%);
+              }
+            
+            }
+            
+            @keyframes spin {
+                from {
+                    transform:rotate(0deg);
+                }
+                to {
+                    transform:rotate(360deg);
+                }
+            }
+            
+            @keyframes rotate {
+              from { transform: rotate(0deg); }
+              to { transform: rotate(360deg); }
+            }
+            
+            @keyframes run_forward_normal {
+              0%{
+                stroke-dashoffset: 0px;
+              }
+              100%{
+                stroke-dashoffset: -600px;
+              }
+            }
+            @keyframes run_backward_normal {
+              0%{
+                stroke-dashoffset: 0px;
+              }
+              100%{
+                stroke-dashoffset: 600px;
+              }
+            }
+            @keyframes run_forward_fast {
+              0%{
+                stroke-dashoffset: 0px;
+              }
+              100%{
+                stroke-dashoffset: -1200px;
+              }
+            }
+            @keyframes run_backward_fast_1 {
+              0%{
+                stroke-dashoffset: 0px;
+              }
+              100%{
+                stroke-dashoffset: 100px;
+              }
+            }
+            @keyframes run_backward_super_fast {
+              0%{
+                stroke-dashoffset: 0px;
+              }
+              100%{
+                stroke-dashoffset: 8000px;
+              }
+            }
+            @keyframes run_forward_slow {
+              0%{
+                stroke-dashoffset: 0px;
+              }
+              100%{  stroke-dashoffset: -300px;
+              }
+            }
+            @keyframes run_backward_slow {
+              0%{
+                stroke-dashoffset: 0px;
+              }
+              100%{
+                stroke-dashoffset: 300px;
+              }
+            }
+                
+                </style>
         <linearGradient id="gradient-67" gradientUnits="userSpaceOnUse" x1="12.2306" y1="8.57237" x2="12.2306" y2="15.889" gradientTransform="matrix(9.430556, 0, 0, 9.430558, 7172.455566, 2289.445313)">
           <stop offset="0" style="stop-color:#E8E3E3" id="stop-85"></stop>
           <stop offset="0.2784" style="stop-color:#C1BEBE" id="stop-86"></stop>
@@ -812,7 +812,7 @@
             </g>
             <text style="fill: rgb(51, 51, 51); font-family: Poppins, sans-serif; font-size: 20px; font-weight: 700; white-space: pre;" x="460.064" y="155.166" class="TXT-1-3">65.1%RH</text>
           </g>
-          <text style="fill: rgb(51, 51, 51); font-family: Poppins, sans-serif; font-size: 21px; white-space: pre;" x="3421.768" y="12101.231">Temperature</text>
+          <text style="fill: rgb(51, 51, 51); font-family: Poppins, sans-serif; font-size: 21px; white-space: pre;" x="3409.768" y="12101.231">Temperature</text>
           <g transform="matrix(1, 0, 0, 1, 2846.531494, 11994.451172)">
             <g id="g-28" transform="matrix(1, 0, 0, 1, 463.7742, 107.426865)"></g>
             <g id="g-29" transform="matrix(1, 0, 0, 1, 463.7742, 107.426865)">
