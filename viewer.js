@@ -9902,9 +9902,7 @@
       
           const viewerVersion = '2.12.115';
       
-          if (_pdfjsLib.version !== viewerVersion) {
-            throw new Error(`The API version "${_pdfjsLib.version}" does not match the Viewer version "${viewerVersion}".`);
-          }
+ 
       
           this.container = options.container;
           this.viewer = options.viewer || options.container.firstElementChild;
