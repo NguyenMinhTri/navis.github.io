@@ -1531,7 +1531,7 @@ h3 {
 
 /* line 1, ../../Arafath/CL/CL October/214. App Landing Page/HTML/scss/_features.scss */
 .features_area {
-  padding: 77px 0 90px 0;
+  padding: 0px 0 0px 0;
 }
 
 @media (max-width: 767px) {
@@ -4487,7 +4487,7 @@ h6 {
 .generic-blockquote {
   padding: 30px 50px 30px 30px;
   background: #f9f9ff;
-  border-left: 2px solid #ff5e13;
+  border-left: 5px solid #1453b4;
 }
 
 /* line 353, ../../Arafath/CL/CL October/214. App Landing Page/HTML/scss/_elements.scss */
@@ -5409,6 +5409,10 @@ h6 {
 .section-top-border {
   padding: 50px 0;
   border-top: 1px dotted #eee;
+}
+.section-bottom-border {
+  padding: 50px 0;
+  border-bottom: 1px dotted #eee;
 }
 
 /* line 1093, ../../Arafath/CL/CL October/214. App Landing Page/HTML/scss/_elements.scss */
