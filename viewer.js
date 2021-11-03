@@ -72,7 +72,7 @@
       kind: OptionKind.VIEWER + OptionKind.PREFERENCE
     },
     defaultUrl: {
-      value: "huong-dan-chuyen-doi-so-cho-dn-viet-nam.pdf",
+      value: pdfURL,
       kind: OptionKind.VIEWER
     },
     defaultZoomValue: {
