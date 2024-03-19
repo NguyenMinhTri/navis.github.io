@@ -10,6 +10,10 @@
 <body>
 
 <div class="container">
+      <!-- Form và các trường nhập thông tin đơn hàng -->
+  <div id="loading" class="text-center" style="display: none;">
+    <img src="./images/loading.gif" alt="Loading...">
+  </div>
   <h2>Thông tin đơn hàng</h2>
   <p>Thiết kế bởi Dai Viet IoT JSC</p>
   <form id="orderForm">
@@ -33,14 +37,14 @@
     <div class="form-group">
       <label for="phoneNumber">Số điện thoại:</label>
       <input type="tel" class="form-control" id="phoneNumber" placeholder="Nhập số điện thoại" pattern="[0-9]{10,11}" required>
-      <small class="form-text text-muted">Ví dụ: 84387226446</small>
+      <small class="form-text text-muted">Ví dụ: 0387226446</small>
     </div>
     <div class="form-group">
       <label for="status">Trạng thái:</label>
       <input type="text" class="form-control" id="status" placeholder="Nhập trạng thái" required>
       <small class="form-text text-muted">Ví dụ: "Chưa thanh toán" "Đã giao thành công" ...</small>
     </div>
-    <button type="submit" class="btn btn-primary">Gửi</button>
+    <button type="submit"  id="submitButton"  class="btn btn-primary">Gửi</button>
   </form>
 </div>
 
@@ -54,7 +58,10 @@
   $(document).ready(function(){
     $('#orderForm').submit(function(event){
       event.preventDefault(); // Prevent default form submission
-      
+        // Hiển thị biểu tượng loading
+    $('#loading').show();
+       // Ẩn nút gửi và hiển thị biểu tượng loading
+       $('#submitButton').prop('disabled', true);
       // Gather form data
       var formData = {
         order_code: $('#orderCode').val(),
@@ -92,14 +99,21 @@
       // Perform POST request to server (replace 'url' with your server endpoint)
       $.post('https://asia-east2-weatherstationiotdaiviet.cloudfunctions.net/HttpPostRequest/api/send-zalozns', formData)
         .done(function(response){
-          console.log('Đã gửi thành công:', response);
-          alert("Đã gửi thành công");
+
+          alert('Message: ' + response);
+         
           // Handle success response here
         })
         .fail(function(error){
           console.error('Lỗi khi gửi dữ liệu:', error);
+   
           // Handle error here
-        });
+        })
+        .always(function(){
+        // Ẩn biểu tượng loading và mở lại nút gửi sau khi nhận được kết quả hoặc gặp lỗi
+        $('#loading').hide();
+        $('#submitButton').prop('disabled', false);
+      });
     });
   });
 </script>
