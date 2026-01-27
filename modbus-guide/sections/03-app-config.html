@@ -1,0 +1,355 @@
+<!-- Section: App Configuration + Field Explanations -->
+<h2>3. Cấu Hình Trên App</h2>
+<p style="color:#666;margin-bottom:15px;">Vào <strong>Settings → Advance Settings → Modbus Settings</strong> để xem và chỉnh sửa các điểm
+    Modbus</p>
+
+<div class="two-cols">
+    <div>
+        <h3>3.1 Màn Hình Danh Sách</h3>
+        <div class="phone-frame" style="max-width:220px;">
+            <div class="phone-screen" style="min-height:180px;">
+                <div class="app-bar">
+                    <span class="material-icons">arrow_back</span>
+                    <span>Cấu Hình Modbus</span>
+                    <div style="display:flex;gap:4px;">
+                        <span class="material-icons">search</span>
+                        <span class="material-icons">save</span>
+                    </div>
+                </div>
+                <div
+                    style="display:flex;gap:4px;padding:6px;background:white;border-bottom:1px solid #eee;overflow-x:auto;">
+                    <div
+                        style="background:#0066cc;color:white;padding:3px 8px;border-radius:12px;font-size:9px;white-space:nowrap;">
+                        Tất cả (8)</div>
+                    <div
+                        style="background:#e0e0e0;padding:3px 8px;border-radius:12px;font-size:9px;white-space:nowrap;">
+                        PLC_Delta (5)</div>
+                    <div
+                        style="background:#e0e0e0;padding:3px 8px;border-radius:12px;font-size:9px;white-space:nowrap;">
+                        Sensors (3)</div>
+                </div>
+                <div style="padding:4px;">
+                    <div
+                        style="background:white;border-radius:6px;margin-bottom:4px;padding:6px;box-shadow:0 1px 3px rgba(0,0,0,0.1);display:flex;align-items:center;gap:6px;">
+                        <span class="badge badge-sensor">SENSOR</span>
+                        <div>
+                            <div style="font-weight:500;font-size:10px;">Nhiệt độ lò</div>
+                            <div style="font-size:8px;color:#666;">Addr: 4196 | ID: 1</div>
+                        </div>
+                    </div>
+                    <div
+                        style="background:white;border-radius:6px;margin-bottom:4px;padding:6px;box-shadow:0 1px 3px rgba(0,0,0,0.1);display:flex;align-items:center;gap:6px;">
+                        <span class="badge badge-setting">SETTING</span>
+                        <div>
+                            <div style="font-weight:500;font-size:10px;">Setpoint</div>
+                            <div style="font-size:8px;color:#666;">Addr: 4396 | ID: 1</div>
+                        </div>
+                    </div>
+                    <div
+                        style="background:white;border-radius:6px;padding:6px;box-shadow:0 1px 3px rgba(0,0,0,0.1);display:flex;align-items:center;gap:6px;">
+                        <span class="badge badge-coil">COIL</span>
+                        <div>
+                            <div style="font-weight:500;font-size:10px;">Máy bơm 1</div>
+                            <div style="font-size:8px;color:#666;">Addr: 2048 | ID: 1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <h3>3.2 Thao Tác Nhanh</h3>
+        <table>
+            <tr>
+                <th>Thao tác</th>
+                <th>Chức năng</th>
+            </tr>
+            <tr>
+                <td>Nhấn vào item</td>
+                <td>Mở form chỉnh sửa</td>
+            </tr>
+            <tr>
+                <td>Vuốt phải →</td>
+                <td>Nhân bản cấu hình</td>
+            </tr>
+            <tr>
+                <td>Vuốt trái ←</td>
+                <td>Xóa cấu hình</td>
+            </tr>
+            <tr>
+                <td>Kéo thả ↕</td>
+                <td>Sắp xếp thứ tự</td>
+            </tr>
+            <tr>
+                <td>Nút + (góc phải)</td>
+                <td>Thêm mới</td>
+            </tr>
+            <tr>
+                <td>Nút Save 💾</td>
+                <td>Lưu thay đổi xuống Gateway</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!-- Bảng giải thích các trường + Mockup giao diện form đầy đủ -->
+<h3>3.3 Giải Thích Các Trường Cấu Hình</h3>
+<div class="two-cols">
+    <div>
+        <table style="font-size:9px;">
+            <tr>
+                <th>Trường</th>
+                <th>Mô tả</th>
+                <th>Ví dụ</th>
+            </tr>
+            <tr>
+                <td><strong>Name</strong></td>
+                <td>Tên hiển thị (≤30 ký tự, không chứa /)</td>
+                <td>Nhiệt độ lò</td>
+            </tr>
+            <tr>
+                <td><strong>Address</strong></td>
+                <td>Địa chỉ Modbus (thập phân)</td>
+                <td>4196 (D100)</td>
+            </tr>
+            <tr>
+                <td><strong>Slave ID</strong></td>
+                <td>ID của thiết bị slave (1-247)</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td><strong>Group Name</strong></td>
+                <td>Tên nhóm (header, ≤30 ký tự)</td>
+                <td>PLC_Delta</td>
+            </tr>
+            <tr>
+                <td><strong>Function Code</strong></td>
+                <td>Mã chức năng Modbus</td>
+                <td>1, 2, 3, 4</td>
+            </tr>
+            <tr>
+                <td><strong>Type</strong></td>
+                <td>Kiểu dữ liệu</td>
+                <td>bool, int, float</td>
+            </tr>
+            <tr>
+                <td><strong>Memory Type</strong></td>
+                <td>Loại hiển thị trên app</td>
+                <td>0: COIL, 1: SENSOR</td>
+            </tr>
+            <tr>
+                <td><strong>Unit</strong></td>
+                <td>Đơn vị hiển thị</td>
+                <td>°C, bar, %, Hz</td>
+            </tr>
+            <tr>
+                <td><strong>Changing Unit</strong></td>
+                <td>Hệ số nhân giá trị</td>
+                <td>0.1 (255→25.5)</td>
+            </tr>
+            <tr>
+                <td><strong>Fractional Digit</strong></td>
+                <td>Số chữ số thập phân</td>
+                <td>0, 1, 2</td>
+            </tr>
+            <tr>
+                <td><strong>Delta Value</strong></td>
+                <td>Ngưỡng thay đổi gửi data</td>
+                <td>0.1</td>
+            </tr>
+            <tr>
+                <td><strong>Cycle Time</strong></td>
+                <td>Chu kỳ đọc (ms, ≥1)</td>
+                <td>1000</td>
+            </tr>
+            <tr>
+                <td><strong>Offset</strong></td>
+                <td>Cộng thêm vào giá trị</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><strong>Get Bit</strong></td>
+                <td>Lấy bit cụ thể (-1 = không)</td>
+                <td>-1, 0, 1...</td>
+            </tr>
+            <tr>
+                <td><strong>Is Modify</strong></td>
+                <td>Cho phép ghi xuống PLC</td>
+                <td>✓</td>
+            </tr>
+            <tr>
+                <td><strong>Is High Alarm</strong></td>
+                <td>Hiển thị màu đỏ khi ON</td>
+                <td>✓</td>
+            </tr>
+            <tr>
+                <td><strong>Is Hide</strong></td>
+                <td>Ẩn khỏi giao diện</td>
+                <td>✓</td>
+            </tr>
+            <tr>
+                <td><strong>Is Column</strong></td>
+                <td>Hiển thị dạng cột</td>
+                <td>✓</td>
+            </tr>
+            <tr>
+                <td><strong>Analog Scale</strong></td>
+                <td>Quy đổi In→Out</td>
+                <td>0-4095→0-100</td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <h4>📱 Form Cấu Hình Đầy Đủ</h4>
+        <div class="phone-frame" style="max-width:200px;">
+            <div class="phone-screen" style="min-height:340px;overflow-y:auto;">
+                <div class="app-bar" style="padding:4px 8px;font-size:10px;position:sticky;top:0;">
+                    <span class="material-icons" style="font-size:14px;">close</span>
+                    <span>Chỉnh sửa</span>
+                    <span class="material-icons" style="font-size:14px;">check</span>
+                </div>
+                <div style="padding:6px;font-size:8px;">
+                    <!-- Basic Info -->
+                    <div
+                        style="background:#e3f2fd;padding:4px;border-radius:4px;margin-bottom:4px;font-weight:600;font-size:9px;">
+                        📋 Thông Tin Cơ Bản</div>
+                    <div style="margin-bottom:4px;">
+                        <label style="color:#666;">Name</label>
+                        <input type="text" value="Nhiệt độ lò"
+                            style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                    </div>
+                    <div style="display:flex;gap:3px;margin-bottom:4px;">
+                        <div style="flex:1;"><label style="color:#666;">Address</label><input type="text" value="4196"
+                                style="width:100%;border:1px solid #0066cc;border-radius:3px;padding:3px;font-size:8px;background:#e3f2fd;">
+                        </div>
+                        <div style="flex:1;"><label style="color:#666;">Slave ID</label><input type="text" value="1"
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                        </div>
+                    </div>
+                    <div style="margin-bottom:4px;">
+                        <label style="color:#666;">Group Name</label>
+                        <input type="text" value="PLC_Delta"
+                            style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                    </div>
+                    <!-- Type Settings -->
+                    <div
+                        style="background:#fff3e0;padding:4px;border-radius:4px;margin-bottom:4px;font-weight:600;font-size:9px;">
+                        ⚙️ Cấu Hình Loại</div>
+                    <div style="display:flex;gap:3px;margin-bottom:4px;">
+                        <div style="flex:1;"><label style="color:#666;">Function</label><select
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:2px;font-size:7px;">
+                                <option>3</option>
+                            </select></div>
+                        <div style="flex:1;"><label style="color:#666;">Type</label><select
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:2px;font-size:7px;">
+                                <option>int</option>
+                            </select></div>
+                    </div>
+                    <div style="display:flex;gap:3px;margin-bottom:4px;">
+                        <div style="flex:1;"><label style="color:#666;">Memory Type</label><select
+                                style="width:100%;border:1px solid #ff9800;border-radius:3px;padding:2px;font-size:7px;background:#fff3e0;">
+                                <option>SENSOR</option>
+                            </select></div>
+                        <div style="flex:1;"><label style="color:#666;">Data Len</label><input type="text" value="1"
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                        </div>
+                    </div>
+                    <!-- Value Settings -->
+                    <div
+                        style="background:#e8f5e9;padding:4px;border-radius:4px;margin-bottom:4px;font-weight:600;font-size:9px;">
+                        📊 Giá Trị</div>
+                    <div style="display:flex;gap:3px;margin-bottom:4px;">
+                        <div style="flex:1;"><label style="color:#666;">Changing Unit</label><input type="text"
+                                value="0.1"
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                        </div>
+                        <div style="flex:1;"><label style="color:#666;">Unit</label><input type="text" value="°C"
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:3px;margin-bottom:4px;">
+                        <div style="flex:1;"><label style="color:#666;">Digit</label><input type="text" value="1"
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                        </div>
+                        <div style="flex:1;"><label style="color:#666;">Offset</label><input type="text" value="0"
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                        </div>
+                    </div>
+                    <!-- Advanced -->
+                    <div
+                        style="background:#fce4ec;padding:4px;border-radius:4px;margin-bottom:4px;font-weight:600;font-size:9px;">
+                        🔧 Nâng Cao</div>
+                    <div style="display:flex;gap:3px;margin-bottom:4px;">
+                        <div style="flex:1;"><label style="color:#666;">Delta Value</label><input type="text"
+                                value="0.1"
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                        </div>
+                        <div style="flex:1;"><label style="color:#666;">Cycle Time</label><input type="text"
+                                value="1000"
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:3px;margin-bottom:4px;">
+                        <div style="flex:1;"><label style="color:#666;">Get Bit</label><input type="text" value="-1"
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                        </div>
+                    </div>
+                    <!-- Toggles -->
+                    <div
+                        style="display:flex;flex-wrap:wrap;gap:4px;padding:4px;background:#f5f5f5;border-radius:4px;margin-bottom:4px;">
+                        <label style="font-size:7px;display:flex;align-items:center;gap:2px;"><input type="checkbox"
+                                checked> Is Modify</label>
+                        <label style="font-size:7px;display:flex;align-items:center;gap:2px;"><input type="checkbox">
+                            High Alarm</label>
+                        <label style="font-size:7px;display:flex;align-items:center;gap:2px;"><input type="checkbox"> Is
+                            Hide</label>
+                        <label style="font-size:7px;display:flex;align-items:center;gap:2px;"><input type="checkbox"> Is
+                            Column</label>
+                    </div>
+                    <!-- Analog Scale -->
+                    <div style="background:#e1f5fe;padding:4px;border-radius:4px;margin-bottom:4px;">
+                        <label style="font-size:7px;display:flex;align-items:center;gap:2px;margin-bottom:3px;"><input
+                                type="checkbox"> Analog Scale</label>
+                        <div style="display:flex;gap:2px;font-size:7px;">
+                            <div style="flex:1;text-align:center;">In: <input type="text" value="0"
+                                    style="width:20px;font-size:7px;text-align:center;">-<input type="text" value="4095"
+                                    style="width:25px;font-size:7px;text-align:center;"></div>
+                            <div style="flex:1;text-align:center;">Out: <input type="text" value="0"
+                                    style="width:20px;font-size:7px;text-align:center;">-<input type="text" value="100"
+                                    style="width:20px;font-size:7px;text-align:center;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Memory Type -->
+<h3>3.4 Memory Type - Loại Hiển Thị</h3>
+<table>
+    <tr>
+        <th>Memory Type</th>
+        <th>Badge</th>
+        <th>Mô tả</th>
+        <th>Vị trí</th>
+    </tr>
+    <tr>
+        <td><strong>0 - COIL</strong></td>
+        <td><span class="badge badge-coil">COIL</span></td>
+        <td>Nút bật/tắt. <code>IsHighAlarm=true</code> → màu đỏ</td>
+        <td>Trang Coils</td>
+    </tr>
+    <tr>
+        <td><strong>1 - SENSOR</strong></td>
+        <td><span class="badge badge-sensor">SENSOR</span></td>
+        <td>Hiển thị giá trị + biểu đồ lịch sử</td>
+        <td>Dashboard</td>
+    </tr>
+    <tr>
+        <td><strong>6 - SETTING</strong></td>
+        <td><span class="badge badge-setting">SETTING</span></td>
+        <td>Giá trị có thể chỉnh sửa</td>
+        <td>Trang Settings</td>
+    </tr>
+</table>

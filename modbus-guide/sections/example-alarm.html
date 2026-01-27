@@ -1,0 +1,57 @@
+<!-- Section: Example - ALARM (Trip) -->
+<h2>Ví Dụ: Cảnh Báo Trip/Lỗi (ALARM COIL)</h2>
+<p style="font-size:11px;color:#666;margin-bottom:8px;">Giám sát M100 - Khi ON hiện ĐỎ nhấp nháy</p>
+
+<div class="example-block">
+    <div class="example-title">📝 BƯỚC 1: Nhập thông tin</div>
+    <div class="config-result">
+        <div>
+            <div class="form-box">
+                <div class="form-title">📌 Thông tin cơ bản</div>
+                <div class="form-field"><label>Tên *</label><input value="TRIP"></div>
+                <div class="form-row">
+                    <div class="form-field highlight"><label>Address *</label><input value="2148"></div>
+                    <div class="form-field"><label>Slave ID</label><input value="1"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field"><label>FC</label><select>
+                            <option>1 - Read Coil</option>
+                        </select></div>
+                    <div class="form-field"><label>Type</label><select>
+                            <option>bool</option>
+                        </select></div>
+                </div>
+                <div class="form-title" style="margin-top:8px;">⚙️ Hiển thị</div>
+                <div class="form-field"><label>Memory Type</label><select>
+                        <option>0 - COIL</option>
+                    </select></div>
+                <div class="form-field"><label>Group Name</label><input value="CANH BAO"></div>
+                <div class="form-check"><input type="checkbox"><label>Is Modify (KHÔNG tick)</label></div>
+                <div class="form-check highlight"><input type="checkbox" checked><label><strong>Is High Alarm ✓</strong>
+                        (hiện ĐỎ)</label></div>
+            </div>
+            <div class="warning" style="font-size:9px;"><strong>Is High Alarm = true</strong>: M100=ON → nhấp nháy
+                ĐỎ<br><strong>Is Modify = false</strong>: Chỉ xem</div>
+        </div>
+        <div class="arrow-right">→</div>
+        <div>
+            <div class="form-title">📱 BƯỚC 2: Khi có lỗi</div>
+            <div class="phone-frame">
+                <div class="phone-screen" style="min-height:70px;">
+                    <div class="app-bar">Coils</div>
+                    <div style="padding:4px;">
+                        <div class="coil-group">
+                            <div class="coil-header">CẢNH BÁO</div>
+                            <div class="coil-grid">
+                                <div class="coil-item">
+                                    <div class="coil-btn alarm-on">⚠️</div>
+                                    <div class="coil-name" style="color:#f44336;">TRIP</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

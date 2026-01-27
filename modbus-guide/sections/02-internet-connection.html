@@ -1,0 +1,289 @@
+<!-- Section: Internet Connection - Detailed Steps -->
+<h2>2. Kết Nối Internet</h2>
+
+<h3>2.1 Nút CONFIG và LED Trạng Thái</h3>
+<div class="warning">
+    <strong>⚠️ QUAN TRỌNG:</strong> Nút CONFIG <strong>CHỈ có tác dụng trong 5 giây đầu</strong> sau khi:<br>
+    • Bật nguồn gateway, HOẶC • Nhấn nút <strong>RESET</strong>
+</div>
+
+<div class="two-cols">
+    <div>
+        <h4>Thao tác nút CONFIG</h4>
+        <table>
+            <tr>
+                <th>Thao tác</th>
+                <th>Chức năng</th>
+            </tr>
+            <tr>
+                <td><strong>Giữ ≥ 5 giây</strong></td>
+                <td>Xóa WiFi → Vào SmartConfig</td>
+            </tr>
+            <tr>
+                <td><strong>Nhấn nhanh 1 lần</strong></td>
+                <td>Chuyển WiFi ↔ Ethernet</td>
+            </tr>
+        </table>
+        <h4>LED Đỏ (Trạng thái kết nối)</h4>
+        <table>
+            <tr>
+                <th>LED</th>
+                <th>Ý nghĩa</th>
+                <th>Xem</th>
+            </tr>
+            <tr>
+                <td>1 lần/s</td>
+                <td>Ethernet</td>
+                <td><span class="led-status led-1"></span></td>
+            </tr>
+            <tr>
+                <td>2 lần/s</td>
+                <td>WiFi</td>
+                <td><span class="led-status led-2"></span></td>
+            </tr>
+            <tr>
+                <td>3 lần/s</td>
+                <td>4G</td>
+                <td><span class="led-status led-3"></span></td>
+            </tr>
+            <tr>
+                <td>Nháy nhanh</td>
+                <td>Chờ SmartConfig</td>
+                <td><span class="led-status led-fast"></span></td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <h4>Sơ đồ lựa chọn kết nối</h4>
+        <div style="background:#f8f9fa;padding:10px;border-radius:8px;font-size:11px;">
+            <div style="text-align:center;margin-bottom:8px;"><strong>Bật nguồn Gateway</strong></div>
+            <div style="display:flex;justify-content:space-around;">
+                <div style="text-align:center;border:1px solid #0066cc;padding:8px;border-radius:6px;background:white;">
+                    <div style="font-size:18px;">📶</div>
+                    <strong>WiFi</strong><br>
+                    <span style="font-size:9px;">SmartConfig</span>
+                </div>
+                <div style="text-align:center;border:1px solid #0066cc;padding:8px;border-radius:6px;background:white;">
+                    <div style="font-size:18px;">🔗</div>
+                    <strong>Ethernet</strong><br>
+                    <span style="font-size:9px;">Cắm dây</span>
+                </div>
+                <div style="text-align:center;border:1px solid #0066cc;padding:8px;border-radius:6px;background:white;">
+                    <div style="font-size:18px;">📡</div>
+                    <strong>4G</strong><br>
+                    <span style="font-size:9px;">SIM card</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== WiFi SmartConfig ===== -->
+<h3 style="color:#4CAF50;">📶 Cách 1: Kết Nối WiFi (SmartConfig)</h3>
+<p style="font-size:11px;color:#666;margin-bottom:10px;">Dùng app gửi thông tin WiFi tới gateway qua sóng 2.4GHz</p>
+
+<div class="two-cols">
+    <div>
+        <h4>Các bước thực hiện:</h4>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Bước</th>
+                <th>Mô tả</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td><strong>Bật nguồn + Giữ CONFIG ≥5s</strong></td>
+                <td>LED nháy nhanh = sẵn sàng</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><strong>Mở App → Settings</strong></td>
+                <td>Vào trang cài đặt</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><strong>Nhấn "Kết nối wifi cho thiết bị"</strong></td>
+                <td>Trong mục Cài đặt khác</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><strong>Chọn WiFi 2.4GHz</strong></td>
+                <td>⚠️ Không dùng 5GHz!</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td><strong>Nhập mật khẩu WiFi</strong></td>
+                <td>Mật khẩu đúng</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td><strong>Nhấn "Kết nối"</strong></td>
+                <td>Đợi 10-60 giây</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td><strong>Kiểm tra LED</strong></td>
+                <td>LED nháy 2 lần/s = Thành công</td>
+            </tr>
+        </table>
+        <div class="warning" style="font-size:10px;">⚠️ <strong>Yêu cầu:</strong> WiFi 2.4GHz (không hỗ trợ 5GHz). Điện
+            thoại và gateway phải cùng mạng.</div>
+    </div>
+    <div>
+        <h4>📱 Màn hình App</h4>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <!-- Step 2-3: Settings -->
+            <div class="phone-frame" style="max-width:100px;">
+                <div class="phone-screen" style="min-height:100px;">
+                    <div class="app-bar" style="font-size:8px;padding:3px 5px;">Settings</div>
+                    <div style="padding:4px;font-size:8px;">
+                        <div
+                            style="background:#e3f2fd;padding:4px;border-radius:4px;margin-bottom:4px;display:flex;align-items:center;gap:3px;">
+                            <span style="color:#0066cc;">📶</span>
+                            <span style="font-weight:500;">Kết nối wifi</span>
+                        </div>
+                        <div style="padding:4px;border-bottom:1px solid #eee;">🗑️ Xóa thiết bị</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Step 4-5-6: WiFi Config -->
+            <div class="phone-frame" style="max-width:120px;">
+                <div class="phone-screen" style="min-height:100px;">
+                    <div class="app-bar" style="font-size:8px;padding:3px 5px;">Cấu hình WiFi</div>
+                    <div style="padding:6px;">
+                        <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px;">
+                            <span style="color:#07C8F9;font-size:12px;">📶</span>
+                            <span style="font-weight:600;font-size:10px;">NAVIS_2.4G</span>
+                        </div>
+                        <div style="margin-bottom:5px;">
+                            <label style="font-size:7px;color:#666;">Mật khẩu</label>
+                            <input type="password" value="••••••"
+                                style="width:100%;border:1px solid #ddd;border-radius:3px;padding:3px;font-size:8px;">
+                        </div>
+                        <button
+                            style="width:100%;background:#07C8F9;color:white;border:none;border-radius:4px;padding:5px;font-size:9px;font-weight:600;">🚀
+                            Kết nối</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Ethernet ===== -->
+<h3 style="color:#2196F3;">🔗 Cách 2: Kết Nối Ethernet</h3>
+<p style="font-size:11px;color:#666;margin-bottom:10px;">Kết nối có dây, ổn định, không cần cấu hình WiFi</p>
+
+<div class="two-cols">
+    <div>
+        <h4>Các bước thực hiện:</h4>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Bước</th>
+                <th>Mô tả</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td><strong>Cắm dây Ethernet</strong></td>
+                <td>Từ router/switch vào cổng RJ45</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><strong>Bật nguồn gateway</strong></td>
+                <td>12-24VDC</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><strong>Nhấn nhanh CONFIG (trong 5s đầu)</strong></td>
+                <td>Chuyển sang Ethernet nếu đang ở WiFi</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><strong>Kiểm tra LED</strong></td>
+                <td>LED nháy 1 lần/s = Ethernet OK</td>
+            </tr>
+        </table>
+        <div class="info" style="font-size:10px;">✅ <strong>Ưu điểm:</strong> Ổn định, không bị nhiễu, tốc độ cao. DHCP
+            tự động (không cần IP tĩnh).</div>
+    </div>
+    <div>
+        <h4>Sơ đồ kết nối</h4>
+        <div style="background:#e3f2fd;padding:12px;border-radius:8px;text-align:center;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
+                <div style="background:white;padding:8px;border-radius:6px;border:2px solid #2196F3;">
+                    <div style="font-size:24px;">🌐</div>
+                    <div style="font-size:9px;font-weight:600;">Router</div>
+                </div>
+                <div style="font-size:20px;">⟶</div>
+                <div style="font-size:10px;">Cáp RJ45</div>
+                <div style="font-size:20px;">⟶</div>
+                <div style="background:white;padding:8px;border-radius:6px;border:2px solid #0066cc;">
+                         <div>
+                <img src="../images/navis-mod-gateway.png" alt="NAVIS MOD GATEWAY" style="height:34px;margin-bottom:5px;"
+                    onerror="this.outerHTML='<div style=background:#0066cc;color:white;padding:8px 15px;border-radius:5px;font-weight:700;>NAVIS</div>'">
+                        
+                        </div>
+                    <div style="font-size:9px;font-weight:600;">NAVIS MOD</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 4G ===== -->
+<h3 style="color:#FF9800;">📡 Cách 3: Kết Nối 4G</h3>
+<p style="font-size:11px;color:#666;margin-bottom:10px;">Dùng SIM 4G khi không có WiFi/Ethernet. Tự động fallback.</p>
+
+<div class="two-cols">
+    <div>
+        <h4>Các bước thực hiện:</h4>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Bước</th>
+                <th>Mô tả</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td><strong>Cắm SIM 4G vào gateway</strong></td>
+                <td>Khe SIM ở mặt dưới/bên</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><strong>Bật nguồn gateway</strong></td>
+                <td>12-24VDC</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><strong>Đợi kết nối tự động</strong></td>
+                <td>30-60 giây</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><strong>Kiểm tra LED</strong></td>
+                <td>LED nháy 3 lần/s = 4G OK</td>
+            </tr>
+        </table>
+        <div class="info" style="font-size:10px;">📡 <strong>Tự động fallback:</strong> Nếu WiFi/Ethernet mất, gateway
+            tự động dùng 4G làm dự phòng.</div>
+    </div>
+    <div>
+        <h4>Yêu cầu SIM</h4>
+        <div style="background:#fff3e0;padding:10px;border-radius:8px;font-size:10px;">
+            <div style="margin-bottom:5px;"><strong>✓ SIM 4G data:</strong> Viettel, Mobi, Vina...</div>
+            <div style="margin-bottom:5px;"><strong>✓ Có sẵn data:</strong> Gói 3G/4G còn dung lượng</div>
+            <div style="margin-bottom:5px;"><strong>✓ APN đúng:</strong> Thường tự động nhận</div>
+            <div><strong>⚠️ Kiểm tra:</strong> Tín hiệu phủ sóng tốt</div>
+        </div>
+        <div
+            style="margin-top:8px;display:flex;align-items:center;gap:8px;background:#e8f5e9;padding:8px;border-radius:6px;">
+            <span style="font-size:24px;">📱</span>
+            <div style="font-size:10px;">
+                <strong>Ưu tiên:</strong><br>
+                1. Ethernet → 2. WiFi → 3. 4G
+            </div>
+        </div>
+    </div>
+</div>

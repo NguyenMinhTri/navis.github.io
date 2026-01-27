@@ -1,0 +1,61 @@
+<!-- Section: Example - COIL (Pump Control) -->
+<h2>Ví Dụ: Điều Khiển Bơm (COIL)</h2>
+<p style="font-size:11px;color:#666;margin-bottom:8px;">Bật/tắt M0 PLC Delta</p>
+
+<div class="example-block">
+    <div class="example-title">📝 BƯỚC 1: Nhập thông tin</div>
+    <div class="config-result">
+        <div>
+            <div class="form-box">
+                <div class="form-title">📌 Thông tin cơ bản</div>
+                <div class="form-field"><label>Tên *</label><input value="Bom 1"></div>
+                <div class="form-row">
+                    <div class="form-field highlight"><label>Address *</label><input value="2048"></div>
+                    <div class="form-field"><label>Slave ID</label><input value="1"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field"><label>FC</label><select>
+                            <option>1 - Read Coil</option>
+                        </select></div>
+                    <div class="form-field"><label>Type</label><select>
+                            <option>bool</option>
+                        </select></div>
+                </div>
+                <div class="form-title" style="margin-top:8px;">⚙️ Hiển thị</div>
+                <div class="form-field highlight"><label>Memory Type</label><select>
+                        <option>0 - COIL</option>
+                    </select></div>
+                <div class="form-field"><label>Group Name</label><input value="DIEU KHIEN"></div>
+                <div class="form-check highlight"><input type="checkbox" checked><label><strong>Is Modify ✓</strong>
+                        (điều khiển)</label></div>
+                <div class="form-check"><input type="checkbox"><label>Is High Alarm</label></div>
+            </div>
+            <div class="info" style="font-size:9px;">M0 = 2048 + 0 = <strong>2048</strong><br>M100 = 2048 + 100 =
+                <strong>2148</strong></div>
+        </div>
+        <div class="arrow-right">→</div>
+        <div>
+            <div class="form-title">📱 BƯỚC 2: Kết quả Coils</div>
+            <div class="phone-frame">
+                <div class="phone-screen" style="min-height:80px;">
+                    <div class="app-bar">Coils</div>
+                    <div style="padding:4px;">
+                        <div class="coil-group">
+                            <div class="coil-header">ĐIỀU KHIỂN</div>
+                            <div class="coil-grid">
+                                <div class="coil-item">
+                                    <div class="coil-btn on">💡</div>
+                                    <div class="coil-name">BƠM 1</div>
+                                </div>
+                                <div class="coil-item">
+                                    <div class="coil-btn off">💡</div>
+                                    <div class="coil-name">BƠM 2</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

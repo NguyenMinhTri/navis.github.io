@@ -1,0 +1,152 @@
+<!-- Section: Getting Started + System Overview -->
+<h2>1. Chuẩn Bị Gateway</h2>
+
+<div class="two-cols">
+    <div style="text-align:center;">
+        <img src="images/navis-mod-gateway.png" alt="NAVIS MOD Gateway"
+            style="max-height:180px;width:auto;margin:10px auto;display:block;"
+            onerror="this.outerHTML='<div style=background:#f5f5f5;padding:30px;border-radius:10px;text-align:center;><span style=font-size:60px;>📦</span><br><b>NAVIS MOD</b></div>'">
+        <div class="info" style="font-size:10px;text-align:left;">
+            <strong>Thông số kỹ thuật:</strong><br>
+            • Nguồn: <strong>12-24VDC</strong><br>
+            • Giao tiếp: RS485, TCP/IP, IO/AO<br>
+            • Kết nối: WiFi / Ethernet / 4G<br>
+            • LED: WiFi, TX/RX, Power
+        </div>
+    </div>
+    <div>
+        <h4>Checklist chuẩn bị:</h4>
+        <table>
+            <tr>
+                <th>✓</th>
+                <th>Hạng mục</th>
+                <th>Ghi chú</th>
+            </tr>
+            <tr>
+                <td>☐</td>
+                <td>NAVIS MOD Gateway</td>
+                <td>Có dán mã QR riêng</td>
+            </tr>
+            <tr>
+                <td>☐</td>
+                <td>Nguồn DC 12-24V</td>
+                <td>Adapter hoặc nguồn công nghiệp</td>
+            </tr>
+            <tr>
+                <td>☐</td>
+                <td>Dây RS485</td>
+                <td>2 dây: A+, B-</td>
+            </tr>
+            <tr>
+                <td>☐</td>
+                <td>PLC/Sensor Modbus</td>
+                <td>Đã cấu hình SLAVE</td>
+            </tr>
+            <tr>
+                <td>☐</td>
+                <td>Internet</td>
+                <td>WiFi 2.4GHz, Ethernet hoặc SIM 4G</td>
+            </tr>
+        </table>
+        <h4>🔌 Đấu nối phần cứng</h4>
+        <table>
+            <tr>
+                <th>Kết nối</th>
+                <th>Chi tiết</th>
+            </tr>
+            <tr>
+                <td><strong>Nguồn DC</strong></td>
+                <td>12-24VDC vào cổng DC 9-36V</td>
+            </tr>
+            <tr>
+                <td><strong>RS485</strong></td>
+                <td>A+ ↔ A+, B- ↔ B-</td>
+            </tr>
+            <tr>
+                <td><strong>Internet</strong></td>
+                <td>WiFi/Ethernet/SIM 4G</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="warning"><strong>⚠️ NAVIS MOD là Modbus MASTER</strong> → PLC/Sensor phải cấu hình <strong>SLAVE</strong>
+    (Slave ID + Baudrate khớp)</div>
+
+<!-- Tổng quan hệ thống -->
+<h3>Tổng Quan Hệ Thống</h3>
+<table>
+    <tr>
+        <th>Thành phần</th>
+        <th>Mô tả</th>
+    </tr>
+    <tr>
+        <td><strong>Navis Smart Industry App</strong></td>
+        <td>Ứng dụng cấu hình và giám sát trên điện thoại</td>
+    </tr>
+    <tr>
+        <td><strong>Navis Cloud</strong></td>
+        <td>Nền tảng lưu trữ dữ liệu đám mây</td>
+    </tr>
+    <tr>
+        <td><strong>NAVIS MOD (Gateway)</strong></td>
+        <td>Thiết bị đọc Modbus từ PLC/Sensor và gửi lên cloud</td>
+    </tr>
+</table>
+<div class="info"><strong>Luồng dữ liệu:</strong> App ↔ Navis Cloud ↔ Gateway (WiFi/Ethernet/4G) ↔ PLC/Sensor</div>
+
+<!-- Quy trình 6 bước -->
+<h3>Quy Trình Thiết Lập (6 Bước)</h3>
+<div class="two-cols">
+    <div>
+        <div class="step-flow" style="flex-direction:column;align-items:flex-start;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div class="step-num">1</div>
+                <div><strong>📱 Tải App</strong><br><span style="font-size:10px;color:#666;">Quét QR hoặc vào
+                        navis.iotdaiviet.com</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div class="step-num">2</div>
+                <div><strong>👤 Đăng Ký Tài Khoản</strong><br><span style="font-size:10px;color:#666;">Tạo tài khoản mới
+                        hoặc đăng nhập</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div class="step-num">3</div>
+                <div><strong>📷 Quét QR Thêm Thiết Bị</strong><br><span style="font-size:10px;color:#666;">Mở app → Quét
+                        mã QR dán trên gateway</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div class="step-num">4</div>
+                <div><strong>🔌 Kết Nối Gateway Với PLC/Sensor</strong><br><span
+                        style="font-size:10px;color:#666;">Nguồn 12-24VDC + RS485 (A↔A, B↔B)</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div class="step-num">5</div>
+                <div><strong>🌐 Kết Nối Internet Cho Gateway</strong><br><span style="font-size:10px;color:#666;"><a
+                            href="#section-internet" style="color:#0066cc;">Xem mục 2 ↓</a> - WiFi/Ethernet/4G</span>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="step-num">6</div>
+                <div><strong>⚙️ Cấu Hình Modbus</strong><br><span style="font-size:10px;color:#666;"><a
+                            href="#section-app-config" style="color:#0066cc;">Xem mục 3 ↓</a> - Thêm địa chỉ trên
+                        app</span></div>
+            </div>
+        </div>
+    </div>
+    <div style="text-align:center;">
+        <div style="display:flex;gap:15px;justify-content:center;align-items:flex-start;">
+            <div>
+                <img src="images/navis-logo.png" alt="NAVIS Logo" style="height:50px;margin-bottom:5px;"
+                    onerror="this.outerHTML='<div style=background:#0066cc;color:white;padding:8px 15px;border-radius:5px;font-weight:700;>NAVIS</div>'">
+                <div style="font-size:9px;color:#666;">Logo</div>
+            </div>
+            <div>
+                <img src="images/qr-app.png" alt="QR Tải App"
+                    style="width:80px;height:80px;border:1px solid #ddd;border-radius:5px;"
+                    onerror="this.outerHTML='<div style=width:80px;height:80px;background:#f5f5f5;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:10px;text-align:center;border-radius:5px;>QR<br>Tải App</div>'">
+                <div style="font-size:9px;color:#666;">navis.iotdaiviet.com</div>
+            </div>
+        </div>
+    </div>
+</div>

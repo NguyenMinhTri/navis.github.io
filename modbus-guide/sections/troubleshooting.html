@@ -1,0 +1,39 @@
+<!-- Section: Troubleshooting -->
+<h2>Xử Lý Sự Cố Thường Gặp</h2>
+<table>
+    <tr>
+        <th>Vấn đề</th>
+        <th>Giải pháp</th>
+    </tr>
+    <tr>
+        <td>Không đọc được data</td>
+        <td>Kiểm tra: Dây A/B, Slave ID khớp, Baudrate 9600, Địa chỉ đúng</td>
+    </tr>
+    <tr>
+        <td>Giá trị NaN hoặc sai</td>
+        <td>Thử đổi Type: float ↔ float-inverse</td>
+    </tr>
+    <tr>
+        <td>COIL không điều khiển được</td>
+        <td>Bật <strong>Is Modify = true</strong></td>
+    </tr>
+    <tr>
+        <td>Alarm không đỏ</td>
+        <td>Bật <strong>Is High Alarm = true</strong></td>
+    </tr>
+    <tr>
+        <td>Gateway offline</td>
+        <td>RESET → Giữ CONFIG 5s → Cài lại WiFi</td>
+    </tr>
+    <tr>
+        <td>4G không kết nối</td>
+        <td>Kiểm tra SIM, tín hiệu, cấu hình APN</td>
+    </tr>
+    <tr>
+        <td>Giá trị không cập nhật</td>
+        <td>Kiểm tra Cycle Time (mặc định 1000ms)</td>
+    </tr>
+</table>
+
+<div class="success"><strong>✅ Hoàn tất:</strong> Sau khi cấu hình, nhấn <strong>💾 Save</strong> → Đợi 10-30 giây → Dữ
+    liệu xuất hiện</div>

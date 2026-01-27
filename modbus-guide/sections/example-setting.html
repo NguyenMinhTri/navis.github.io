@@ -1,0 +1,60 @@
+<!-- Section: Example - SETTING (Setpoint) -->
+<h2>Ví Dụ: Cài Đặt Setpoint (SETTING)</h2>
+<p style="font-size:11px;color:#666;margin-bottom:8px;">Ghi setpoint xuống D200 PLC Delta</p>
+
+<div class="example-block">
+    <div class="example-title">📝 BƯỚC 1: Nhập thông tin</div>
+    <div class="config-result">
+        <div>
+            <div class="form-box">
+                <div class="form-title">📌 Thông tin cơ bản</div>
+                <div class="form-field"><label>Tên *</label><input value="SP Nhiet do"></div>
+                <div class="form-row">
+                    <div class="form-field highlight"><label>Address *</label><input value="4296"></div>
+                    <div class="form-field"><label>Slave ID</label><input value="1"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field"><label>FC</label><select>
+                            <option>3 - Holding</option>
+                        </select></div>
+                    <div class="form-field"><label>Type</label><select>
+                            <option>int</option>
+                        </select></div>
+                </div>
+                <div class="form-title" style="margin-top:8px;">⚙️ Hiển thị</div>
+                <div class="form-row">
+                    <div class="form-field highlight"><label>Memory Type</label><select>
+                            <option>6 - SETTING</option>
+                        </select></div>
+                    <div class="form-field"><label>Group</label><input value="PLC_Delta"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field"><label>Changing Unit</label><input value="0.1"></div>
+                    <div class="form-field"><label>Đơn vị</label><input value="°C"></div>
+                </div>
+                <div class="form-check highlight"><input type="checkbox" checked><label><strong>Is Modify ✓</strong>
+                        (BẮT BUỘC)</label></div>
+            </div>
+            <div class="warning" style="font-size:9px;">D200 = 4096 + 200 = <strong>4296</strong><br><strong>Is Modify =
+                    true</strong> để ghi xuống PLC</div>
+        </div>
+        <div class="arrow-right">→</div>
+        <div>
+            <div class="form-title">📱 BƯỚC 2: Kết quả Settings</div>
+            <div class="phone-frame">
+                <div class="phone-screen" style="min-height:60px;">
+                    <div class="app-bar">Settings</div>
+                    <div style="padding:4px;">
+                        <div class="setting-card">
+                            <div class="setting-icon">🌡️</div>
+                            <div class="setting-info">
+                                <div class="setting-name">SP NHIỆT ĐỘ</div>
+                            </div>
+                            <div class="setting-value">45.0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

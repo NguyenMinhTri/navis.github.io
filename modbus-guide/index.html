@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng Dẫn Cấu Hình Modbus - NAVIS MOD Gateway</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0066cc, #004499);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header img {
+            height: 45px;
+            margin-bottom: 6px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 11px;
+        }
+
+        .content {
+            padding: 18px;
+        }
+
+        .footer {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            font-size: 10px;
+        }
+
+        .footer a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="images/navis-logo.png" alt="NAVIS" onerror="this.style.display='none'">
+            <h1>🔧 Hướng Dẫn Sử Dụng NAVIS MOD Gateway</h1>
+            <p>Dành cho người mới • Từ A đến Z • Đại Việt IoT</p>
+        </div>
+
+        <div class="content">
+            <!-- Video hướng dẫn -->
+            <div class="video-section" style="margin-bottom: 24px;">
+                <h2
+                    style="color: #0066cc; font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-icons">play_circle</span>
+                    Video Hướng Dẫn Cài Đặt
+                </h2>
+                <div
+                    style="position: relative; width: 100%; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+                    <video controls style="width: 100%; display: block;" poster="images/navis-mod-gateway.png">
+                        <source src="NAVIS_MOD_Cai_Dat.mp4" type="video/mp4">
+                        Trình duyệt của bạn không hỗ trợ video.
+                    </video>
+                </div>
+            </div>
+
+            <!-- Các section được include từ file riêng -->
+            <!-- Khi develop: copy nội dung từ sections/*.html vào đây -->
+            <!-- Hoặc dùng server-side include / build tool -->
+
+            <div id="section-getting-started"></div>
+            <div id="section-internet"></div>
+            <div id="section-app-config"></div>
+            <div id="section-example-sensor"></div>
+            <div id="section-example-setting"></div>
+            <div id="section-example-coil"></div>
+            <div id="section-example-alarm"></div>
+            <div id="section-address-table"></div>
+            <div id="section-troubleshooting"></div>
+        </div>
+
+        <div class="footer">
+            <strong>Hỗ trợ:</strong> <a href="https://navis.iotdaiviet.com" target="_blank">navis.iotdaiviet.com</a><br>
+            <small style="color:#999;">NAVIS MOD Gateway v2.x • 27/01/2026</small>
+        </div>
+    </div>
+
+    <script>
+        // Auto-load sections (chỉ hoạt động khi chạy từ server)
+        const sections = [
+            { id: 'section-getting-started', file: 'sections/01-getting-started.html' },
+            { id: 'section-internet', file: 'sections/02-internet-connection.html' },
+            { id: 'section-app-config', file: 'sections/03-app-config.html' },
+            { id: 'section-example-sensor', file: 'sections/example-sensor.html' },
+            { id: 'section-example-setting', file: 'sections/example-setting.html' },
+            { id: 'section-example-coil', file: 'sections/example-coil.html' },
+            { id: 'section-example-alarm', file: 'sections/example-alarm.html' },
+            { id: 'section-address-table', file: 'sections/address-table.html' },
+            { id: 'section-troubleshooting', file: 'sections/troubleshooting.html' }
+        ];
+
+        sections.forEach(s => {
+            fetch(s.file)
+                .then(r => r.text())
+                .then(html => document.getElementById(s.id).innerHTML = html)
+                .catch(() => console.log('Load from local: ' + s.file));
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,86 @@
+/* NAVIS Modbus Guide - Shared Styles */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Roboto',sans-serif;font-size:13px;line-height:1.5;color:#333}
+h2{color:#0066cc;padding:10px 14px;background:linear-gradient(90deg,#e6f3ff,white);border-left:4px solid #0066cc;margin:20px 0 12px 0;border-radius:0 8px 8px 0;font-size:16px}
+h3{color:#333;margin:15px 0 8px 0;font-size:14px}
+h4{color:#555;margin:10px 0 6px 0;font-size:12px;font-weight:600}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:11px}
+th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}
+th{background:#0066cc;color:white;font-size:10px}
+tr:nth-child(even){background:#f8f9fa}
+
+/* Alerts */
+.warning{background:#fff3cd;border-left:4px solid #ffc107;padding:10px;margin:10px 0;border-radius:0 8px 8px 0;font-size:11px}
+.info{background:#e7f3ff;border-left:4px solid #0066cc;padding:10px;margin:10px 0;border-radius:0 8px 8px 0;font-size:11px}
+.success{background:#d4edda;border-left:4px solid #28a745;padding:10px;margin:10px 0;border-radius:0 8px 8px 0;font-size:11px}
+
+/* Layout */
+.two-cols{display:flex;gap:15px;flex-wrap:wrap}
+.two-cols>div{flex:1;min-width:240px}
+
+/* Steps */
+.step-flow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;justify-content:center}
+.step-card{background:white;border:2px solid #0066cc;border-radius:10px;padding:10px;width:120px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.step-num{background:#0066cc;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-weight:bold;font-size:12px}
+.step-icon{font-size:28px;margin-bottom:4px}
+.step-title{font-weight:700;font-size:10px;color:#333}
+.step-desc{font-size:9px;color:#666}
+
+/* LED */
+.led-status{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.led-1{animation:blink-1 1s infinite}
+.led-2{animation:blink-2 1s infinite}
+.led-3{animation:blink-3 1s infinite}
+.led-fast{animation:blink-fast 0.2s infinite}
+@keyframes blink-1{0%,20%{background:#f44336}21%,100%{background:#333}}
+@keyframes blink-2{0%,15%{background:#f44336}16%,30%{background:#333}31%,45%{background:#f44336}46%,100%{background:#333}}
+@keyframes blink-3{0%,10%{background:#f44336}11%,20%{background:#333}21%,30%{background:#f44336}31%,40%{background:#333}41%,50%{background:#f44336}51%,100%{background:#333}}
+@keyframes blink-fast{0%,50%{background:#f44336}51%,100%{background:#333}}
+
+/* Phone Mockup */
+.phone-frame{background:#1a1a2e;border-radius:14px;padding:5px;max-width:200px;margin:8px auto;box-shadow:0 5px 15px rgba(0,0,0,0.3)}
+.phone-screen{background:#f5f5f5;border-radius:10px;overflow:hidden;min-height:100px}
+.app-bar{background:linear-gradient(135deg,#0066cc,#004499);color:white;padding:5px 8px;display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:500}
+
+/* Cards */
+.sensor-card{background:white;border-radius:8px;padding:8px;margin:4px;box-shadow:0 2px 5px rgba(0,0,0,0.1);border:1.5px solid rgba(0,102,204,0.2);text-align:center}
+.sensor-name{font-weight:700;font-size:9px;color:#333;margin-bottom:2px}
+.sensor-value{font-family:'Courier New',monospace;font-size:22px;font-weight:bold;color:#0066cc}
+.sensor-unit{font-size:9px;color:#666}
+.coil-group{background:white;border-radius:8px;margin:4px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+.coil-header{background:#0066cc;color:white;padding:4px 8px;font-weight:700;font-size:8px;text-align:center}
+.coil-grid{display:flex;flex-wrap:wrap;padding:5px;gap:5px;justify-content:center}
+.coil-item{text-align:center;width:35px}
+.coil-btn{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 2px;font-size:11px}
+.coil-btn.on{background:#00bcd4;box-shadow:0 0 8px rgba(0,188,212,0.6);color:white}
+.coil-btn.off{background:#bdbdbd;color:#757575}
+.coil-btn.alarm-on{background:#f44336;box-shadow:0 0 8px rgba(244,67,54,0.6);color:white;animation:pulse-alarm 1s infinite}
+@keyframes pulse-alarm{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.coil-name{font-size:7px;font-weight:600;color:#333}
+.setting-card{background:white;border-radius:8px;padding:7px;margin:4px;box-shadow:0 2px 5px rgba(0,0,0,0.1);display:flex;align-items:center;gap:6px}
+.setting-icon{width:22px;height:22px;background:#ff9800;border-radius:5px;display:flex;align-items:center;justify-content:center;color:white;font-size:12px}
+.setting-name{font-weight:600;font-size:9px;color:#333}
+.setting-value{background:#f5f5f5;border:1px solid #ddd;border-radius:4px;padding:3px 5px;font-weight:700;color:#0066cc;font-size:11px;min-width:40px;text-align:center}
+
+/* Form */
+.form-box{background:#fafafa;border:1px solid #e0e0e0;border-radius:8px;padding:8px;margin:6px 0;max-width:220px}
+.form-title{font-size:9px;color:#0066cc;font-weight:600;margin-bottom:5px;border-bottom:1px solid #e0e0e0;padding-bottom:3px}
+.form-row{display:flex;gap:5px;margin-bottom:5px}
+.form-field{flex:1}
+.form-field label{display:block;font-size:7px;color:#666;margin-bottom:1px}
+.form-field input,.form-field select{width:100%;border:1px solid #ddd;border-radius:3px;padding:4px;font-size:9px}
+.form-field.highlight input,.form-field.highlight select{background:#fff59d;border-color:#ffc107}
+.form-check{display:flex;align-items:center;gap:3px;font-size:8px;margin:3px 0}
+.form-check input{width:12px;height:12px}
+
+/* Utility */
+.badge{display:inline-block;padding:2px 5px;border-radius:3px;font-size:8px;font-weight:700;color:white}
+.badge-coil{background:#00bcd4}
+.badge-sensor{background:#4caf50}
+.badge-setting{background:#ff9800}
+.highlight{background:#fff59d !important;font-weight:700}
+.example-block{background:#f8f9fa;border:1px solid #ddd;border-radius:8px;padding:10px;margin:12px 0}
+.example-title{font-weight:700;color:#0066cc;font-size:12px;margin-bottom:8px}
+.config-result{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.config-result>div{flex:1;min-width:200px}
+.arrow-right{font-size:24px;color:#0066cc;display:flex;align-items:center}

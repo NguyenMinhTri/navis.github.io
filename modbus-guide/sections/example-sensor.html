@@ -1,0 +1,55 @@
+<!-- Section: Example - SENSOR (Temperature) -->
+<h2>Ví Dụ: Giám Sát Nhiệt Độ (SENSOR)</h2>
+<p style="font-size:11px;color:#666;margin-bottom:8px;">Đọc D100 PLC Delta, hiển thị biểu đồ</p>
+
+<div class="example-block">
+    <div class="example-title">📝 BƯỚC 1: Nhập thông tin</div>
+    <div class="config-result">
+        <div>
+            <div class="form-box">
+                <div class="form-title">📌 Thông tin cơ bản</div>
+                <div class="form-field"><label>Tên *</label><input value="Nhiet do lo"></div>
+                <div class="form-row">
+                    <div class="form-field highlight"><label>Address *</label><input value="4196"></div>
+                    <div class="form-field"><label>Slave ID</label><input value="1"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field"><label>FC</label><select>
+                            <option>3 - Holding</option>
+                        </select></div>
+                    <div class="form-field"><label>Type</label><select>
+                            <option>int</option>
+                        </select></div>
+                </div>
+                <div class="form-title" style="margin-top:8px;">⚙️ Hiển thị</div>
+                <div class="form-row">
+                    <div class="form-field highlight"><label>Memory Type</label><select>
+                            <option>1 - SENSOR</option>
+                        </select></div>
+                    <div class="form-field"><label>Group</label><input value="PLC_Delta"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field"><label>Changing Unit</label><input value="0.1"></div>
+                    <div class="form-field"><label>Đơn vị</label><input value="°C"></div>
+                </div>
+            </div>
+            <div class="info" style="font-size:9px;">D100 = 4096 + 100 = <strong>4196</strong><br>Changing Unit 0.1:
+                PLC=255 → App=25.5°C</div>
+        </div>
+        <div class="arrow-right">→</div>
+        <div>
+            <div class="form-title">📱 BƯỚC 2: Kết quả Dashboard</div>
+            <div class="phone-frame">
+                <div class="phone-screen" style="min-height:80px;">
+                    <div class="app-bar">Dashboard</div>
+                    <div style="padding:4px;">
+                        <div class="sensor-card">
+                            <div class="sensor-name">NHIỆT ĐỘ LÒ</div>
+                            <div><span class="sensor-value">25.5</span><span class="sensor-unit">°C</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
