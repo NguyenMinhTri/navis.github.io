@@ -280,6 +280,7 @@
             <img src="navis-logo.png" alt="Navis IoT Logo">
         </div>
         <div class="nav-links">
+            <a href="#projects">Dự án</a>
             <a href="#summary">Tổng kết</a>
             <a href="#contact">Liên hệ</a>
         </div>
@@ -287,12 +288,134 @@
     </nav>
 
     <!-- =============================== -->
+    <!-- SLIDE: DỰ ÁN TIÊU BIỂU          -->
+    <!-- =============================== -->
+    <section class="slide" id="projects" style="background: var(--bg);">
+        <div class="slide-content">
+            <div class="slide-header" style="text-align: center;">
+                <div class="slide-number">09 — Dự Án Tiêu Biểu</div>
+                <h2 class="slide-title" style="text-align: center;">
+                    Khách Hàng <span class="accent">Đã Tin Tưởng Triển Khai</span>
+                </h2>
+                <p class="slide-desc" style="margin: 0 auto; text-align: center;">
+                    Navis IoT Platform đã được triển khai thực tế tại nhiều nhà máy, khu công nghiệp và trạm xử lý nước trên toàn quốc — mang lại hiệu quả vận hành vượt trội.
+                </p>
+            </div>
+
+            <style>
+                .project-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+                .project-card {
+                    background: #fff; border-radius: 12px; overflow: hidden;
+                    border: 1px solid var(--border); transition: all 0.3s;
+                    box-shadow: var(--shadow-sm);
+                }
+                .project-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); cursor: pointer; }
+                .project-card img {
+                    width: 100%; height: 130px; object-fit: cover;
+                    border-bottom: 2px solid var(--primary); cursor: pointer;
+                }
+                .project-card .pc-body { padding: 12px 14px; }
+                .project-card h3 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+                .project-card p { font-size: 10.5px; color: var(--text-secondary); line-height: 1.5; }
+                @media print { .project-card:hover { transform: none; box-shadow: var(--shadow-sm); } }
+                /* Lightbox */
+                .lightbox-overlay {
+                    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.85); z-index: 9999;
+                    justify-content: center; align-items: center; cursor: pointer;
+                }
+                .lightbox-overlay.active { display: flex; }
+                .lightbox-overlay img {
+                    max-width: 90%; max-height: 90%; object-fit: contain;
+                    border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+                    animation: lbZoomIn 0.3s ease;
+                }
+                .lightbox-close {
+                    position: absolute; top: 20px; right: 30px; color: #fff;
+                    font-size: 36px; font-weight: bold; cursor: pointer; z-index: 10000;
+                    background: rgba(0,0,0,0.5); border-radius: 50%; width: 48px; height: 48px;
+                    display: flex; align-items: center; justify-content: center;
+                }
+                .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+                @keyframes lbZoomIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+                @media print { .lightbox-overlay { display: none !important; } }
+            </style>
+            <div class="project-grid">
+                <div class="project-card">
+                    <img src="project-lixil.png" alt="LIXIL — Bình Dương">
+                    <div class="pc-body">
+                        <h3>LIXIL — Bình Dương</h3>
+                        <p>Giám sát &amp; cảnh báo quan trắc nước thải từ xa cho nhà máy sản xuất thiết bị vệ sinh.</p>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <img src="project-poonginvina.png" alt="Poong In Vina — Bình Dương">
+                    <div class="pc-body">
+                        <h3>Poong In Vina — Bình Dương</h3>
+                        <p>Cải tạo hệ thống xử lý nước thải, cung cấp phần mềm giám sát SCADA trên App &amp; Web.</p>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <img src="project-gas.png" alt="GAS — Bắc Giang">
+                    <div class="pc-body">
+                        <h3>GAS — Bắc Giang</h3>
+                        <p>Kết nối máy lấy mẫu khí, xuất báo cáo tự động &amp; giám sát từ xa qua App Navis.</p>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <img src="project-nhamay-nuoc.png" alt="Nhà Máy Nước — Bến Tre">
+                    <div class="pc-body">
+                        <h3>Nhà Máy Nước — Bến Tre</h3>
+                        <p>Trạm quan trắc chất lượng nước từ xa — theo dõi độ đục, Clo dư, lưu lượng realtime.</p>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <img src="project-pccc.png" alt="PCCC — Bình Dương">
+                    <div class="pc-body">
+                        <h3>PCCC — Bình Dương</h3>
+                        <p>Cảnh báo cháy từ xa, giám sát mực nước bồn PCCC — push notification tức thì.</p>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <img src="project-pttfood.png" alt="PTT FOOD — Bình Dương">
+                    <div class="pc-body">
+                        <h3>PTT FOOD — Bình Dương</h3>
+                        <p>Tủ điện &amp; phần mềm giám sát hệ thống RO công nghiệp — theo dõi áp suất, lưu lượng.</p>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <img src="project-visip.png" alt="VISIP — Bình Dương">
+                    <div class="pc-body">
+                        <h3>VISIP — Bình Dương</h3>
+                        <p>Hệ thống tủ điện &amp; phần mềm giám sát RO cho nhà máy thực phẩm — EC, pH, TDS.</p>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <img src="project-server.png" alt="Phòng Server — Bình Dương">
+                    <div class="pc-body">
+                        <h3>Phòng Server — Bình Dương</h3>
+                        <p>Giám sát nhiệt độ, độ ẩm phòng server — cảnh báo tức thì khi nhiệt độ vượt ngưỡng.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box" style="margin-top: 20px; justify-content: center; text-align: center; flex-direction: column; padding: 22px;">
+                <h4 style="font-size: 16px; margin-bottom: 6px;">🏆 Đa Dạng Ngành Nghề — Từ Nước Thải, Nước Sạch, PCCC Đến Server Room</h4>
+                <p>Navis IoT Platform không giới hạn ngành nghề — bất kỳ hệ thống nào có cảm biến, PLC, hoặc thiết bị Modbus đều có thể kết nối và giám sát từ xa.</p>
+            </div>
+        </div>
+        <div class="slide-nav-bottom">
+            <a href="#summary" class="scroll-arrow">▼</a>
+        </div>
+    </section>
+
+    <!-- =============================== -->
     <!-- SLIDE: TỔNG KẾT                  -->
     <!-- =============================== -->
     <section class="slide" id="summary" style="background: var(--bg-white);">
         <div class="slide-content">
             <div class="slide-header" style="text-align: center;">
-                <div class="slide-number">09 — Tổng Kết</div>
+                <div class="slide-number">10 — Tổng Kết</div>
                 <h2 class="slide-title" style="text-align: center;">
                     Tại Sao Chọn <span class="accent">Navis IoT Platform?</span>
                 </h2>
@@ -383,10 +506,31 @@
                         </div>
                     </div>
                     <div class="cta-contact">
+                        <span class="ct-icon">📞</span>
+                        <div>
+                            <div class="ct-label">Liên hệ</div>
+                            <div class="ct-value">0932.786.579 (Mr. Cường)</div>
+                        </div>
+                    </div>
+                    <div class="cta-contact">
+                        <span class="ct-icon">📧</span>
+                        <div>
+                            <div class="ct-label">Email</div>
+                            <div class="ct-value">omwater.vn@gmail.com</div>
+                        </div>
+                    </div>
+                    <div class="cta-contact">
                         <span class="ct-icon">🌐</span>
                         <div>
                             <div class="ct-label">Website</div>
                             <div class="ct-value">navis.iotdaiviet.com</div>
+                        </div>
+                    </div>
+                    <div class="cta-contact">
+                        <span class="ct-icon">📍</span>
+                        <div>
+                            <div class="ct-label">Địa chỉ</div>
+                            <div class="ct-value">124/5P, ấp 6, Xuân Thới Sơn, Hóc Môn, TP.HCM</div>
                         </div>
                     </div>
                 </div>
@@ -425,7 +569,26 @@
         }, { threshold: 0.5 });
         slides.forEach(slide => observer.observe(slide));
 
+        // Lightbox for project images
+        const lbOverlay = document.createElement('div');
+        lbOverlay.className = 'lightbox-overlay';
+        lbOverlay.innerHTML = '<span class="lightbox-close">&times;</span><img src="" alt="">';
+        document.body.appendChild(lbOverlay);
+        const lbImg = lbOverlay.querySelector('img');
+        const lbClose = lbOverlay.querySelector('.lightbox-close');
 
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const img = card.querySelector('img');
+                if (img) { lbImg.src = img.src; lbOverlay.classList.add('active'); }
+            });
+        });
+        lbOverlay.addEventListener('click', (e) => {
+            if (e.target !== lbImg) lbOverlay.classList.remove('active');
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') lbOverlay.classList.remove('active');
+        });
     </script>
 </body>
 </html>
