@@ -305,7 +305,35 @@
         }
         .footer .contact span { display: flex; align-items: center; gap: 6px; }
 
+        /* ===== SIDEBAR TOC ===== */
+        .faq-layout{display:flex;gap:0;position:relative}
+        .faq-sidebar{width:280px;flex-shrink:0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;background:#fff;border-right:1px solid #e8eaf6;padding:16px 0;z-index:50}
+        .faq-sidebar::-webkit-scrollbar{width:3px}
+        .faq-sidebar::-webkit-scrollbar-thumb{background:#c5cae9;border-radius:3px}
+        .faq-main{flex:1;min-width:0}
+        .toc-title{padding:12px 20px 8px;font-size:11px;font-weight:700;color:#9e9e9e;text-transform:uppercase;letter-spacing:1px}
+        .toc-section{margin-bottom:2px}
+        .toc-section-link{display:flex;align-items:center;gap:8px;padding:8px 20px;font-size:13px;font-weight:600;color:var(--primary);text-decoration:none;cursor:pointer;transition:all .2s;border-left:3px solid transparent}
+        .toc-section-link:hover{background:#e8eaf6;border-left-color:#3949AB}
+        .toc-section-link.active{background:#e8eaf6;border-left-color:var(--primary);color:var(--primary)}
+        .toc-section-link .toc-icon{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+        .toc-section-link .toc-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .toc-questions{max-height:0;overflow:hidden;transition:max-height .3s ease}
+        .toc-section.open .toc-questions{max-height:600px}
+        .toc-q{display:block;padding:4px 20px 4px 48px;font-size:11.5px;color:#546E7A;text-decoration:none;cursor:pointer;transition:all .15s;line-height:1.4;border-left:3px solid transparent}
+        .toc-q:hover{color:var(--primary);background:#f5f5f5;border-left-color:#90CAF9}
+        .toc-q.active{color:var(--primary);font-weight:600;border-left-color:var(--primary)}
+
+        /* Mobile TOC toggle */
+        .toc-mobile-btn{display:none;position:fixed;bottom:20px;left:16px;z-index:200;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#3949AB);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(26,35,126,.35);align-items:center;justify-content:center}
+        .toc-mobile-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:150}
+
         /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .faq-sidebar{position:fixed;left:-300px;top:0;height:100vh;z-index:160;box-shadow:4px 0 20px rgba(0,0,0,.15);transition:left .3s ease}
+            .faq-sidebar.open{left:0}
+            .toc-mobile-btn{display:flex}
+        }
         @media (max-width: 640px) {
             .header h1 { font-size: 22px; }
             .section-body { padding: 16px; }
@@ -315,6 +343,7 @@
         }
 
         @media print {
+            .faq-sidebar,.toc-mobile-btn{display:none!important}
             .section.collapsed .section-body { max-height: none; padding: 24px; }
             .toggle { display: none; }
             .header { padding: 24px; }
@@ -343,6 +372,128 @@
     <div class="badge">📋 Tài liệu kỹ thuật &nbsp;•&nbsp; Đại Việt IoT</div>
 </div>
 
+<!-- Mobile TOC button -->
+<button class="toc-mobile-btn" id="tocMobileBtn" onclick="toggleTocMobile()" title="Mục lục">☰</button>
+<div class="toc-mobile-overlay" id="tocOverlay" onclick="toggleTocMobile()"></div>
+
+<div class="faq-layout">
+
+<!-- ===== SIDEBAR TOC ===== -->
+<nav class="faq-sidebar" id="faqSidebar">
+    <div class="toc-title">📋 Mục lục câu hỏi</div>
+
+    <div class="toc-section" data-sec="sec-1">
+        <a class="toc-section-link" onclick="scrollToSec('sec-1')"><span class="toc-icon">⚙️</span><span class="toc-label">1. Gateway / Phần cứng</span></a>
+        <div class="toc-questions">
+            <a class="toc-q" onclick="scrollToQ(this,'sec-1',0)">1.1 Cổng RS485?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-1',1)">1.2 Modbus, 4-20mA, DI/DO?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-1',2)">1.3 Có 4G không?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-1',3)">1.4 Tối đa bao nhiêu tag?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-1',4)">1.5 Lưu dữ liệu cục bộ?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-1',5)">1.6 Lưu được bao lâu?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-1',6)">1.7 Gửi bù khi có mạng?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-1',7)">1.8 Watchdog, chống treo?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-1',8)">1.9 Bảo hành bao lâu?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-1',9)">1.10 Datasheet?</a>
+        </div>
+    </div>
+
+    <div class="toc-section" data-sec="sec-2">
+        <a class="toc-section-link" onclick="scrollToSec('sec-2')"><span class="toc-icon">🔌</span><span class="toc-label">2. Kết nối thiết bị</span></a>
+        <div class="toc-questions">
+            <a class="toc-q" onclick="scrollToQ(this,'sec-2',0)">2.1 Cấu hình RS485/Modbus?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-2',1)">2.2 Cần thông tin gì?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-2',2)">2.3 INT, FLOAT32, đảo byte?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-2',3)">2.4 Không có Modbus map?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-2',4)">2.5 Kết nối PLC/SCADA?</a>
+        </div>
+    </div>
+
+    <div class="toc-section" data-sec="sec-3">
+        <a class="toc-section-link" onclick="scrollToSec('sec-3')"><span class="toc-icon">💻</span><span class="toc-label">3. Phần mềm App/Web</span></a>
+        <div class="toc-questions">
+            <a class="toc-q" onclick="scrollToQ(this,'sec-3',0)">3.1 App riêng hay Navis?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-3',1)">3.2 Campuchia dùng chung?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-3',2)">3.3 Chi phí mở rộng?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-3',3)">3.6 Đổi logo, màu sắc?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-3',4)">3.7 App riêng trên Store?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-3',5)">3.8 Bao nhiêu chức năng?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-3',6)">3.10 Realtime, biểu đồ, map?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-3',7)">3.11 Phân quyền?</a>
+        </div>
+    </div>
+
+    <div class="toc-section" data-sec="sec-4">
+        <a class="toc-section-link" onclick="scrollToSec('sec-4')"><span class="toc-icon">🔔</span><span class="toc-label">4. Cảnh báo</span></a>
+        <div class="toc-questions">
+            <a class="toc-q" onclick="scrollToQ(this,'sec-4',0)">4.1 Kênh cảnh báo?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-4',1)">4.3 Ngưỡng cao/thấp?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-4',2)">4.4 Thời gian trễ?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-4',3)">4.5 Lịch sử cảnh báo?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-4',4)">4.6 Phân quyền theo trạm?</a>
+        </div>
+    </div>
+
+    <div class="toc-section" data-sec="sec-5">
+        <a class="toc-section-link" onclick="scrollToSec('sec-5')"><span class="toc-icon">☁️</span><span class="toc-label">5. Dữ liệu & Báo cáo</span></a>
+        <div class="toc-questions">
+            <a class="toc-q" onclick="scrollToQ(this,'sec-5',0)">5.1 Lưu bao lâu?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-5',1)">5.2 Server đặt ở đâu?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-5',2)">5.3 Backup dữ liệu?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-5',3)">5.4 Xuất dữ liệu khi dừng?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-5',4)">5.5 Định dạng xuất?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-5',5)">5.6 Báo cáo email tự động?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-5',6)">5.7 Mẫu báo cáo công ty?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-5',7)">5.8 Log thao tác?</a>
+        </div>
+    </div>
+
+    <div class="toc-section" data-sec="sec-6">
+        <a class="toc-section-link" onclick="scrollToSec('sec-6')"><span class="toc-icon">🔐</span><span class="toc-label">6. Bảo mật</span></a>
+        <div class="toc-questions">
+            <a class="toc-q" onclick="scrollToQ(this,'sec-6',0)">6.1 Giao thức truyền?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-6',1)">6.2 Mã hóa dữ liệu?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-6',2)">6.3 Xác thực 2 lớp?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-6',3)">6.6 Ai sở hữu dữ liệu?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-6',4)">6.7 ĐV có xem dữ liệu?</a>
+        </div>
+    </div>
+
+    <div class="toc-section" data-sec="sec-7">
+        <a class="toc-section-link" onclick="scrollToSec('sec-7')"><span class="toc-icon">💰</span><span class="toc-label">7. Chi phí & Thanh toán</span></a>
+        <div class="toc-questions">
+            <a class="toc-q" onclick="scrollToQ(this,'sec-7',0)">7.1 Phí 5.5tr/năm gồm gì?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-7',1)">7.3 Phí cloud bao gồm?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-7',2)">7.4 Domain, SSL, SIM?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-7',3)">7.6 Tăng tag tính phí?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-7',4)">7.7 Phí bảo trì onsite?</a>
+        </div>
+    </div>
+
+    <div class="toc-section" data-sec="sec-8">
+        <a class="toc-section-link" onclick="scrollToSec('sec-8')"><span class="toc-icon">🚀</span><span class="toc-label">8. Triển khai & Hỗ trợ</span></a>
+        <div class="toc-questions">
+            <a class="toc-q" onclick="scrollToQ(this,'sec-8',0)">8.1 Demo trạm thật?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-8',1)">8.3 Thời gian triển khai?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-8',2)">8.4 Tiêu chí nghiệm thu?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-8',3)">8.5 Chạy thử miễn phí?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-8',4)">8.6 Thời gian phản hồi lỗi?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-8',5)">8.8 Hỗ trợ onsite?</a>
+        </div>
+    </div>
+
+    <div class="toc-section" data-sec="sec-9">
+        <a class="toc-section-link" onclick="scrollToSec('sec-9')"><span class="toc-icon">🏭</span><span class="toc-label">9. Quan trắc & Mở rộng</span></a>
+        <div class="toc-questions">
+            <a class="toc-q" onclick="scrollToQ(this,'sec-9',0)">9.1 Truyền về Sở TNMT?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-9',1)">9.2 Đã triển khai Sở?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-9',2)">9.4 Camera, máy lấy mẫu?</a>
+            <a class="toc-q" onclick="scrollToQ(this,'sec-9',3)">9.5 Xuất kiểm tra nội bộ?</a>
+        </div>
+    </div>
+</nav>
+
+<div class="faq-main">
 <div class="container">
 
 <!-- ===== SƠ ĐỒ HỆ THỐNG ===== -->
@@ -1038,6 +1189,10 @@
 
 </div><!-- /.container -->
 
+</div><!-- /container -->
+</div><!-- /faq-main -->
+</div><!-- /faq-layout -->
+
 <!-- ===== FOOTER ===== -->
 <div class="footer">
     <p><strong>Navis Smart Industry</strong> — Nền tảng Giám sát IoT Công nghiệp</p>
@@ -1053,6 +1208,74 @@
 function toggleSection(id) {
     const el = document.getElementById(id);
     el.classList.toggle('collapsed');
+}
+
+// === TOC Logic ===
+function scrollToSec(secId) {
+    var sec = document.getElementById(secId);
+    if (!sec) return;
+    // Expand section if collapsed
+    sec.classList.remove('collapsed');
+    sec.scrollIntoView({behavior:'smooth',block:'start'});
+    // Open TOC sub-items
+    document.querySelectorAll('.toc-section').forEach(function(t){t.classList.remove('open')});
+    var tocSec = document.querySelector('.toc-section[data-sec="'+secId+'"]');
+    if(tocSec) tocSec.classList.add('open');
+    // Highlight
+    document.querySelectorAll('.toc-section-link').forEach(function(a){a.classList.remove('active')});
+    if(tocSec) tocSec.querySelector('.toc-section-link').classList.add('active');
+    closeTocMobile();
+}
+
+function scrollToQ(el, secId, qIndex) {
+    var sec = document.getElementById(secId);
+    if (!sec) return;
+    sec.classList.remove('collapsed');
+    var items = sec.querySelectorAll('.qa-item');
+    if (items[qIndex]) {
+        setTimeout(function(){
+            items[qIndex].scrollIntoView({behavior:'smooth',block:'center'});
+            items[qIndex].style.transition='background .3s';
+            items[qIndex].style.background='#E8EAF6';
+            setTimeout(function(){items[qIndex].style.background='';},1500);
+        }, 100);
+    }
+    // Highlight in sidebar
+    document.querySelectorAll('.toc-q').forEach(function(q){q.classList.remove('active')});
+    el.classList.add('active');
+    closeTocMobile();
+}
+
+// Intersection Observer for active section highlighting
+var sectionIds = ['sec-1','sec-2','sec-3','sec-4','sec-5','sec-6','sec-7','sec-8','sec-9'];
+var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+        if(entry.isIntersecting){
+            var id = entry.target.id;
+            document.querySelectorAll('.toc-section-link').forEach(function(a){a.classList.remove('active')});
+            var tocSec = document.querySelector('.toc-section[data-sec="'+id+'"]');
+            if(tocSec) tocSec.querySelector('.toc-section-link').classList.add('active');
+        }
+    });
+},{threshold:0.2,rootMargin:'-60px 0px -40% 0px'});
+sectionIds.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) observer.observe(el);
+});
+
+// Mobile TOC
+function toggleTocMobile(){
+    var sb = document.getElementById('faqSidebar');
+    var ov = document.getElementById('tocOverlay');
+    var isOpen = sb.classList.contains('open');
+    if(isOpen){closeTocMobile();}else{
+        sb.classList.add('open');
+        ov.style.display='block';
+    }
+}
+function closeTocMobile(){
+    document.getElementById('faqSidebar').classList.remove('open');
+    document.getElementById('tocOverlay').style.display='none';
 }
 </script>
 
