@@ -218,13 +218,31 @@
         .nx-docs{grid-template-columns:repeat(2,1fr)}
         .nx-pid-grid{grid-template-columns:repeat(2,1fr)}
     }
+    @media(max-width:768px){
+        /* Hero: hide phone slider on mobile */
+        .phone_thumb{display:none!important}
+        .col-xl-7.col-md-6{flex:0 0 100%!important;max-width:100%!important}
+        .slider_text h3{font-size:1.6rem!important}
+        .slider_text p{font-size:.9rem!important}
+        .single_slider{min-height:auto!important;padding:100px 0 40px!important}
+        /* Hide QR on mobile */
+        .img-qr{display:none!important}
+        /* Stats compact */
+        .nx-hero-stats{gap:12px!important}
+        .nx-stat-num{font-size:1.2rem!important}
+        .nx-stat-label{font-size:.65rem!important}
+        /* Sections compact */
+        .nx-section{padding:40px 0!important}
+        .nx-section-title h2{font-size:1.3rem!important}
+    }
     @media(max-width:600px){
         .nx-flow,.nx-features{grid-template-columns:1fr}
         .nx-projects{grid-template-columns:1fr}
         .nx-docs{grid-template-columns:1fr}
-        .nx-hero-stats{gap:20px}
+        .nx-hero-stats{gap:10px}
         .nx-specs{grid-template-columns:1fr}
         .nx-pid-grid{grid-template-columns:1fr}
+        .single_slider{padding:90px 0 30px!important}
     }
     </style>
 
