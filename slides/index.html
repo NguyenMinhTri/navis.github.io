@@ -35,7 +35,7 @@
 <div class="progress-bar-track"><div class="progress-bar" id="progress-bar"></div></div>
 
 <!-- Slide counter -->
-<div class="slide-counter" id="slide-counter">1 / 9</div>
+<div class="slide-counter" id="slide-counter">1 / 10</div>
 
 <!-- Nav dots -->
 <div class="slide-nav" id="slide-nav"></div>
@@ -75,104 +75,74 @@
 <!-- ===== SLIDE 2: VẤN ĐỀ ===== -->
 <div class="slide slide--light" id="slide-2">
     <div class="slide-content">
-        <div class="badge animate">❓ VẤN ĐỀ</div>
-        <h1 class="slide-title animate" style="font-size:36px;">Doanh nghiệp đang gặp khó khăn gì?</h1>
-        <div class="feature-grid" style="margin-top:32px;">
-            <div class="feature-card animate">
-                <div class="card-icon">🏃</div>
+        <div class="badge animate">❓ TỔNG QUAN</div>
+        <h1 class="slide-title animate" style="font-size:36px;">Doanh nghiệp bạn đang gặp vấn đề gì?</h1>
+        <p class="slide-subtitle animate">Hầu hết nhà máy, khu công nghiệp, trạm xử lý nước vẫn vận hành theo cách truyền thống</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:28px;">
+            <div class="problem-card animate">
+                <div style="font-size:1.4rem;margin-bottom:6px;">🏃</div>
                 <h3>Phải đến tận nơi</h3>
-                <p>Nhân viên phải đi đến từng trạm để ghi chép số liệu, tốn thời gian và nhân lực</p>
+                <p>Nhân viên phải đi đến từng trạm để kiểm tra, ghi chép — tốn thời gian, nhân lực.</p>
             </div>
-            <div class="feature-card animate">
-                <div class="card-icon">📋</div>
+            <div class="problem-card animate">
+                <div style="font-size:1.4rem;margin-bottom:6px;">📋</div>
                 <h3>Ghi chép thủ công</h3>
-                <p>Số liệu ghi tay dễ sai sót, khó tổng hợp báo cáo, mất dữ liệu lịch sử</p>
+                <p>Số liệu ghi tay dễ sai sót, khó tổng hợp báo cáo, mất dữ liệu lịch sử.</p>
             </div>
-            <div class="feature-card animate">
-                <div class="card-icon">⏰</div>
-                <h3>Phát hiện lỗi chậm</h3>
-                <p>Khi sự cố xảy ra, phải chờ đến lúc kiểm tra mới biết → thiệt hại lớn</p>
+            <div class="problem-card animate">
+                <div style="font-size:1.4rem;margin-bottom:6px;">⏰</div>
+                <h3>Phát hiện sự cố chậm</h3>
+                <p>Thiết bị lỗi hoặc vượt ngưỡng, phải chờ kiểm tra mới biết — gây thiệt hại lớn.</p>
             </div>
-            <div class="feature-card animate">
-                <div class="card-icon">📊</div>
-                <h3>Thiếu dữ liệu quản lý</h3>
-                <p>Không có biểu đồ, xu hướng, thống kê → khó đưa ra quyết định chính xác</p>
+            <div class="problem-card animate">
+                <div style="font-size:1.4rem;margin-bottom:6px;">🏭</div>
+                <h3>Quản lý nhiều trạm khó khăn</h3>
+                <p>Nhiều trạm phân tán, không có cái nhìn tổng quan, khó phối hợp vận hành.</p>
+            </div>
+            <div class="problem-card animate">
+                <div style="font-size:1.4rem;margin-bottom:6px;">📊</div>
+                <h3>Không có data khi cần</h3>
+                <p>Sự cố xảy ra không có dữ liệu lịch sử để truy xuất nguyên nhân, trình cấp trên.</p>
             </div>
         </div>
     </div>
 </div>
 
 <!-- ===== SLIDE 3: GIẢI PHÁP ===== -->
-<div class="slide slide--dark" id="slide-3">
+<div class="slide slide--light" id="slide-3">
     <div class="slide-content" style="text-align:center;">
-        <div class="badge animate">💡 GIẢI PHÁP</div>
-        <h1 class="slide-title animate" style="font-size:36px;">Giám sát <span class="highlight">mọi lúc, mọi nơi</span></h1>
-        <p class="slide-subtitle animate">Chỉ cần 1 Gateway + App là đủ</p>
+        <div class="badge animate" style="background:rgba(0,137,123,.1);color:#00897B;border-color:rgba(0,137,123,.15);">✅ GIẢI PHÁP</div>
+        <h1 class="slide-title animate" style="font-size:36px;">Navis Smart Industry — Giám sát <span class="highlight">mọi lúc, mọi nơi</span></h1>
+        <p class="slide-subtitle animate">Chỉ cần 1 thiết bị Gateway + 1 App — kết nối, giám sát, cảnh báo toàn bộ hệ thống</p>
 
-        <!-- Architecture SVG -->
-        <div class="animate" style="margin-top:32px;">
-            <svg viewBox="0 0 800 300" style="width:100%;max-width:800px;" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1A237E"/><stop offset="100%" stop-color="#3949AB"/></linearGradient>
-                    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00897B"/><stop offset="100%" stop-color="#00BFA5"/></linearGradient>
-                    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E65100"/><stop offset="100%" stop-color="#FF8F00"/></linearGradient>
-                </defs>
-                <!-- Thiết bị -->
-                <rect x="20" y="90" width="160" height="120" rx="12" fill="url(#g1)" opacity="0.9"/>
-                <text x="100" y="130" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="13" font-weight="700">🔌 THIẾT BỊ</text>
-                <text x="100" y="152" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Inter,sans-serif" font-size="11">Cảm biến, PLC,</text>
-                <text x="100" y="168" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Inter,sans-serif" font-size="11">Đồng hồ đo, DI/DO</text>
-                <text x="100" y="195" text-anchor="middle" fill="#00BFA5" font-family="Inter,sans-serif" font-size="10" font-weight="600">RS485 / Modbus</text>
-
-                <!-- Arrow 1 -->
-                <line x1="180" y1="150" x2="240" y2="150" stroke="#00BFA5" stroke-width="3" stroke-dasharray="6,4"/>
-                <polygon points="236,144 248,150 236,156" fill="#00BFA5"/>
-
-                <!-- Gateway -->
-                <rect x="250" y="70" width="180" height="160" rx="14" fill="url(#g2)"/>
-                <text x="340" y="110" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="14" font-weight="700">⚙️ GATEWAY</text>
-                <text x="340" y="130" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="13" font-weight="600">Navis MOD</text>
-                <text x="340" y="155" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="Inter,sans-serif" font-size="10">WiFi / LAN / 4G</text>
-                <text x="340" y="172" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="Inter,sans-serif" font-size="10">Max 100 tag</text>
-                <text x="340" y="189" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="Inter,sans-serif" font-size="10">Watchdog + OTA</text>
-                <text x="340" y="218" text-anchor="middle" fill="#FFD54F" font-family="Inter,sans-serif" font-size="10" font-weight="600">MQTT + TLS 🔒</text>
-
-                <!-- Arrow 2 -->
-                <line x1="430" y1="150" x2="490" y2="150" stroke="#FF8F00" stroke-width="3" stroke-dasharray="6,4"/>
-                <polygon points="486,144 498,150 486,156" fill="#FF8F00"/>
-
-                <!-- Cloud + App -->
-                <rect x="500" y="40" width="280" height="220" rx="14" fill="url(#g3)" opacity="0.9"/>
-                <text x="640" y="75" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="14" font-weight="700">☁️ CLOUD + APP</text>
-
-                <rect x="520" y="90" width="120" height="45" rx="8" fill="rgba(255,255,255,0.2)"/>
-                <text x="580" y="110" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="11" font-weight="600">📱 App Mobile</text>
-                <text x="580" y="126" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Inter,sans-serif" font-size="9">iOS + Android</text>
-
-                <rect x="650" y="90" width="120" height="45" rx="8" fill="rgba(255,255,255,0.2)"/>
-                <text x="710" y="110" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="11" font-weight="600">🖥️ Web App</text>
-                <text x="710" y="126" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Inter,sans-serif" font-size="9">Domain riêng</text>
-
-                <rect x="520" y="145" width="250" height="40" rx="8" fill="rgba(255,255,255,0.15)"/>
-                <text x="645" y="164" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="10">🔔 Cảnh báo tức thì &nbsp;|&nbsp; 📊 Biểu đồ &nbsp;|&nbsp; 📋 Báo cáo</text>
-                <text x="645" y="178" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9">Push Notification + Email</text>
-
-                <rect x="520" y="195" width="250" height="55" rx="8" fill="rgba(255,255,255,0.1)"/>
-                <text x="645" y="215" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="10">Google Cloud (Đại lý VN, có VAT)</text>
-                <text x="645" y="230" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9">Lưu trữ dài hạn &nbsp;|&nbsp; Backup &nbsp;|&nbsp; Mã hóa</text>
-                <text x="645" y="243" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9">Server châu Á &nbsp;|&nbsp; VAT đầy đủ</text>
-            </svg>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:28px;margin-bottom:24px;">
+            <div class="solution-card animate" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);">
+                <div style="font-size:2.2rem;margin-bottom:10px;">📡</div>
+                <h3 style="color:#1B5E20;">Gateway Navis MOD</h3>
+                <p style="color:#2E7D32;">Thiết bị nhỏ gọn, kết nối PLC/cảm biến qua RS485 Modbus. Hỗ trợ WiFi, LAN, 4G — không cần lập trình.</p>
+            </div>
+            <div class="solution-card animate" style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB);">
+                <div style="font-size:2.2rem;margin-bottom:10px;">☁️</div>
+                <h3 style="color:#0D47A1;">Cloud Server an toàn</h3>
+                <p style="color:#1565C0;">Google Cloud server tại châu Á, mã hóa TLS/SSL. Lưu trữ dài hạn, backup tự động, VAT đầy đủ.</p>
+            </div>
+            <div class="solution-card animate" style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2);">
+                <div style="font-size:2.2rem;margin-bottom:10px;">📱</div>
+                <h3 style="color:#E65100;">App & Web trọn gói</h3>
+                <p style="color:#EF6C00;">Dashboard realtime, biểu đồ, bản đồ, cảnh báo push, phân quyền, xuất báo cáo Excel/PDF tự động.</p>
+            </div>
         </div>
-        <p class="slide-subtitle animate" style="margin-top:32px;font-size:13px;">Một số dự án đã triển khai (click để phóng to)</p>
+
+        <p class="slide-subtitle animate" style="font-size:13px;">Một số dự án đã triển khai (click để phóng to)</p>
         <div class="animate" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px;">
-            <img src="project-nhamay-nuoc.png" alt="Nhà máy nước" class="proj-thumb" style="height:80px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);" onclick="openLB(this.src,this.alt)">
-            <img src="project-lixil.png" alt="LIXIL Vietnam" class="proj-thumb" style="height:80px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);" onclick="openLB(this.src,this.alt)">
-            <img src="project-visip.png" alt="VSIP Industrial Park" class="proj-thumb" style="height:80px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);" onclick="openLB(this.src,this.alt)">
-            <img src="project-poonginvina.png" alt="Poongin Vina" class="proj-thumb" style="height:80px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);" onclick="openLB(this.src,this.alt)">
-            <img src="project-pttfood.png" alt="PTT Food" class="proj-thumb" style="height:80px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);" onclick="openLB(this.src,this.alt)">
-            <img src="project-gas.png" alt="Hệ thống Gas" class="proj-thumb" style="height:80px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);" onclick="openLB(this.src,this.alt)">
-            <img src="project-pccc.png" alt="Hệ thống PCCC" class="proj-thumb" style="height:80px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);" onclick="openLB(this.src,this.alt)">
-            <img src="project-server.png" alt="Phòng Server" class="proj-thumb" style="height:80px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);" onclick="openLB(this.src,this.alt)">
+            <img src="project-nhamay-nuoc.png" alt="Nhà máy nước" class="proj-thumb" style="height:70px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);" onclick="openLB(this.src,this.alt)">
+            <img src="project-lixil.png" alt="LIXIL Vietnam" class="proj-thumb" style="height:70px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);" onclick="openLB(this.src,this.alt)">
+            <img src="project-visip.png" alt="VSIP Industrial Park" class="proj-thumb" style="height:70px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);" onclick="openLB(this.src,this.alt)">
+            <img src="project-poonginvina.png" alt="Poongin Vina" class="proj-thumb" style="height:70px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);" onclick="openLB(this.src,this.alt)">
+            <img src="project-pttfood.png" alt="PTT Food" class="proj-thumb" style="height:70px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);" onclick="openLB(this.src,this.alt)">
+            <img src="project-gas.png" alt="Hệ thống Gas" class="proj-thumb" style="height:70px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);" onclick="openLB(this.src,this.alt)">
+            <img src="project-pccc.png" alt="Hệ thống PCCC" class="proj-thumb" style="height:70px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);" onclick="openLB(this.src,this.alt)">
+            <img src="project-server.png" alt="Phòng Server" class="proj-thumb" style="height:70px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);" onclick="openLB(this.src,this.alt)">
         </div>
     </div>
 </div>
@@ -271,8 +241,44 @@
     </div>
 </div>
 
-<!-- ===== SLIDE 6: CẢNH BÁO ===== -->
-<div class="slide slide--accent" id="slide-6">
+<!-- ===== SLIDE 6: GIAO DIỆN THỰC TẾ ===== -->
+<div class="slide slide--light" id="slide-6">
+    <div class="slide-content" style="text-align:center;">
+        <div class="badge animate">📸 GIAO DIỆN</div>
+        <h1 class="slide-title animate" style="font-size:36px;">Mọi thứ bạn cần trên <span class="highlight">một nền tảng</span></h1>
+        <p class="slide-subtitle animate">Click vào ảnh để phóng to xem chi tiết</p>
+
+        <div class="animate" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px;max-width:900px;margin-left:auto;margin-right:auto;">
+            <div style="text-align:center;">
+                <img src="navis-dashboard-sensors.png" alt="Dashboard Realtime" class="proj-thumb" style="width:100%;height:200px;object-fit:cover;object-position:top;border-radius:10px;border:1px solid rgba(0,0,0,.08);" onclick="openLB(this.src,this.alt)">
+                <p style="font-size:11px;margin-top:6px;opacity:.7;">📊 Dashboard Realtime</p>
+            </div>
+            <div style="text-align:center;">
+                <img src="navis-statistics-activity.png" alt="Biểu đồ & Thống kê" class="proj-thumb" style="width:100%;height:200px;object-fit:cover;object-position:top;border-radius:10px;border:1px solid rgba(0,0,0,.08);" onclick="openLB(this.src,this.alt)">
+                <p style="font-size:11px;margin-top:6px;opacity:.7;">📈 Biểu đồ & Thống kê</p>
+            </div>
+            <div style="text-align:center;">
+                <img src="navis-map-monitoring.png" alt="Bản đồ giám sát" class="proj-thumb" style="width:100%;height:200px;object-fit:cover;object-position:top;border-radius:10px;border:1px solid rgba(0,0,0,.08);" onclick="openLB(this.src,this.alt)">
+                <p style="font-size:11px;margin-top:6px;opacity:.7;">🗺️ Bản đồ trạm</p>
+            </div>
+            <div style="text-align:center;">
+                <img src="navis-alarm-detail.png" alt="Cảnh báo Push" class="proj-thumb" style="width:100%;height:200px;object-fit:cover;object-position:top;border-radius:10px;border:1px solid rgba(0,0,0,.08);" onclick="openLB(this.src,this.alt)">
+                <p style="font-size:11px;margin-top:6px;opacity:.7;">🔔 Cảnh báo chi tiết</p>
+            </div>
+            <div style="text-align:center;">
+                <img src="navis-multi-station.png" alt="Quản lý nhiều trạm" class="proj-thumb" style="width:100%;height:200px;object-fit:cover;object-position:top;border-radius:10px;border:1px solid rgba(0,0,0,.08);" onclick="openLB(this.src,this.alt)">
+                <p style="font-size:11px;margin-top:6px;opacity:.7;">🔐 Phân quyền & nhiều trạm</p>
+            </div>
+            <div style="text-align:center;">
+                <img src="navis-water-quality.png" alt="Chất lượng nước" class="proj-thumb" style="width:100%;height:200px;object-fit:cover;object-position:top;border-radius:10px;border:1px solid rgba(0,0,0,.08);" onclick="openLB(this.src,this.alt)">
+                <p style="font-size:11px;margin-top:6px;opacity:.7;">📄 Báo cáo & chất lượng</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SLIDE 7: CẢNH BÁO ===== -->
+<div class="slide slide--accent" id="slide-7">
     <div class="slide-content" style="text-align:center;">
         <div class="badge animate">🔔 CẢNH BÁO</div>
         <h1 class="slide-title animate" style="font-size:36px;">Phát hiện sự cố <span class="highlight">ngay lập tức</span></h1>
@@ -312,8 +318,8 @@
     </div>
 </div>
 
-<!-- ===== SLIDE 7: BÁO CÁO ===== -->
-<div class="slide slide--light" id="slide-7">
+<!-- ===== SLIDE 8: BÁO CÁO ===== -->
+<div class="slide slide--light" id="slide-8">
     <div class="slide-content">
         <div class="badge animate">📋 BÁO CÁO & BẢO MẬT</div>
         <h1 class="slide-title animate" style="font-size:36px;">Dữ liệu an toàn, báo cáo tự động</h1>
@@ -353,8 +359,8 @@
     </div>
 </div>
 
-<!-- ===== SLIDE 8: CHI PHÍ ===== -->
-<div class="slide slide--dark" id="slide-8">
+<!-- ===== SLIDE 9: CHI PHÍ ===== -->
+<div class="slide slide--dark" id="slide-9">
     <div class="slide-content" style="text-align:center;">
         <div class="badge animate">💰 CHI PHÍ</div>
         <h1 class="slide-title animate" style="font-size:36px;">Đơn giản & <span class="highlight">Minh bạch</span></h1>
@@ -410,8 +416,8 @@
     </div>
 </div>
 
-<!-- ===== SLIDE 9: LIÊN HỆ ===== -->
-<div class="slide slide--accent" id="slide-9">
+<!-- ===== SLIDE 10: LIÊN HỆ ===== -->
+<div class="slide slide--accent" id="slide-10">
     <div class="slide-content" style="text-align:center;">
         <h1 class="slide-title animate" style="font-size:40px;">Sẵn sàng <span class="highlight">bắt đầu</span>?</h1>
         <p class="slide-subtitle animate">Demo miễn phí • Triển khai 1-2 tuần • Hỗ trợ chạy thử</p>
