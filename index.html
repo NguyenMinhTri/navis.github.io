@@ -692,6 +692,180 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
     <script src="js/mail-script.js"></script>
     <script src="js/bootstrap-toolkit.min.js"></script>
     <script src="js/main.js"></script>
+
+<!-- ===== SMART APP DOWNLOAD BANNER (Mobile Only) ===== -->
+<div id="app-banner" style="display:none;">
+    <style>
+        #app-banner .ab-overlay {
+            position:fixed; bottom:0; left:0; right:0; z-index:9999;
+            padding:0 12px 12px; pointer-events:none;
+            animation: abSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        @keyframes abSlideUp { from{transform:translateY(120%);opacity:0} to{transform:translateY(0);opacity:1} }
+        @keyframes abSlideDown { from{transform:translateY(0);opacity:1} to{transform:translateY(120%);opacity:0} }
+        @keyframes abPulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,191,165,.4)} 50%{box-shadow:0 0 0 12px rgba(0,191,165,0)} }
+        @keyframes abShine { 0%{left:-100%} 100%{left:200%} }
+
+        #app-banner .ab-card {
+            pointer-events:all;
+            max-width:420px; margin:0 auto;
+            background:linear-gradient(135deg,rgba(26,35,126,0.97),rgba(57,73,171,0.97));
+            backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+            border-radius:20px; padding:18px 20px;
+            box-shadow:0 -4px 30px rgba(0,0,0,0.25), 0 0 60px rgba(26,35,126,0.2);
+            border:1px solid rgba(255,255,255,0.12);
+            display:flex; align-items:center; gap:14px;
+            position:relative; overflow:hidden;
+        }
+        #app-banner .ab-card::after {
+            content:''; position:absolute; top:0; left:-100%; width:60%; height:100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);
+            animation: abShine 3s ease-in-out infinite;
+        }
+
+        #app-banner .ab-icon {
+            width:56px; height:56px; border-radius:14px; flex-shrink:0;
+            background:linear-gradient(135deg,#00BFA5,#00897B);
+            display:flex; align-items:center; justify-content:center;
+            font-size:28px; box-shadow:0 4px 12px rgba(0,191,165,0.3);
+        }
+        #app-banner .ab-info { flex:1; min-width:0; }
+        #app-banner .ab-title {
+            color:#fff; font-family:'Inter',system-ui,sans-serif;
+            font-size:15px; font-weight:700; line-height:1.3;
+            margin-bottom:2px;
+        }
+        #app-banner .ab-subtitle {
+            color:rgba(255,255,255,0.7); font-family:'Inter',system-ui,sans-serif;
+            font-size:12px; line-height:1.4;
+        }
+        #app-banner .ab-stars { color:#FFD54F; font-size:11px; margin-top:2px; letter-spacing:1px; }
+
+        #app-banner .ab-btn {
+            flex-shrink:0; text-decoration:none;
+            background:linear-gradient(135deg,#00BFA5,#00E5C0);
+            color:#fff; font-family:'Inter',system-ui,sans-serif;
+            font-size:13px; font-weight:700; padding:10px 18px;
+            border-radius:12px; white-space:nowrap;
+            box-shadow:0 4px 16px rgba(0,191,165,0.35);
+            transition:transform .2s, box-shadow .2s;
+            position:relative; z-index:1;
+        }
+        #app-banner .ab-btn:active { transform:scale(0.95); }
+
+        #app-banner .ab-close {
+            position:absolute; top:8px; right:10px;
+            background:rgba(255,255,255,0.15); border:none; color:rgba(255,255,255,0.6);
+            width:24px; height:24px; border-radius:50%;
+            font-size:14px; cursor:pointer; z-index:2;
+            display:flex; align-items:center; justify-content:center;
+            transition:background .2s;
+        }
+        #app-banner .ab-close:hover { background:rgba(255,255,255,0.25); color:#fff; }
+
+        /* Floating re-open button */
+        #app-fab {
+            display:none; position:fixed; bottom:16px; right:16px; z-index:9998;
+            width:52px; height:52px; border-radius:50%;
+            background:linear-gradient(135deg,#1A237E,#3949AB);
+            border:2px solid rgba(0,191,165,0.5);
+            box-shadow:0 4px 20px rgba(0,0,0,0.3);
+            cursor:pointer; font-size:24px;
+            align-items:center; justify-content:center;
+            animation: abPulse 2s ease-in-out infinite;
+            transition:transform .2s;
+        }
+        #app-fab:active { transform:scale(0.9); }
+
+        /* Desktop: hide everything */
+        @media (min-width:769px) {
+            #app-banner, #app-fab { display:none!important; }
+        }
+    </style>
+
+    <div class="ab-overlay" id="ab-overlay">
+        <div class="ab-card">
+            <button class="ab-close" onclick="dismissBanner()" title="Đóng">✕</button>
+            <div class="ab-icon" id="ab-icon">📱</div>
+            <div class="ab-info">
+                <div class="ab-title" id="ab-title">Navis Smart Industry</div>
+                <div class="ab-subtitle" id="ab-subtitle">Giám sát IoT mọi lúc mọi nơi</div>
+                <div class="ab-stars">★★★★★</div>
+            </div>
+            <a class="ab-btn" id="ab-btn" href="https://onelink.to/3nga3q" target="_blank">
+                <span id="ab-btn-text">Tải App</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Floating re-open button -->
+<div id="app-fab" onclick="showBanner()">📱</div>
+
+<script>
+(function(){
+    // Only run on mobile
+    var ua = navigator.userAgent || '';
+    var isIOS = /iPhone|iPad|iPod/i.test(ua);
+    var isAndroid = /Android/i.test(ua);
+    var isMobile = isIOS || isAndroid || (window.innerWidth <= 768);
+
+    if (!isMobile) return;
+
+    // Check if dismissed recently (24h cookie)
+    if (document.cookie.indexOf('ab_dismissed=1') !== -1) {
+        document.getElementById('app-fab').style.display = 'flex';
+        return;
+    }
+
+    var banner = document.getElementById('app-banner');
+    var icon = document.getElementById('ab-icon');
+    var title = document.getElementById('ab-title');
+    var subtitle = document.getElementById('ab-subtitle');
+    var btn = document.getElementById('ab-btn');
+    var btnText = document.getElementById('ab-btn-text');
+
+    if (isIOS) {
+        icon.textContent = '';
+        title.textContent = 'Navis Smart Industry';
+        subtitle.textContent = 'Tải miễn phí trên App Store';
+        btn.href = 'https://apps.apple.com/vn/app/%C4%91%E1%BA%A1i-vi%E1%BB%87t-iot/id1542793174';
+        btnText.textContent = 'Mở App Store';
+        icon.style.background = 'linear-gradient(135deg,#007AFF,#5856D6)';
+    } else if (isAndroid) {
+        icon.textContent = '🤖';
+        title.textContent = 'Navis Smart Industry';
+        subtitle.textContent = 'Tải miễn phí trên Google Play';
+        btn.href = 'https://play.google.com/store/apps/details?id=vn.daivietiot.ro_system';
+        btnText.textContent = 'Mở Google Play';
+        icon.style.background = 'linear-gradient(135deg,#34A853,#0F9D58)';
+    }
+
+    // Show after 1.5s delay for better UX
+    setTimeout(function(){ banner.style.display = 'block'; }, 1500);
+})();
+
+function dismissBanner() {
+    var overlay = document.getElementById('ab-overlay');
+    overlay.style.animation = 'abSlideDown 0.4s ease forwards';
+    setTimeout(function(){
+        document.getElementById('app-banner').style.display = 'none';
+        document.getElementById('app-fab').style.display = 'flex';
+    }, 400);
+    // Remember for 24 hours
+    document.cookie = 'ab_dismissed=1;max-age=86400;path=/';
+}
+
+function showBanner() {
+    document.getElementById('app-fab').style.display = 'none';
+    var overlay = document.getElementById('ab-overlay');
+    overlay.style.animation = 'abSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) forwards';
+    document.getElementById('app-banner').style.display = 'block';
+    document.cookie = 'ab_dismissed=0;max-age=0;path=/';
+}
+</script>
+<!-- ===== END SMART APP BANNER ===== -->
+
 </body>
 
 </html>
