@@ -29,80 +29,45 @@ var ViewPort = function ViewPort(isFirst) {
 }
 
 function startSlider() {
+  // Show first image immediately
   addShow(0);
-  imgSlider(0);
+  imgSlider();
 }
 
 function imgSlider() {
-  if (index < images.length) {
-    stopLooping = setTimeout(function () {
-      addHide(index);
-      if (index + 1 < images.length) {
-        addShow(index + 1);
-      } else {
-        addShow(0);
-      }
-      index++;
-      imgSlider();
-    }, 3000);
-  }
-  else {
-    index = 0;
+  stopLooping = setTimeout(function () {
+    addHide(index);
+    index = (index + 1) % images.length;
+    addShow(index);
     imgSlider();
-  }
+  }, 2500);
 }
 
 
 function next() {
-  clearInterval(stopLooping);
-
-  if (index + 1 < images.length) {
-    index = index + 1;
-  } else {
-    index = 0;
-  }
-  nextSlide(index);
+  clearTimeout(stopLooping);
+  addHide(index);
+  index = (index + 1) % images.length;
+  addShow(index);
+  imgSlider();
 }
 
 function previous() {
-  clearInterval(stopLooping);
-
-  if (index - 1 < 0) {
-    index = length - 1;
-  } else {
-    index = index - 1;
-  }
-  prevSlide(index);
-}
-
-function nextSlide(index) {
-  if (index == 0) {
-    addHide(length - 1);
-  } else {
-    addHide(index - 1);
-  }
+  clearTimeout(stopLooping);
+  addHide(index);
+  index = (index - 1 + images.length) % images.length;
   addShow(index);
+  imgSlider();
 }
 
-function prevSlide(index, newindex) {
-  if (index == length - 1) {
-    addHide(0);
-  } else {
-    addHide(index + 1);
-  }
-  addShow(index);
+function addShow(i) {
+  images[i].classList.add("dispBlocknext");
+  images[i].classList.remove("dispNone");
 }
 
-function addShow(newIndex) {
-  images[newIndex].classList.add("dispBlocknext");
-  images[newIndex].classList.remove("dispNone");
-  images[newIndex].style.visibility = 'visible';
-}
-
-function addHide(newIndex) {
-  images[newIndex].classList.add("dispNone");
-  images[newIndex].classList.remove("dispBlocknext");
-  images[newIndex].style.visibility = 'hidden';
+function addHide(i) {
+  images[i].classList.remove("dispBlocknext");
+  images[i].classList.add("dispNone");
 }
 (function ($) {
   "use strict";
