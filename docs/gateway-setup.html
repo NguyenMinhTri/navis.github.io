@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Hướng Dẫn Cài Đặt Gateway | Navis Smart Industry</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--p:#1A237E;--p2:#283593;--a:#00BFA5;--bg:#F5F7FA;--card:#fff;--text:#1a1a2e;--sub:#5f6368;--r:12px;--sh:0 2px 12px rgba(26,35,126,.08)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+.top-bar{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.top-bar a{color:rgba(255,255,255,.85);text-decoration:none;font-size:.85rem}
+.top-bar a:hover{color:#fff}
+.logo{font-weight:800;font-size:1.1rem;letter-spacing:1px}
+.hero{background:linear-gradient(135deg,var(--p) 0%,#0D47A1 100%);color:#fff;padding:48px 24px 40px;text-align:center}
+.hero h1{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;margin-bottom:8px}
+.hero p{opacity:.85;font-size:.95rem;max-width:600px;margin:0 auto}
+.badge{display:inline-block;background:var(--a);color:#fff;padding:4px 14px;border-radius:20px;font-size:.75rem;font-weight:600;margin-bottom:12px}
+.container{max-width:860px;margin:0 auto;padding:24px 16px 48px}
+.section{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:28px 24px;margin-bottom:20px}
+.section-title{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--bg)}
+.section-num{width:32px;height:32px;background:linear-gradient(135deg,var(--p),var(--a));color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+.section-title h2{font-size:1.15rem;color:var(--p);font-weight:700}
+.specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.spec-item{background:var(--bg);border-radius:8px;padding:14px;text-align:center;border-left:3px solid var(--a)}
+.spec-item strong{display:block;font-size:.75rem;color:var(--sub);text-transform:uppercase;margin-bottom:4px}
+.spec-item span{font-weight:600;font-size:.9rem;color:var(--p)}
+svg.diagram{width:100%;max-width:600px;margin:16px auto;display:block;background:#f8f9ff;border-radius:8px;border:1px solid #e0e0e0}
+.step-list{counter-reset:step}
+.step{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--bg);counter-increment:step}
+.step:last-child{border-bottom:none}
+.step::before{content:counter(step);width:28px;height:28px;background:var(--p);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0;margin-top:2px}
+.step-content{flex:1}
+.step-content strong{color:var(--p)}
+.conn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.conn-card{background:var(--bg);border-radius:8px;padding:16px;border-top:3px solid var(--a)}
+.conn-card h4{color:var(--p);margin-bottom:6px;font-size:.95rem}
+.conn-card p{font-size:.85rem;color:var(--sub)}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px}
+th{background:var(--p);color:#fff;padding:10px 12px;text-align:left;font-weight:600}
+td{padding:10px 12px;border-bottom:1px solid #eee}
+tr:nth-child(even){background:var(--bg)}
+.led-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.led-green{background:#00c853}.led-blue{background:#2979ff}.led-orange{background:#ff9100}
+.trouble-item{padding:12px 16px;background:var(--bg);border-radius:8px;margin-bottom:8px;border-left:3px solid #ff5252}
+.trouble-item strong{color:#c62828;font-size:.9rem}
+.trouble-item p{font-size:.85rem;color:var(--sub);margin-top:4px}
+footer{text-align:center;padding:24px;background:var(--p);color:rgba(255,255,255,.8);font-size:.8rem}
+footer strong{color:#fff}
+@media print{.top-bar{position:static}body{background:#fff}.section{box-shadow:none;break-inside:avoid}}
+@media(max-width:600px){.section{padding:20px 16px}.specs{grid-template-columns:1fr 1fr}.conn-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top-bar"><span class="logo">NAVIS</span><div style="display:flex;gap:16px;align-items:center;"><a href="../slides/">← Slide giới thiệu</a><span style="opacity:.3">|</span><a href="faq.html">📋 Q&A Kỹ thuật</a><span style="opacity:.3">|</span><a href="../index.html">🏠 Trang chủ</a></div></div>
+
+<div class="hero">
+  <span class="badge">HƯỚNG DẪN CÀI ĐẶT</span>
+  <h1>Gateway Navis MOD</h1>
+  <p>Hướng dẫn từng bước kết nối và cấu hình Gateway thu thập dữ liệu Modbus RTU/TCP</p>
+</div>
+
+<div class="container">
+  <!-- 1. TỔNG QUAN -->
+  <div class="section">
+    <div class="section-title"><span class="section-num">1</span><h2>TỔNG QUAN</h2></div>
+    <div class="specs">
+      <div class="spec-item"><strong>Nguồn</strong><span>12–24 VDC</span></div>
+      <div class="spec-item"><strong>Giao tiếp</strong><span>RS485 · TCP/IP</span></div>
+      <div class="spec-item"><strong>Kết nối</strong><span>WiFi · LAN · 4G</span></div>
+      <div class="spec-item"><strong>Kích thước</strong><span>10 × 7.5 × 3 cm</span></div>
+      <div class="spec-item"><strong>Tối đa</strong><span>100 tag</span></div>
+      <div class="spec-item"><strong>Giao thức</strong><span>Modbus RTU/TCP</span></div>
+    </div>
+  </div>
+
+  <!-- 2. SƠ ĐỒ NỐI DÂY -->
+  <div class="section">
+    <div class="section-title"><span class="section-num">2</span><h2>SƠ ĐỒ NỐI DÂY</h2></div>
+    <svg class="diagram" viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="gw" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1A237E"/><stop offset="100%" stop-color="#283593"/></linearGradient>
+      <linearGradient id="dv" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00897B"/><stop offset="100%" stop-color="#00695C"/></linearGradient></defs>
+      <!-- Gateway box -->
+      <rect x="20" y="30" width="160" height="140" rx="10" fill="url(#gw)"/>
+      <text x="100" y="58" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="Inter">NAVIS GATEWAY</text>
+      <text x="100" y="76" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="9" font-family="Inter">MOD Series</text>
+      <!-- Gateway ports -->
+      <rect x="130" y="95" width="46" height="20" rx="4" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+      <text x="153" y="109" text-anchor="middle" fill="#80CBC4" font-size="9" font-weight="600" font-family="Inter">A (D+)</text>
+      <rect x="130" y="122" width="46" height="20" rx="4" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+      <text x="153" y="136" text-anchor="middle" fill="#FFAB91" font-size="9" font-weight="600" font-family="Inter">B (D−)</text>
+      <!-- Device box -->
+      <rect x="340" y="30" width="160" height="140" rx="10" fill="url(#dv)"/>
+      <text x="420" y="58" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="Inter">THIẾT BỊ</text>
+      <text x="420" y="76" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="9" font-family="Inter">Modbus RTU Slave</text>
+      <rect x="344" y="95" width="46" height="20" rx="4" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+      <text x="367" y="109" text-anchor="middle" fill="#80CBC4" font-size="9" font-weight="600" font-family="Inter">RS+ / A</text>
+      <rect x="344" y="122" width="46" height="20" rx="4" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+      <text x="367" y="136" text-anchor="middle" fill="#FFAB91" font-size="9" font-weight="600" font-family="Inter">RS− / B</text>
+      <!-- Wires -->
+      <line x1="176" y1="105" x2="344" y2="105" stroke="#00BFA5" stroke-width="2.5" stroke-dasharray="6,3"/>
+      <line x1="176" y1="132" x2="344" y2="132" stroke="#FF7043" stroke-width="2.5" stroke-dasharray="6,3"/>
+      <text x="260" y="99" text-anchor="middle" fill="#00897B" font-size="8" font-weight="600" font-family="Inter">RS485 A ⟷ RS+</text>
+      <text x="260" y="148" text-anchor="middle" fill="#E64A19" font-size="8" font-weight="600" font-family="Inter">RS485 B ⟷ RS−</text>
+      <!-- Power -->
+      <rect x="40" y="148" width="80" height="16" rx="4" fill="rgba(255,255,255,.12)"/>
+      <text x="80" y="160" text-anchor="middle" fill="#FFD54F" font-size="8" font-weight="600" font-family="Inter">⚡ 12–24 VDC</text>
+    </svg>
+    <p style="text-align:center;font-size:.82rem;color:var(--sub)">Kết nối đúng cực A↔A, B↔B. Sai cực sẽ không gây hỏng nhưng không đọc được dữ liệu.</p>
+  </div>
+
+  <!-- 3. KẾT NỐI MẠNG -->
+  <div class="section">
+    <div class="section-title"><span class="section-num">3</span><h2>KẾT NỐI MẠNG</h2></div>
+    <div class="conn-grid">
+      <div class="conn-card">
+        <h4>📶 WiFi</h4>
+        <p>Giữ nút <strong>Config &gt;5 giây</strong> → Mở App → Kết nối WiFi <strong>2.4 GHz</strong></p>
+      </div>
+      <div class="conn-card">
+        <h4>🔌 LAN (Ethernet)</h4>
+        <p>Cắm cáp mạng RJ45 → Nhấn <strong>1 lần</strong> nút Config → Tự nhận IP (DHCP)</p>
+      </div>
+      <div class="conn-card">
+        <h4>📡 4G (chỉ Việt Nam)</h4>
+        <p>Lắp SIM 4G vào khe → Cấp nguồn → Gateway <strong>tự kết nối</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. CẤU HÌNH MODBUS -->
+  <div class="section">
+    <div class="section-title"><span class="section-num">4</span><h2>CẤU HÌNH MODBUS QUA APP</h2></div>
+    <div class="step-list">
+      <div class="step"><div class="step-content"><strong>Mở App Navis Smart Industrial</strong><br>Tải trên Google Play hoặc App Store, đăng nhập tài khoản.</div></div>
+      <div class="step"><div class="step-content"><strong>Quét QR Code</strong><br>Quét mã QR trên mặt gateway để thêm thiết bị vào hệ thống.</div></div>
+      <div class="step"><div class="step-content"><strong>Advance Settings → Modbus Settings</strong><br>Vào <em>Settings → Advance Settings → Modbus Settings</em> để cấu hình giao thức.</div></div>
+      <div class="step"><div class="step-content"><strong>Cấu hình thanh ghi</strong><br>Chọn template có sẵn hoặc nhập thủ công: Slave ID, Function Code, Address, Data Type.</div></div>
+      <div class="step"><div class="step-content"><strong>Lưu & Cập nhật</strong><br>Nhấn <em>Lưu → Update</em>. Đợi <strong>20–30 giây</strong> để gateway nhận cấu hình mới.</div></div>
+    </div>
+  </div>
+
+  <!-- 5. TRẠNG THÁI LED -->
+  <div class="section">
+    <div class="section-title"><span class="section-num">5</span><h2>TRẠNG THÁI LED</h2></div>
+    <table>
+      <tr><th>Chế độ</th><th>Tần số LED</th><th>Ý nghĩa</th></tr>
+      <tr><td><span class="led-dot led-blue"></span>WiFi</td><td>2 lần / giây</td><td>Đang kết nối WiFi</td></tr>
+      <tr><td><span class="led-dot led-green"></span>LAN</td><td>1 lần / giây</td><td>Đang kết nối Ethernet</td></tr>
+      <tr><td><span class="led-dot led-orange"></span>4G</td><td>3 lần / giây</td><td>Đang kết nối mạng 4G</td></tr>
+      <tr><td>—</td><td>Sáng liên tục</td><td>Đã kết nối thành công ✓</td></tr>
+      <tr><td>—</td><td>Tắt</td><td>Mất nguồn hoặc lỗi phần cứng</td></tr>
+    </table>
+  </div>
+
+  <!-- 6. XỬ LÝ SỰ CỐ -->
+  <div class="section">
+    <div class="section-title"><span class="section-num">6</span><h2>XỬ LÝ SỰ CỐ</h2></div>
+    <div class="trouble-item"><strong>Gateway không online</strong><p>Kiểm tra nguồn 12–24VDC, kết nối mạng (WiFi/LAN/4G), và tín hiệu LED. Thử restart gateway.</p></div>
+    <div class="trouble-item"><strong>Không đọc được Modbus</strong><p>Kiểm tra đấu dây A/B đúng cực, baudrate khớp (9600/19200/115200), Slave ID chính xác, và khoảng cách cáp RS485 (&lt;1200m).</p></div>
+    <div class="trouble-item"><strong>LED nhấp nháy liên tục</strong><p>Gateway đang trong quá trình kết nối. Đợi tối đa <strong>60 giây</strong>. Nếu vẫn nhấp nháy, kiểm tra lại cấu hình mạng.</p></div>
+  </div>
+</div>
+
+<footer>
+  <strong>NAVIS SMART INDUSTRY</strong><br>
+  📞 0932.786.579 &nbsp;|&nbsp; 🌐 navis.iotdaiviet.com
+</footer>
+</body>
+</html>

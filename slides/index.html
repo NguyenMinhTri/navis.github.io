@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navis Smart Industry — Giải Pháp IoT Công Nghiệp</title>
+    <meta name="description" content="Nền tảng giám sát IoT công nghiệp hàng đầu Việt Nam. Gateway + Phần mềm trọn gói.">
+    <link rel="stylesheet" href="css/slides.css">
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar-track"><div class="progress-bar" id="progress-bar"></div></div>
+
+<!-- Slide counter -->
+<div class="slide-counter" id="slide-counter">1 / 9</div>
+
+<!-- Nav dots -->
+<div class="slide-nav" id="slide-nav"></div>
+
+<!-- ===== SLIDE 1: COVER ===== -->
+<div class="slide slide--dark" id="slide-1">
+    <div class="slide-content" style="text-align:center;">
+        <div class="badge animate">🏭 IoT CÔNG NGHIỆP</div>
+        <h1 class="slide-title animate" style="margin-top:24px;">
+            NAVIS <span class="highlight">SMART</span> INDUSTRY
+        </h1>
+        <p class="slide-subtitle animate">Nền tảng Giám sát IoT Công nghiệp — Đại Việt IoT</p>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:40px;flex-wrap:wrap;">
+            <div class="stat-card animate">
+                <div class="stat-number">177+</div>
+                <div class="stat-label">Trạm online</div>
+            </div>
+            <div class="stat-card animate">
+                <div class="stat-number">100</div>
+                <div class="stat-label">Tag / trạm</div>
+            </div>
+            <div class="stat-card animate">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Giám sát</div>
+            </div>
+            <div class="stat-card animate">
+                <div class="stat-number">OTA</div>
+                <div class="stat-label">Update từ xa</div>
+            </div>
+        </div>
+        <p class="slide-text animate" style="margin-top:32px;opacity:0.6;font-size:14px;">
+            Nhấn <kbd>→</kbd> hoặc cuộn xuống để xem tiếp
+        </p>
+    </div>
+</div>
+
+<!-- ===== SLIDE 2: VẤN ĐỀ ===== -->
+<div class="slide slide--light" id="slide-2">
+    <div class="slide-content">
+        <div class="badge animate">❓ VẤN ĐỀ</div>
+        <h1 class="slide-title animate" style="font-size:36px;">Doanh nghiệp đang gặp khó khăn gì?</h1>
+        <div class="feature-grid" style="margin-top:32px;">
+            <div class="feature-card animate">
+                <div class="card-icon">🏃</div>
+                <h3>Phải đến tận nơi</h3>
+                <p>Nhân viên phải đi đến từng trạm để ghi chép số liệu, tốn thời gian và nhân lực</p>
+            </div>
+            <div class="feature-card animate">
+                <div class="card-icon">📋</div>
+                <h3>Ghi chép thủ công</h3>
+                <p>Số liệu ghi tay dễ sai sót, khó tổng hợp báo cáo, mất dữ liệu lịch sử</p>
+            </div>
+            <div class="feature-card animate">
+                <div class="card-icon">⏰</div>
+                <h3>Phát hiện lỗi chậm</h3>
+                <p>Khi sự cố xảy ra, phải chờ đến lúc kiểm tra mới biết → thiệt hại lớn</p>
+            </div>
+            <div class="feature-card animate">
+                <div class="card-icon">📊</div>
+                <h3>Thiếu dữ liệu quản lý</h3>
+                <p>Không có biểu đồ, xu hướng, thống kê → khó đưa ra quyết định chính xác</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SLIDE 3: GIẢI PHÁP ===== -->
+<div class="slide slide--dark" id="slide-3">
+    <div class="slide-content" style="text-align:center;">
+        <div class="badge animate">💡 GIẢI PHÁP</div>
+        <h1 class="slide-title animate" style="font-size:36px;">Giám sát <span class="highlight">mọi lúc, mọi nơi</span></h1>
+        <p class="slide-subtitle animate">Chỉ cần 1 Gateway + App là đủ</p>
+
+        <!-- Architecture SVG -->
+        <div class="animate" style="margin-top:32px;">
+            <svg viewBox="0 0 800 300" style="width:100%;max-width:800px;" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1A237E"/><stop offset="100%" stop-color="#3949AB"/></linearGradient>
+                    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00897B"/><stop offset="100%" stop-color="#00BFA5"/></linearGradient>
+                    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E65100"/><stop offset="100%" stop-color="#FF8F00"/></linearGradient>
+                </defs>
+                <!-- Thiết bị -->
+                <rect x="20" y="90" width="160" height="120" rx="12" fill="url(#g1)" opacity="0.9"/>
+                <text x="100" y="130" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="13" font-weight="700">🔌 THIẾT BỊ</text>
+                <text x="100" y="152" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Inter,sans-serif" font-size="11">Cảm biến, PLC,</text>
+                <text x="100" y="168" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Inter,sans-serif" font-size="11">Đồng hồ đo, DI/DO</text>
+                <text x="100" y="195" text-anchor="middle" fill="#00BFA5" font-family="Inter,sans-serif" font-size="10" font-weight="600">RS485 / Modbus</text>
+
+                <!-- Arrow 1 -->
+                <line x1="180" y1="150" x2="240" y2="150" stroke="#00BFA5" stroke-width="3" stroke-dasharray="6,4"/>
+                <polygon points="236,144 248,150 236,156" fill="#00BFA5"/>
+
+                <!-- Gateway -->
+                <rect x="250" y="70" width="180" height="160" rx="14" fill="url(#g2)"/>
+                <text x="340" y="110" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="14" font-weight="700">⚙️ GATEWAY</text>
+                <text x="340" y="130" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="13" font-weight="600">Navis MOD</text>
+                <text x="340" y="155" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="Inter,sans-serif" font-size="10">WiFi / LAN / 4G</text>
+                <text x="340" y="172" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="Inter,sans-serif" font-size="10">Max 100 tag</text>
+                <text x="340" y="189" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="Inter,sans-serif" font-size="10">Watchdog + OTA</text>
+                <text x="340" y="218" text-anchor="middle" fill="#FFD54F" font-family="Inter,sans-serif" font-size="10" font-weight="600">MQTT + TLS 🔒</text>
+
+                <!-- Arrow 2 -->
+                <line x1="430" y1="150" x2="490" y2="150" stroke="#FF8F00" stroke-width="3" stroke-dasharray="6,4"/>
+                <polygon points="486,144 498,150 486,156" fill="#FF8F00"/>
+
+                <!-- Cloud + App -->
+                <rect x="500" y="40" width="280" height="220" rx="14" fill="url(#g3)" opacity="0.9"/>
+                <text x="640" y="75" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="14" font-weight="700">☁️ CLOUD + APP</text>
+
+                <rect x="520" y="90" width="120" height="45" rx="8" fill="rgba(255,255,255,0.2)"/>
+                <text x="580" y="110" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="11" font-weight="600">📱 App Mobile</text>
+                <text x="580" y="126" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Inter,sans-serif" font-size="9">iOS + Android</text>
+
+                <rect x="650" y="90" width="120" height="45" rx="8" fill="rgba(255,255,255,0.2)"/>
+                <text x="710" y="110" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="11" font-weight="600">🖥️ Web App</text>
+                <text x="710" y="126" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Inter,sans-serif" font-size="9">Domain riêng</text>
+
+                <rect x="520" y="145" width="250" height="40" rx="8" fill="rgba(255,255,255,0.15)"/>
+                <text x="645" y="164" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="10">🔔 Cảnh báo tức thì &nbsp;|&nbsp; 📊 Biểu đồ &nbsp;|&nbsp; 📋 Báo cáo</text>
+                <text x="645" y="178" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9">Push Notification + Email</text>
+
+                <rect x="520" y="195" width="250" height="55" rx="8" fill="rgba(255,255,255,0.1)"/>
+                <text x="645" y="215" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="10">Google Cloud (Đại lý VN, có VAT)</text>
+                <text x="645" y="230" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9">Lưu trữ dài hạn &nbsp;|&nbsp; Backup &nbsp;|&nbsp; Mã hóa</text>
+                <text x="645" y="243" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-family="Inter,sans-serif" font-size="9">Server châu Á &nbsp;|&nbsp; VAT đầy đủ</text>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SLIDE 4: SẢN PHẨM GATEWAY ===== -->
+<div class="slide slide--light" id="slide-4">
+    <div class="slide-content">
+        <div class="badge animate">📦 SẢN PHẨM</div>
+        <h1 class="slide-title animate" style="font-size:36px;">Gateway <span class="highlight">Navis MOD</span></h1>
+        <p class="slide-subtitle animate">Thiết bị thu thập dữ liệu công nghiệp — trái tim của hệ thống</p>
+
+        <div style="display:flex;gap:32px;margin-top:24px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="flex:1;min-width:280px;">
+                <table class="slide-table animate">
+                    <tr><th colspan="2" style="text-align:center;">⚙️ Thông số kỹ thuật</th></tr>
+                    <tr><td>Nguồn điện</td><td>12 – 24 VDC</td></tr>
+                    <tr><td>Giao tiếp</td><td>RS485 (Modbus RTU/TCP)</td></tr>
+                    <tr><td>Kết nối</td><td>WiFi / Ethernet / 4G</td></tr>
+                    <tr><td>Số tag tối đa</td><td><strong>100 tag</strong></td></tr>
+                    <tr><td>Kích thước</td><td>10 × 7.5 × 3 cm</td></tr>
+                    <tr><td>Bảo mật</td><td>MQTT + TLS/SSL + JWT</td></tr>
+                    <tr><td>Tính năng</td><td>Watchdog, OTA, Auto-restart</td></tr>
+                    <tr><td>Bảo hành</td><td>12 tháng</td></tr>
+                </table>
+            </div>
+            <div style="flex:1;min-width:280px;">
+                <div class="feature-card animate" style="margin-bottom:12px;">
+                    <h3>🔌 Kết nối mọi thiết bị</h3>
+                    <p>PLC, cảm biến, đồng hồ đo, biến tần, lưu lượng kế — bất kỳ thiết bị nào có RS485/Modbus</p>
+                </div>
+                <div class="feature-card animate" style="margin-bottom:12px;">
+                    <h3>📡 3 chế độ kết nối</h3>
+                    <p><strong>WiFi</strong> (giữ Config >5s) • <strong>LAN</strong> (cắm cáp) • <strong>4G</strong> (lắm SIM — chỉ VN)</p>
+                </div>
+                <div class="feature-card animate">
+                    <h3>🛡️ Ổn định tuyệt đối</h3>
+                    <p>Watchdog chống treo, tự khởi động lại, cập nhật firmware OTA từ xa, giám sát liên tục 24/7</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SLIDE 5: PHẦN MỀM ===== -->
+<div class="slide slide--dark" id="slide-5">
+    <div class="slide-content">
+        <div class="badge animate">💻 PHẦN MỀM</div>
+        <h1 class="slide-title animate" style="font-size:36px;">App & Web <span class="highlight">trọn gói</span></h1>
+        <p class="slide-subtitle animate">15-20+ màn hình chức năng — Dùng chung App Navis, hiển thị thương hiệu riêng</p>
+
+        <div class="feature-grid animate" style="margin-top:24px;">
+            <div class="feature-card">
+                <div class="card-icon">📊</div>
+                <h3>Dashboard Realtime</h3>
+                <p>Xem dữ liệu cập nhật liên tục, tổng quan tất cả trạm trên 1 màn hình</p>
+            </div>
+            <div class="feature-card">
+                <div class="card-icon">📈</div>
+                <h3>Biểu đồ & Lịch sử</h3>
+                <p>Line chart, zoom, lọc thời gian, Min/Max/Avg, xuất Excel/PDF</p>
+            </div>
+            <div class="feature-card">
+                <div class="card-icon">🗺️</div>
+                <h3>Bản đồ giám sát</h3>
+                <p>Tất cả trạm trên bản đồ với marker trạng thái xanh/đỏ/vàng</p>
+            </div>
+            <div class="feature-card">
+                <div class="card-icon">🔔</div>
+                <h3>Cảnh báo thông minh</h3>
+                <p>Ngưỡng đa cấp, delay chống báo giả, lặp lại nếu chưa xử lý</p>
+            </div>
+            <div class="feature-card">
+                <div class="card-icon">🔐</div>
+                <h3>Phân quyền chi tiết</h3>
+                <p>Owner / Admin / Kỹ thuật / Viewer — theo từng trạm riêng biệt</p>
+            </div>
+            <div class="feature-card">
+                <div class="card-icon">📱</div>
+                <h3>App iOS + Android</h3>
+                <p>Quét QR thêm thiết bị, điều khiển bật/tắt từ xa, nhận push notification</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SLIDE 6: CẢNH BÁO ===== -->
+<div class="slide slide--accent" id="slide-6">
+    <div class="slide-content" style="text-align:center;">
+        <div class="badge animate">🔔 CẢNH BÁO</div>
+        <h1 class="slide-title animate" style="font-size:36px;">Phát hiện sự cố <span class="highlight">ngay lập tức</span></h1>
+
+        <div style="display:flex;gap:20px;justify-content:center;margin-top:32px;flex-wrap:wrap;">
+            <div class="icon-card animate">
+                <div class="ic-icon">📱</div>
+                <div class="ic-title">Push Notification</div>
+                <div class="ic-desc">Cảnh báo tức thì lên điện thoại</div>
+            </div>
+            <div class="icon-card animate">
+                <div class="ic-icon">✉️</div>
+                <div class="ic-title">Email</div>
+                <div class="ic-desc">Gửi chi tiết qua email</div>
+            </div>
+            <div class="icon-card animate">
+                <div class="ic-icon">🔊</div>
+                <div class="ic-title">Còi tại chỗ</div>
+                <div class="ic-desc">Bật relay alarm qua Modbus</div>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:32px;flex-wrap:wrap;">
+            <div class="feature-card animate" style="max-width:250px;text-align:left;">
+                <h3>⏱️ Delay Timer</h3>
+                <p>Cài thời gian trễ tránh báo giả. Giá trị bình thường lại → tự hủy cảnh báo.</p>
+            </div>
+            <div class="feature-card animate" style="max-width:250px;text-align:left;">
+                <h3>📊 Ngưỡng đa cấp</h3>
+                <p>High/Low 2 cấp cho từng cảm biến. Bật/tắt riêng từng ngưỡng.</p>
+            </div>
+            <div class="feature-card animate" style="max-width:250px;text-align:left;">
+                <h3>🔁 Repeat Alarm</h3>
+                <p>Gửi lại nhiều lần nếu chưa xử lý. Cấu hình số lần và chu kỳ.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SLIDE 7: BÁO CÁO ===== -->
+<div class="slide slide--light" id="slide-7">
+    <div class="slide-content">
+        <div class="badge animate">📋 BÁO CÁO & BẢO MẬT</div>
+        <h1 class="slide-title animate" style="font-size:36px;">Dữ liệu an toàn, báo cáo tự động</h1>
+
+        <div style="display:flex;gap:24px;margin-top:24px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:280px;">
+                <h2 class="animate" style="color:var(--primary);margin-bottom:16px;font-size:18px;">📊 Báo cáo</h2>
+                <div class="feature-card animate" style="margin-bottom:10px;">
+                    <h3>Xuất Excel & PDF</h3>
+                    <p>Header công ty, biểu đồ nhúng, ngưỡng tô màu, Min/Max/Avg</p>
+                </div>
+                <div class="feature-card animate" style="margin-bottom:10px;">
+                    <h3>Tự động gửi email</h3>
+                    <p>Theo chu kỳ ngày / tuần / tháng. File đính kèm tự động.</p>
+                </div>
+                <div class="feature-card animate">
+                    <h3>Custom thương hiệu</h3>
+                    <p>Tên công ty, logo, địa chỉ, SĐT trên header báo cáo</p>
+                </div>
+            </div>
+            <div style="flex:1;min-width:280px;">
+                <h2 class="animate" style="color:var(--primary);margin-bottom:16px;font-size:18px;">🔒 Bảo mật</h2>
+                <div class="feature-card animate" style="margin-bottom:10px;">
+                    <h3>Mã hóa nhiều lớp</h3>
+                    <p>TLS/SSL truyền dữ liệu • HTTPS web/app • JWT xác thực • Mã hóa lưu trữ</p>
+                </div>
+                <div class="feature-card animate" style="margin-bottom:10px;">
+                    <h3>Xác thực 2 lớp</h3>
+                    <p>SĐT + OTP • Google • Apple • Email + Password</p>
+                </div>
+                <div class="feature-card animate">
+                    <h3>Dữ liệu thuộc khách hàng</h3>
+                    <p>Xuất toàn bộ khi dừng dịch vụ. Server Google Cloud VN (có VAT).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SLIDE 8: CHI PHÍ ===== -->
+<div class="slide slide--dark" id="slide-8">
+    <div class="slide-content" style="text-align:center;">
+        <div class="badge animate">💰 CHI PHÍ</div>
+        <h1 class="slide-title animate" style="font-size:36px;">Đơn giản & <span class="highlight">Minh bạch</span></h1>
+
+        <div style="display:flex;gap:24px;justify-content:center;margin-top:32px;flex-wrap:wrap;">
+            <!-- Card 1: Gateway -->
+            <div class="pricing-card animate">
+                <div class="pricing-icon">⚙️</div>
+                <div class="pricing-title">Gateway Navis MOD</div>
+                <div class="pricing-desc">Phần cứng mua 1 lần</div>
+                <ul class="pricing-list">
+                    <li>1 cổng RS485, max 100 tag</li>
+                    <li>WiFi / LAN / 4G</li>
+                    <li>Watchdog, OTA update</li>
+                    <li>Bảo hành 12 tháng</li>
+                </ul>
+            </div>
+
+            <!-- Card 2: Phần mềm -->
+            <div class="pricing-card highlight-card animate">
+                <div class="pricing-badge">⭐ TRỌN GÓI</div>
+                <div class="pricing-icon">💻</div>
+                <div class="pricing-title">Phần mềm + Cloud</div>
+                <div class="pricing-desc">Phí duy trì / năm / trạm</div>
+                <ul class="pricing-list">
+                    <li>✅ App Mobile (iOS + Android)</li>
+                    <li>✅ Web App (domain riêng)</li>
+                    <li>✅ Cloud server (Google Cloud VN)</li>
+                    <li>✅ Push + Email cảnh báo</li>
+                    <li>✅ Báo cáo Excel/PDF tự động</li>
+                    <li>✅ Hỗ trợ kỹ thuật từ xa</li>
+                    <li>✅ Cập nhật phần mềm</li>
+                </ul>
+            </div>
+
+            <!-- Card 3: White-label -->
+            <div class="pricing-card animate">
+                <div class="pricing-icon">🎨</div>
+                <div class="pricing-title">White-label</div>
+                <div class="pricing-desc">Tùy chỉnh thương hiệu</div>
+                <ul class="pricing-list">
+                    <li>Logo, màu sắc riêng</li>
+                    <li>Domain khách tự cấp</li>
+                    <li>App hiện branding riêng</li>
+                    <li>Báo cáo header công ty</li>
+                </ul>
+            </div>
+        </div>
+
+        <p class="slide-text animate" style="margin-top:24px;font-size:14px;opacity:0.7;">
+            Khách tự cấp: Tên miền, SIM 4G (VN). &nbsp;|&nbsp; SSL miễn phí. &nbsp;|&nbsp; Push + Email không giới hạn.
+        </p>
+    </div>
+</div>
+
+<!-- ===== SLIDE 9: LIÊN HỆ ===== -->
+<div class="slide slide--accent" id="slide-9">
+    <div class="slide-content" style="text-align:center;">
+        <h1 class="slide-title animate" style="font-size:40px;">Sẵn sàng <span class="highlight">bắt đầu</span>?</h1>
+        <p class="slide-subtitle animate">Demo miễn phí • Triển khai 1-2 tuần • Hỗ trợ chạy thử</p>
+
+        <div style="display:flex;gap:20px;justify-content:center;margin-top:40px;flex-wrap:wrap;">
+            <div class="icon-card animate">
+                <div class="ic-icon">📞</div>
+                <div class="ic-title">0932.786.579</div>
+                <div class="ic-desc">Mr. Cường</div>
+            </div>
+            <div class="icon-card animate">
+                <div class="ic-icon">✉️</div>
+                <div class="ic-title">omwater.vn@gmail.com</div>
+                <div class="ic-desc">Email tư vấn</div>
+            </div>
+            <div class="icon-card animate">
+                <div class="ic-icon">🌐</div>
+                <div class="ic-title">navis.iotdaiviet.com</div>
+                <div class="ic-desc">Website chính thức</div>
+            </div>
+        </div>
+
+        <div style="margin-top:40px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+            <a href="../docs/faq.html" class="cta-btn animate">📋 Xem Q&A chi tiết</a>
+            <a href="../docs/gateway-setup.html" class="cta-btn cta-outline animate">⚙️ Hướng dẫn cài đặt</a>
+            <a href="../index.html" class="cta-btn cta-outline animate">🏠 Trang chủ Navis</a>
+        </div>
+
+        <p class="animate" style="margin-top:40px;font-size:13px;opacity:0.5;">
+            © 2024 Đại Việt IoT — Navis Smart Industry
+        </p>
+    </div>
+</div>
+
+<script src="js/slides.js"></script>
+</body>
+</html>
