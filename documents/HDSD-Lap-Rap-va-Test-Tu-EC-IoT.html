@@ -691,11 +691,11 @@
             <div class="img-grid-2">
                 <div class="img-box">
                     <img src="images/ec-iot-test/user_img_day_cuon.jpg" alt="3 cuộn dây điều khiển" style="width:100%; display:block; object-fit:contain; max-height:320px;">
-                    <div class="caption">Dây điều khiển cuộn: <strong>Xám</strong> – cáp 10 lõi 0.5mm² · <strong>Đen (dây hồng)</strong> – cáp 2 lõi 0.5mm² shield chống nhiễu analog · <strong>Đen lớn</strong> – dây điện DPC-FA 2x1.0mm² màu xám (pha nóng + trung tính 220V)</div>
+                    <div class="caption">Dây điều khiển cuộn: <strong style="color:#555;">⬛ Vỏ ĐEN</strong> – cáp 10 lõi 0.5mm² (tín hiệu Digital PLC) &amp; cáp 2 lõi 0.5mm² Shield chống nhiễu (Analog EC±) &nbsp;|&nbsp; <strong style="color:#555;">▪ Vỏ XÁM</strong> – cáp 2×1.0mm² nguồn AC 220V (lõi 🔴 Đỏ = L, 🔵 Xanh blue = N)</div>
                 </div>
                 <div class="img-box">
                     <img src="images/ec-iot-test/user_img_day_bam_cos.jpg" alt="Dây đã bấm cos hàng loạt" style="width:100%; display:block; object-fit:contain; max-height:320px;">
-                    <div class="caption">Dây đã cắt, tuốt đầu và bấm cos kim hàng loạt – xanh (24V), đỏ (L 220V), trắng/xám (tín hiệu) đã gắn tag số sẵn sàng lắp ráp</div>
+                    <div class="caption">Dây đã cắt, tuốt đầu và bấm cos kim hàng loạt – <strong>vỏ xám</strong> (lõi 🔴 đỏ = L 220V, 🔵 xanh blue = N), <strong>vỏ đen</strong> (lõi trắng = +24V / tín hiệu, lõi đen = 0V) – đã gắn tag số sẵn sàng lắp ráp</div>
                 </div>
             </div>
 
@@ -872,51 +872,107 @@
     <div class="section">
         <div class="section-header">🔌 Bước 4: Lắp Thiết Bị Lên Ray DIN Và Đấu Dây</div>
         <div class="section-body">
-            <p style="margin-bottom:7px;">Gá thiết bị lên ray DIN rail theo bố cục: CB CHNT → Nguồn Meanwell 24V → PLC XINJE. Gắn DAM3102 và Gateway Navis Mod bằng vít M4. Đấu nối dây theo sơ đồ.</p>
+            <p style="margin-bottom:7px;">Gá thiết bị lên ray DIN rail theo bố cục: CB CHINT → Nguồn Meanwell 24V → PLC XINJE. Gắn DAM3102 và Gateway NavisMod bằng vít M4. Đấu nối dây theo sơ đồ bên dưới.</p>
 
-            <div class="img-grid-2">
-                <div class="img-box">
-                    <img src="images/ec-iot-test/canva_img_26_MAHLxMMjdWI.png" alt="Thiết bị lắp ray thực tế đang đi dây" class="tall">
-                    <div class="caption">Thực tế lắp thiết bị và đi dây: PLC XINJE (trái), Nguồn MDR-60-24 (phải), CB CHNT xanh, DAM3102 (xanh-xám bên dưới). Dây đa màu đã được bấm cos và gắn tag</div>
-                </div>
-                <div class="img-box">
-                    <img src="images/ec-iot-test/canva_img_10_MAHLw3peyiw.jpg" alt="Tủ hoàn thiện bên trong" class="tall">
-                    <div class="caption">Tủ hoàn thiện bên trong: DAM3102 xanh (trên), PLC XINJE (giữa-dưới), Nguồn MDR-60-24 (phải), CB CHNT (trái), Gateway NavisMod (trên cùng – có QR code A-TPN-354)</div>
-                </div>
+            <!-- SƠ ĐỒ ĐẤU DÂY -->
+            <div class="sub-heading">4.0 – Sơ đồ điện tủ giám sát EC Online (xem trước khi đấu dây)</div>
+            <div class="img-single">
+                <img src="images/ec-iot-test/canva_img_31_MAHLxBZG8Zs.png" alt="Sơ đồ điện tủ giám sát EC Online" style="width:100%; display:block; object-fit:contain;">
+                <div class="caption"><strong>SƠ ĐỒ ĐIỆN TỦ GIÁM SÁT EC ONLINE</strong> – Tham chiếu toàn bộ các đường dây L01–L19 trước khi đấu nối. EC Sensor nằm ngoài tủ, cáp analog Shield (L18/L19) đi qua PG25 ra ngoài tủ.</div>
             </div>
 
-            <!-- Quy tắc đi dây -->
+            <!-- ẢNH THỰC TẾ -->
+            <div class="sub-heading">4.1 – Lắp thiết bị lên tấm đế và đi dây thực tế</div>
+            <div class="img-single">
+                <img src="images/ec-iot-test/canva_img_26_MAHLxMMjdWI.png" alt="Thiết bị lắp ray thực tế đang đi dây" style="width:100%; display:block; object-fit:contain;">
+                <div class="caption">Thực tế lắp thiết bị và đi dây: PLC XINJE (góc trên trái), Nguồn MDR-60-24 (trên phải), CB CHINT xanh (phải), DAM3102 xanh (dưới giữa), Gateway NavisMod (ngoài khung). Dây đã bấm cos kim và gắn tag số sẵn sàng lắp ráp</div>
+            </div>
+            <div class="img-single" style="margin-top:8px;">
+                <img src="images/ec-iot-test/canva_img_10_MAHLw3peyiw.jpg" alt="Tủ hoàn thiện bên trong" style="width:100%; display:block; object-fit:contain;">
+                <div class="caption">Tủ hoàn thiện bên trong: DAM3102 xanh (trên), PLC XINJE (giữa-dưới), Nguồn MDR-60-24 (phải), CB CHINT (trái), Gateway NavisMod (trên cùng)</div>
+            </div>
+
+            <!-- PHÂN LOẠI DÂY THỰC TẾ -->
+            <div class="sub-heading">4.2 – Phân loại dây theo vỏ bọc thực tế</div>
+            <div class="info-box" style="margin-bottom:8px;">
+                <strong>⚠️ Lưu ý nhận dạng dây:</strong> Tủ 180D chỉ dùng <strong>2 loại vỏ dây</strong>. Không có dây hồng hay màu khác.
+            </div>
+            <table class="wire-table" style="margin-bottom:10px;">
+                <thead>
+                    <tr>
+                        <th>Vỏ dây</th>
+                        <th>Dùng cho</th>
+                        <th>Màu lõi bên trong</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>🔘 Vỏ XÁM</strong></td>
+                        <td>Dây nguồn AC 220V (2×1.0mm²)</td>
+                        <td>
+                            <span style="display:inline-block;width:11px;height:11px;background:#D32F2F;border-radius:2px;vertical-align:middle;margin-right:3px;"></span><strong style="color:#D32F2F;">Đỏ</strong> = L (pha nóng) &nbsp;|&nbsp;
+                            <span style="display:inline-block;width:11px;height:11px;background:#1565C0;border-radius:2px;vertical-align:middle;margin-right:3px;"></span><strong style="color:#1565C0;">Xanh blue</strong> = N (trung tính)
+                        </td>
+                        <td>CB CHINT → PLC và Nguồn Meanwell</td>
+                    </tr>
+                    <tr>
+                        <td><strong>⬛ Vỏ ĐEN</strong></td>
+                        <td>Dây nguồn DC 24V + Tín hiệu 10 lõi</td>
+                        <td>
+                            <span style="display:inline-block;width:11px;height:11px;background:#F5F5F5;border:1px solid #999;border-radius:2px;vertical-align:middle;margin-right:3px;"></span><strong>Trắng</strong> = V+ (24V) / A+ (Modbus) / tín hiệu &nbsp;|&nbsp;
+                            <span style="display:inline-block;width:11px;height:11px;background:#212121;border-radius:2px;vertical-align:middle;margin-right:3px;"></span><strong>Đen</strong> = V– (0V) / B– (Modbus)
+                        </td>
+                        <td>Nguồn 24V, Modbus RS485, tín hiệu DI</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- QUY TẮC ĐẤU DÂY -->
             <div class="success-box" style="margin-top:8px;">
                 <strong>📐 Quy tắc đi dây và đấu nối:</strong>
                 <ul style="margin-top:4px;">
-                    <li><strong>Dây nguồn AC 220V:</strong>
+                    <li><strong>Dây nguồn AC 220V (vỏ xám):</strong>
                         <span style="display:inline-block;width:12px;height:12px;background:#D32F2F;border-radius:2px;vertical-align:middle;margin:0 2px;"></span><span style="color:#D32F2F;font-weight:700;">Đỏ (L – pha nóng)</span> +
                         <span style="display:inline-block;width:12px;height:12px;background:#1565C0;border-radius:2px;vertical-align:middle;margin:0 2px;"></span><span style="color:#1565C0;font-weight:700;">Xanh Blue (N – trung tính)</span>
                         từ CB CHINT → chân L-N của PLC và nguồn Meanwell
                     </li>
-                    <li><strong>Dây nguồn DC 24V:</strong>
+                    <li><strong>Dây nguồn DC 24V (vỏ đen 2 lõi):</strong>
                         <span style="display:inline-block;width:12px;height:12px;background:#F5F5F5;border:1px solid #999;border-radius:2px;vertical-align:middle;margin:0 2px;"></span><span style="color:#555;font-weight:700;">Trắng (V+)</span> +
                         <span style="display:inline-block;width:12px;height:12px;background:#212121;border-radius:2px;vertical-align:middle;margin:0 2px;"></span><span style="color:#333;font-weight:700;">Đen (V–)</span>
                         từ Meanwell → DAM3102, Gateway, cổng COM PLC
                     </li>
-                    <li><strong>Cáp Modbus RS485:</strong>
+                    <li><strong>Cáp Modbus RS485 (vỏ đen 2 lõi):</strong>
                         <span style="display:inline-block;width:12px;height:12px;background:#F5F5F5;border:1px solid #999;border-radius:2px;vertical-align:middle;margin:0 2px;"></span><span style="color:#555;font-weight:700;">Trắng (A+)</span> +
                         <span style="display:inline-block;width:12px;height:12px;background:#212121;border-radius:2px;vertical-align:middle;margin:0 2px;"></span><span style="color:#333;font-weight:700;">Đen (B–)</span>
                         cáp xoắn đôi chống nhiễu giữa Gateway, PLC (COM1) và DAM3102 (485+/485–)
                     </li>
-                    <li><strong>Cáp Analog EC (Shield):</strong>
+                    <li><strong>Cáp Analog EC – Shield (vỏ đen 2 lõi chống nhiễu):</strong>
                         <span style="display:inline-block;width:12px;height:12px;background:#F5F5F5;border:1px solid #999;border-radius:2px;vertical-align:middle;margin:0 2px;"></span><span style="color:#555;font-weight:700;">Trắng (EC.I+)</span> +
                         <span style="display:inline-block;width:12px;height:12px;background:#212121;border-radius:2px;vertical-align:middle;margin:0 2px;"></span><span style="color:#333;font-weight:700;">Đen (EC.I–)</span>
-                        cáp Shield 2 lõi, đi riêng từ DAM3102 → đầu nối tủ → cảm biến EC
+                        cáp Shield 2 lõi 0.5mm²
                     </li>
-                    <li><strong>Dây tín hiệu Digital PLC (X0–X6):</strong>
-                        <span style="display:inline-block;width:12px;height:12px;background:#F5F5F5;border:1px solid #999;border-radius:2px;vertical-align:middle;margin:0 2px;"></span><span style="color:#555;font-weight:700;">Trắng đơn 0.5mm²</span>
-                        (cắt từ cáp 10 lõi) – mang tín hiệu ON/OFF từ máy RO vào PLC
+                    <li><strong>Dây tín hiệu Digital PLC X0–X7 (cáp 10 lõi vỏ đen):</strong>
+                        <span style="display:inline-block;width:12px;height:12px;background:#F5F5F5;border:1px solid #999;border-radius:2px;vertical-align:middle;margin:0 2px;"></span><span style="color:#555;font-weight:700;">Trắng 0.5mm² × 10 lõi</span>
+                        – mang tín hiệu ON/OFF từ máy RO vào PLC, gắn tag số 1–8
                     </li>
                 </ul>
             </div>
 
-            <div class="danger-box">
+            <!-- LƯU Ý EC SENSOR -->
+            <div class="warning-box" style="margin-top:8px;">
+                <div class="icon">📏</div>
+                <div>
+                    <strong>Tủ 180D – Cảm biến EC để NGOÀI tủ:</strong>
+                    <ul style="margin-top:4px;">
+                        <li>Cáp analog Shield (L18/L19) phải cắt dài <strong>≥ 1.2m</strong> – đủ đi từ DAM3102 trong tủ ra đến vị trí cảm biến EC ngoài tủ</li>
+                        <li>Cáp đi qua <strong>PG25</strong> trên thân tủ mặt bản lề – siết chặt đai ốc PG25 chống nước, chống kéo đứt</li>
+                        <li>Bấm cos kim đầu trong (nối DAM3102), đầu ngoài để trần hoặc dùng terminal chống nước tùy vị trí lắp đặt</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="danger-box" style="margin-top:8px;">
                 <div class="icon">⚡</div>
                 <div>
                     <h3>CẢNH BÁO ĐẤU DÂY – ĐỌC KỸ TRƯỚC KHI ĐẤU NỐI</h3>
@@ -924,13 +980,13 @@
                         <li><strong>Chỉ PLC XINJE</strong> dùng nguồn <strong>220VAC</strong> trực tiếp. Tất cả thiết bị còn lại (Gateway, DAM3102, cảm biến) đều dùng <strong>24VDC</strong></li>
                         <li>Dây tín hiệu <strong>Modbus RS485</strong> phải đi riêng, <strong>tuyệt đối không chập vào đường 24VDC hoặc 220VAC</strong></li>
                         <li>Dây tín hiệu <strong>Analog 4–20mA</strong> (cáp Shield EC±) phải đi riêng, <strong>không được chập vào 24VDC hoặc 220VAC</strong></li>
-                        <li>Lớp Shield của cáp analog chỉ nối đất (<em>GND</em>) ở một đầu duy nhất để tránh tạo vòng nhiễu</li>
+                        <li>Lớp Shield của cáp analog chỉ nối đất (<em>GND</em>) ở <strong>một đầu duy nhất</strong> để tránh tạo vòng nhiễu</li>
                     </ul>
                 </div>
             </div>
 
             <!-- Bảng đấu dây chi tiết -->
-            <div class="sub-heading">4.1 – Bảng đấu nối chi tiết theo sơ đồ</div>
+            <div class="sub-heading">4.3 – Bảng đấu nối chi tiết theo sơ đồ (L01–L19)</div>
             <table class="wire-table">
                 <thead>
                     <tr>
@@ -938,20 +994,20 @@
                         <th>Từ (Nguồn)</th>
                         <th>Đến (Đích)</th>
                         <th>Loại dây</th>
-                        <th>Màu</th>
+                        <th>Màu lõi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>01ok</td><td>CB.L220V / CB.N220V</td><td>PLC.N220V / NG.N220V</td><td>Dây đơn 1.0mm²</td><td>🔵 Xanh Blue (N – L01,L02) + 🔴 Đỏ (L – L01.1)</td></tr>
-                    <tr><td>02ok</td><td>CB.L220V</td><td>NG.L220V / PLC.L220V</td><td>Dây đơn 1.0mm²</td><td>Đỏ (L03, L04)</td></tr>
-                    <tr><td>03ok</td><td>NG.24VDC / NG.0VDC</td><td>24VDC / 0VDC / PLC.0V</td><td>Cáp 2 lõi trắng đen 0.5mm²</td><td>Trắng (W) + Đen (Bl)</td></tr>
-                    <tr><td>04ok</td><td>EC.24V / NG.24VDC</td><td>PLC.C0 / BCD.24V</td><td>Đơn trắng 0.5mm²</td><td>Trắng (L07, L08, L09)</td></tr>
-                    <tr><td>04aok</td><td>PLC.Y0</td><td>GW.24VDC</td><td>Đơn trắng 0.5mm²</td><td>Trắng (L08a)</td></tr>
-                    <tr><td>05ok</td><td>EC.0V / NG.0VDC</td><td>GW.0V / BCD.0V</td><td>Đơn đen 0.5mm²</td><td>Đen (L10, L11, L12)</td></tr>
-                    <tr><td>06ok</td><td>BCD.A</td><td>GW.A / PLC.D+</td><td>Đơn trắng 0.5mm²</td><td>Trắng (L13, L14)</td></tr>
-                    <tr><td>07ok</td><td>BCD.B</td><td>PLC.D– / GW.B</td><td>Đơn đen 0.5mm²</td><td>Đen (L15, L16)</td></tr>
-                    <tr><td>08ok</td><td>PLC.X0–X6, EC.R.COM, EC.R.NO</td><td>Tag 1–10 (Đầu nối tủ)</td><td>Cáp 10 lõi trắng 0.5mm²</td><td>Trắng 0.5 × 10 sợi (L17)</td></tr>
-                    <tr><td>09ok</td><td>EC.I– / EC.I+</td><td>BCD.I– / BCD.I+</td><td>Cáp 2 lõi Shield chống nhiễu 0.5mm²</td><td>Đen (Bl) + Trắng (W) – L18</td></tr>
+                    <tr><td>01ok</td><td>CB.L220V / CB.N220V</td><td>PLC.N220V / NG.N220V</td><td>Dây đơn 1.0mm² vỏ xám</td><td>🔵 Xanh Blue (N – L01,L02) + 🔴 Đỏ (L – L01.1)</td></tr>
+                    <tr><td>02ok</td><td>CB.L220V</td><td>NG.L220V / PLC.L220V</td><td>Dây đơn 1.0mm² vỏ xám</td><td>🔴 Đỏ (L03, L04)</td></tr>
+                    <tr><td>03ok</td><td>NG.24VDC / NG.0VDC</td><td>24VDC / 0VDC / PLC.0V</td><td>Cáp 2 lõi vỏ đen 0.5mm²</td><td>Trắng (V+) + Đen (V–)</td></tr>
+                    <tr><td>04ok</td><td>EC.24V / NG.24VDC</td><td>PLC.C0 / BCD.24V</td><td>Đơn trắng 0.5mm² vỏ đen</td><td>Trắng (L07, L08, L09)</td></tr>
+                    <tr><td>04aok</td><td>PLC.Y0</td><td>GW.24VDC</td><td>Đơn trắng 0.5mm² vỏ đen</td><td>Trắng (L08a)</td></tr>
+                    <tr><td>05ok</td><td>EC.0V / NG.0VDC</td><td>GW.0V / BCD.0V</td><td>Đơn đen 0.5mm² vỏ đen</td><td>Đen (L10, L11, L12)</td></tr>
+                    <tr><td>06ok</td><td>BCD.A</td><td>GW.A / PLC.D+</td><td>Đơn trắng 0.5mm² vỏ đen</td><td>Trắng (L13, L14)</td></tr>
+                    <tr><td>07ok</td><td>BCD.B</td><td>PLC.D– / GW.B</td><td>Đơn đen 0.5mm² vỏ đen</td><td>Đen (L15, L16)</td></tr>
+                    <tr><td>08ok</td><td>PLC.X0–X6, RORI</td><td>Tag 1–8 (Đầu nối tủ)</td><td>Cáp 10 lõi vỏ đen 0.5mm²</td><td>Trắng × 10 lõi (L17)</td></tr>
+                    <tr style="background:#FFF8E1;"><td>09ok</td><td>EC.I+ / EC.I–</td><td>BCD.I+ / BCD.I–</td><td>Cáp 2 lõi Shield vỏ đen 0.5mm²</td><td>Trắng (EC.I+) + Đen (EC.I–) – L18 <strong>dài 1.2m ra ngoài tủ</strong></td></tr>
                 </tbody>
             </table>
         </div>
