@@ -208,12 +208,15 @@ if (sessionStorage.getItem('fw_auth') === '1') {
         <div id="idHistory" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
 
-    <!-- Step 3: Flash -->
+    <!-- Flash & Monitor -->
     <div class="card">
-        <div class="card-title">⚡ 3. Flash</div>
+        <div class="card-title">⚡ Flash & Monitor</div>
         <div class="btn-row">
             <button class="btn btn-green" id="flashBtn" onclick="startFlash()" disabled>
-                ⚡ Kết nối & Flash
+                ⚡ Flash Firmware
+            </button>
+            <button class="btn btn-accent" id="monitorBtn" onclick="toggleMonitor()" style="display:none;">
+                📟 Start Monitor
             </button>
             <button class="btn btn-red btn-sm" id="disconnectBtn" onclick="disconnect()" style="display:none;">
                 ⏏ Ngắt kết nối
@@ -222,7 +225,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
         <div class="progress-bar" id="progressBar" style="display:none;">
             <div class="progress-fill" id="progressFill"></div>
         </div>
-        <div id="statusText" style="font-size:13px;color:var(--text2);margin-top:8px;">Chờ upload firmware...</div>
+        <div id="statusText" style="font-size:13px;color:var(--text2);margin-top:8px;">Chờ firmware load...</div>
     </div>
 
     <!-- Console -->
@@ -266,6 +269,9 @@ let firmwareBuffer = null;
 let originalDeviceId = null;
 let transport = null;
 let esploader = null;
+let monitorPort = null;
+let monitorReader = null;
+let monitoring = false;
 const PLACEHOLDER = "PLACEHOLDER_DEVICE_0000";  // 23 chars - must match context.h
 const FLASH_OFFSETS = {
     bootloader: 0x1000,
@@ -453,60 +459,40 @@ function patchDeviceId(buffer, oldId, newId) {
     return true;
 }
 
-function recalcChecksum(buffer) {
-    // ESP32 image format:
-    // - First byte = 0xE9 (magic)
-    // - Byte 1 = segment count
-    // - After all segments: XOR checksum on 16-byte aligned boundary
-    // - If hash_appended (byte 23 bit 0): 32-byte SHA-256 after checksum
+function recalcChecksum(buffer, oldId, newId) {
+    // ESP32 binary checksum: XOR of all segment data bytes, initial 0xEF
+    // Position: end of file - 33 (if SHA-256 appended) or end of file - 1
+    // Delta approach: new_checksum = old_checksum ^ XOR(old_bytes ^ new_bytes)
     
-    if (buffer[0] !== 0xE9) {
-        log('warn', '⚠️ Not a valid ESP32 image (magic != 0xE9)');
-        return;
-    }
+    if (buffer[0] !== 0xE9) { log('warn', '⚠️ Not a valid ESP32 image'); return; }
     
-    const segCount = buffer[1];
     const hashAppended = (buffer[23] & 0x01) === 1;
+    const checksumPos = hashAppended ? buffer.length - 33 : buffer.length - 1;
     
-    // Parse segments to find data area
-    let offset = 24; // after header
-    let xorVal = 0xEF; // initial XOR value
-    
-    for (let seg = 0; seg < segCount; seg++) {
-        if (offset + 8 > buffer.length) break;
-        const segAddr = buffer[offset] | (buffer[offset+1] << 8) | (buffer[offset+2] << 16) | (buffer[offset+3] << 24);
-        const segLen = buffer[offset+4] | (buffer[offset+5] << 8) | (buffer[offset+6] << 16) | (buffer[offset+7] << 24);
-        offset += 8; // skip segment header
-        
-        // XOR all data bytes in this segment
-        for (let i = 0; i < segLen && (offset + i) < buffer.length; i++) {
-            xorVal ^= buffer[offset + i];
-        }
-        offset += segLen;
+    // Calculate XOR delta from changed bytes
+    const encoder = new TextEncoder();
+    const oldBytes = encoder.encode(oldId);
+    const newBytes = encoder.encode(newId);
+    let delta = 0;
+    for (let i = 0; i < oldBytes.length; i++) {
+        const ob = oldBytes[i];
+        const nb = i < newBytes.length ? newBytes[i] : 0; // null-padded
+        if (ob !== nb) delta ^= ob ^ nb;
     }
     
-    // Checksum is at the next 16-byte aligned position
-    const checksumOffset = (offset % 16 === 0) ? offset : offset + (16 - (offset % 16));
-    if (checksumOffset < buffer.length) {
-        const oldChecksum = buffer[checksumOffset];
-        buffer[checksumOffset] = xorVal;
-        log('info', `🔧 XOR checksum: 0x${oldChecksum.toString(16)} → 0x${xorVal.toString(16)} at offset 0x${checksumOffset.toString(16)}`);
-    }
+    const oldChecksum = buffer[checksumPos];
+    buffer[checksumPos] = (oldChecksum ^ delta) & 0xFF;
+    log('info', `🔧 Checksum: 0x${oldChecksum.toString(16)} → 0x${buffer[checksumPos].toString(16)} @ 0x${checksumPos.toString(16)}`);
     
-    // SHA-256 recalculation
+    // Recalc SHA-256 if appended (covers everything before the 32-byte hash)
     if (hashAppended) {
-        const shaStart = checksumOffset + 1;
-        if (shaStart + 32 <= buffer.length) {
-            // We need to hash everything before the SHA-256 hash
-            const dataToHash = buffer.slice(0, shaStart);
-            crypto.subtle.digest('SHA-256', dataToHash).then(hash => {
-                const hashBytes = new Uint8Array(hash);
-                for (let i = 0; i < 32; i++) {
-                    buffer[shaStart + i] = hashBytes[i];
-                }
-                log('info', `🔧 SHA-256 recalculated`);
-            });
-        }
+        const shaStart = checksumPos + 1;
+        const dataToHash = buffer.slice(0, shaStart);
+        crypto.subtle.digest('SHA-256', dataToHash).then(hash => {
+            const hb = new Uint8Array(hash);
+            for (let i = 0; i < 32; i++) buffer[shaStart + i] = hb[i];
+            log('info', `🔧 SHA-256 recalculated`);
+        });
     }
 }
 
@@ -519,6 +505,12 @@ async function loadStaticBin(url) {
 
 window.startFlash = async function() {
     if (!firmwareBuffer) { log('error', 'Firmware chưa load!'); return; }
+    
+    // Stop monitor first if running
+    if (monitoring) {
+        log('info', '⏹ Stopping monitor for flash...');
+        await stopMonitor();
+    }
     
     let newId = $('deviceIdInput').value.trim();
     
@@ -570,7 +562,7 @@ window.confirmFlash = async function() {
     if (originalDeviceId && originalDeviceId !== newId) {
         log('info', `✏️ Patching Device ID: "${originalDeviceId}" → "${newId}"`);
         if (!patchDeviceId(patchedBuffer, originalDeviceId, newId)) return;
-        recalcChecksum(patchedBuffer);
+        recalcChecksum(patchedBuffer, originalDeviceId, newId);
         await new Promise(r => setTimeout(r, 100)); // wait for SHA-256
     } else if (!originalDeviceId) {
         log('warn', '⚠️ Device ID not found in binary — flashing without patching');
@@ -653,13 +645,21 @@ window.confirmFlash = async function() {
         log('success', `✅ Flash hoàn tất! Device ID: ${newId}`);
         $('statusText').textContent = `✅ Flash thành công! Device ID: ${newId}`;
         
-        // Hard reset & cleanup connection for next flash
+        // Hard reset & cleanup esptool connection
         try { await transport.setDTR(false); await new Promise(r => setTimeout(r, 100)); await transport.setDTR(true); } catch(e){}
         log('info', '🔄 Device reset');
+        
+        // Save port reference for monitor, then cleanup esptool
+        const flashPort = transport ? transport.device : null;
         try { await transport.disconnect(); } catch(e){}
         transport = null;
         esploader = null;
         $('disconnectBtn').style.display = 'none';
+        
+        // Auto-start monitor
+        log('info', '📟 Auto-starting monitor...');
+        await new Promise(r => setTimeout(r, 1500)); // wait for device boot
+        await startMonitor(flashPort);
         
     } catch (e) {
         log('error', `❌ Flash failed: ${e.message || e}`);
@@ -679,17 +679,84 @@ window.cancelFlash = function() {
 };
 
 window.disconnect = async function() {
+    await stopMonitor();
     try {
-        if (transport) {
-            await transport.disconnect();
-            transport = null;
-            esploader = null;
+        if (transport) { await transport.disconnect(); transport = null; esploader = null; }
+    } catch(e){}
+    $('disconnectBtn').style.display = 'none';
+    $('monitorBtn').style.display = 'none';
+    log('info', '⏏ Disconnected');
+    $('statusText').textContent = 'Đã ngắt kết nối.';
+};
+
+// ===== Serial Monitor =====
+function stripAnsi(str) {
+    return str.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\[\d+m/g, '');
+}
+
+async function startMonitor(existingPort) {
+    if (monitoring) return;
+    try {
+        monitorPort = existingPort || await navigator.serial.requestPort();
+        if (!monitorPort.readable) {
+            await monitorPort.open({ baudRate: 115200 });
         }
-        $('disconnectBtn').style.display = 'none';
-        log('info', '⏏ Disconnected');
-        $('statusText').textContent = 'Đã ngắt kết nối.';
+        monitoring = true;
+        $('monitorBtn').textContent = '⏹ Stop Monitor';
+        $('monitorBtn').style.display = 'inline-flex';
+        $('monitorBtn').className = 'btn btn-red';
+        $('disconnectBtn').style.display = 'inline-flex';
+        $('statusText').textContent = '📟 Monitoring...';
+        log('success', '📟 Serial Monitor started (115200 baud)');
+        
+        const decoder = new TextDecoder();
+        let lineBuffer = '';
+        
+        while (monitorPort.readable && monitoring) {
+            monitorReader = monitorPort.readable.getReader();
+            try {
+                while (monitoring) {
+                    const { value, done } = await monitorReader.read();
+                    if (done) break;
+                    lineBuffer += decoder.decode(value, {stream: true});
+                    const lines = lineBuffer.split('\n');
+                    lineBuffer = lines.pop(); // keep incomplete line
+                    for (const line of lines) {
+                        const clean = stripAnsi(line.trim());
+                        if (clean) log('info', clean);
+                    }
+                }
+            } catch (e) {
+                if (monitoring) log('warn', `Monitor read error: ${e.message}`);
+            } finally {
+                try { monitorReader.releaseLock(); } catch(e){}
+                monitorReader = null;
+            }
+        }
     } catch (e) {
-        log('error', `Disconnect error: ${e}`);
+        log('error', `❌ Monitor failed: ${e.message}`);
+    }
+    monitoring = false;
+    $('monitorBtn').textContent = '📟 Start Monitor';
+    $('monitorBtn').className = 'btn btn-accent';
+}
+
+async function stopMonitor() {
+    monitoring = false;
+    try { if (monitorReader) await monitorReader.cancel(); } catch(e){}
+    try { if (monitorPort && monitorPort.readable) { await monitorPort.close(); } } catch(e){}
+    monitorPort = null;
+    monitorReader = null;
+    $('monitorBtn').textContent = '📟 Start Monitor';
+    $('monitorBtn').className = 'btn btn-accent';
+    log('info', '⏹ Monitor stopped');
+}
+
+window.toggleMonitor = async function() {
+    if (monitoring) {
+        await stopMonitor();
+    } else {
+        await startMonitor();
     }
 };
 
