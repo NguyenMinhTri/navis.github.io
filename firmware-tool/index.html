@@ -202,7 +202,13 @@ if (sessionStorage.getItem('fw_auth') === '1') {
             <label>Nhập Device ID (để trống = tự lấy NM03-MAC)</label>
             <input type="text" id="deviceIdInput" placeholder="Để trống → NM03-AABBCCDDEEFF" maxlength="23" autocomplete="off">
         </div>
-        <div style="font-size:12px;color:var(--text2);">
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text);">
+                <input type="checkbox" id="autoIncrementCb" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+                Auto tăng Device ID sau khi Flash (VD: A-1 → A-2)
+            </label>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-top:6px;">
             Tối đa 23 ký tự. Nếu để trống, tự đọc MAC address từ ESP32 → <strong>NM03-XXXXXXXXXXXX</strong>
         </div>
         <div id="idHistory" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
@@ -645,6 +651,14 @@ window.confirmFlash = async function() {
         log('success', `✅ Flash hoàn tất! Device ID: ${newId}`);
         $('statusText').textContent = `✅ Flash thành công! Device ID: ${newId}`;
         
+        // Auto-increment Device ID
+        if ($('autoIncrementCb').checked) {
+            const nextId = incrementDeviceId(newId);
+            $('deviceIdInput').value = nextId;
+            localStorage.setItem('last_device_id', nextId);
+            log('info', `➡️ Auto-increment: ${newId} → ${nextId}`);
+        }
+        
         // Hard reset & cleanup esptool connection
         try { await transport.setDTR(false); await new Promise(r => setTimeout(r, 100)); await transport.setDTR(true); } catch(e){}
         log('info', '🔄 Device reset');
@@ -781,6 +795,25 @@ function renderHistory() {
         `<button class="btn btn-sm" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);font-family:monospace;" onclick="document.getElementById('deviceIdInput').value='${id}'">${id}</button>`
     ).join('');
 }
+
+// ===== Auto-increment Device ID =====
+function incrementDeviceId(id) {
+    // Find trailing number: "A-TPN-218" → prefix="A-TPN-", num="218"
+    const match = id.match(/^(.*?)(\d+)$/);
+    if (!match) return id + '-1'; // no number found, append -1
+    const prefix = match[1];
+    const numStr = match[2];
+    const nextNum = parseInt(numStr, 10) + 1;
+    // Preserve zero-padding: "007" → "008"
+    const nextStr = String(nextNum).padStart(numStr.length, '0');
+    return prefix + nextStr;
+}
+
+// Persist checkbox state
+$('autoIncrementCb').checked = localStorage.getItem('auto_increment') === '1';
+$('autoIncrementCb').addEventListener('change', () => {
+    localStorage.setItem('auto_increment', $('autoIncrementCb').checked ? '1' : '0');
+});
 
 renderHistory();
 
