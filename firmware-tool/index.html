@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navis Firmware Flasher</title>
+<meta name="description" content="Flash ESP32 firmware directly from your browser via USB">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script type="module" src="https://unpkg.com/esptool-js@0.4.3/bundle.js"></script>
+<style>
+:root {
+    --bg: #0f0f13; --bg2: #1a1a24; --bg3: #24243a;
+    --text: #e8e8f0; --text2: #8888a8;
+    --accent: #6366f1; --accent2: #818cf8;
+    --green: #22c55e; --green2: #16a34a;
+    --orange: #f59e0b; --red: #ef4444;
+    --border: #2a2a3e; --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.header {
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+    text-align: center;
+}
+.header h1 { font-size: 22px; font-weight: 700; }
+.header h1 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.container { max-width: 800px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--accent); }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+.badge-ok { background: rgba(34,197,94,.15); color: var(--green); }
+.badge-warn { background: rgba(245,158,11,.15); color: var(--orange); }
+.badge-err { background: rgba(239,68,68,.15); color: var(--red); }
+
+/* Drop zone */
+.drop-zone {
+    border: 2px dashed var(--border); border-radius: var(--radius); padding: 40px 20px;
+    text-align: center; cursor: pointer; transition: all 0.3s;
+}
+.drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: rgba(99,102,241,.05); }
+.drop-zone.has-file { border-color: var(--green); border-style: solid; }
+.drop-zone .icon { font-size: 36px; margin-bottom: 8px; }
+.drop-zone .label { font-size: 14px; color: var(--text2); }
+.drop-zone .filename { font-size: 16px; font-weight: 600; color: var(--green); margin-top: 4px; }
+input[type="file"] { display: none; }
+
+/* Form */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.field input {
+    width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 15px; font-family: 'Inter', monospace;
+    font-weight: 600; transition: border-color 0.2s;
+}
+.field input:focus { outline: none; border-color: var(--accent); }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.info-item { background: var(--bg); border-radius: 8px; padding: 10px 14px; }
+.info-item .label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+.info-item .value { font-size: 14px; font-weight: 600; margin-top: 2px; font-family: monospace; }
+
+/* Buttons */
+.btn {
+    padding: 12px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; display: inline-flex;
+    align-items: center; gap: 8px;
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover:not(:disabled) { background: var(--accent2); transform: translateY(-1px); }
+.btn-green { background: var(--green2); color: #fff; }
+.btn-green:hover:not(:disabled) { background: var(--green); }
+.btn-red { background: var(--red); color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Console */
+.console {
+    background: #000; border-radius: 8px; padding: 12px; font-family: 'Courier New', monospace;
+    font-size: 12px; height: 240px; overflow-y: auto; line-height: 1.6;
+    border: 1px solid var(--border);
+}
+.console .line { white-space: pre-wrap; word-break: break-all; }
+.console .success { color: var(--green); }
+.console .error { color: var(--red); }
+.console .warn { color: var(--orange); }
+.console .info { color: var(--text2); }
+
+/* Progress */
+.progress-bar { width: 100%; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin: 10px 0; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); width: 0%; transition: width 0.3s; border-radius: 3px; }
+
+/* Confirm dialog */
+.confirm-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: center;
+    justify-content: center; z-index: 1000; backdrop-filter: blur(4px);
+}
+.confirm-box {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px; max-width: 420px; width: 90%; text-align: center;
+}
+.confirm-box h3 { font-size: 18px; margin-bottom: 16px; }
+.confirm-id { font-size: 28px; font-weight: 700; color: var(--accent2); margin: 16px 0; font-family: monospace; letter-spacing: 1px; }
+.confirm-info { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+.unsupported {
+    background: var(--bg2); border: 2px solid var(--red); border-radius: var(--radius);
+    padding: 40px; text-align: center; margin: 40px auto; max-width: 500px;
+}
+.unsupported h2 { color: var(--red); margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>⚡ <span>Navis Firmware Flasher</span></h1>
+    <p>Flash ESP32 firmware trực tiếp từ trình duyệt qua USB</p>
+</div>
+
+<div class="container" id="mainContent">
+    <!-- Step 1: Upload -->
+    <div class="card">
+        <div class="card-title">📦 1. Firmware File</div>
+        <div class="drop-zone" id="dropZone" onclick="$('fileInput').click()">
+            <div class="icon" id="dropIcon">📁</div>
+            <div class="label" id="dropLabel">Kéo thả file <strong>.bin</strong> vào đây hoặc click để chọn</div>
+            <div class="filename" id="dropFilename" style="display:none"></div>
+        </div>
+        <input type="file" id="fileInput" accept=".bin">
+        <div id="fwInfo" style="display:none;margin-top:14px;">
+            <div class="info-grid">
+                <div class="info-item"><div class="label">Device ID (từ binary)</div><div class="value" id="infoDeviceId">—</div></div>
+                <div class="info-item"><div class="label">File Size</div><div class="value" id="infoSize">—</div></div>
+                <div class="info-item"><div class="label">FW Version</div><div class="value" id="infoVersion">—</div></div>
+                <div class="info-item"><div class="label">Checksum</div><div class="value" id="infoChecksum">—</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Device ID -->
+    <div class="card">
+        <div class="card-title">🏷️ 2. Device ID</div>
+        <div class="field">
+            <label>Nhập Device ID mới (hoặc giữ nguyên)</label>
+            <input type="text" id="deviceIdInput" placeholder="VD: A-NAVIS-1" maxlength="24" autocomplete="off">
+        </div>
+        <div style="font-size:12px;color:var(--text2);">
+            Tối đa <span id="maxIdLen">24</span> ký tự. ID sẽ được ghi trực tiếp vào binary trước khi flash.
+        </div>
+        <div id="idHistory" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- Step 3: Flash -->
+    <div class="card">
+        <div class="card-title">⚡ 3. Flash</div>
+        <div class="btn-row">
+            <button class="btn btn-green" id="flashBtn" onclick="startFlash()" disabled>
+                ⚡ Kết nối & Flash
+            </button>
+            <button class="btn btn-red btn-sm" id="disconnectBtn" onclick="disconnect()" style="display:none;">
+                ⏏ Ngắt kết nối
+            </button>
+        </div>
+        <div class="progress-bar" id="progressBar" style="display:none;">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div id="statusText" style="font-size:13px;color:var(--text2);margin-top:8px;">Chờ upload firmware...</div>
+    </div>
+
+    <!-- Console -->
+    <div class="card">
+        <div class="card-title">📋 Console <button class="btn btn-sm" style="margin-left:auto;background:var(--bg);color:var(--text2);border:1px solid var(--border);" onclick="clearConsole()">Clear</button></div>
+        <div class="console" id="console"></div>
+    </div>
+</div>
+
+<!-- Confirm Dialog (hidden) -->
+<div class="confirm-overlay" id="confirmDialog" style="display:none;">
+    <div class="confirm-box">
+        <h3>⚡ Xác nhận Flash</h3>
+        <div class="confirm-info">Device ID sẽ được ghi vào firmware:</div>
+        <div class="confirm-id" id="confirmDeviceId"></div>
+        <div class="confirm-info" id="confirmDetails"></div>
+        <div class="btn-row" style="justify-content:center;margin-top:20px;">
+            <button class="btn btn-green" onclick="confirmFlash()">✅ Flash ngay</button>
+            <button class="btn" style="background:var(--bg);color:var(--text2);border:1px solid var(--border);" onclick="cancelFlash()">Hủy</button>
+        </div>
+    </div>
+</div>
+
+<!-- Unsupported browser -->
+<div class="unsupported" id="unsupported" style="display:none;">
+    <h2>⚠️ Trình duyệt không hỗ trợ</h2>
+    <p style="margin-top:10px;color:var(--text2);">Web Serial API chỉ hoạt động trên <strong>Chrome</strong> hoặc <strong>Edge</strong> (desktop).</p>
+    <p style="margin-top:6px;color:var(--text2);">Vui lòng mở trang này bằng Chrome/Edge.</p>
+</div>
+
+<script type="module">
+import { ESPLoader, Transport } from 'https://unpkg.com/esptool-js@0.4.3/bundle.js';
+
+const $ = id => document.getElementById(id);
+const consoleEl = $('console');
+
+// ===== State =====
+let firmwareBuffer = null;
+let originalDeviceId = null;
+let transport = null;
+let esploader = null;
+const PLACEHOLDER = "PLACEHOLDER_DEVICE_0000";  // 23 chars - must match context.h
+const FLASH_OFFSETS = {
+    bootloader: 0x1000,
+    partition: 0x8000,
+    otadata: 0xd000,
+    app: 0x10000,
+};
+
+// ===== Browser check =====
+if (!("serial" in navigator)) {
+    $('mainContent').style.display = 'none';
+    $('unsupported').style.display = 'block';
+}
+
+// ===== Console =====
+function log(cls, text) {
+    const div = document.createElement('div');
+    div.className = 'line ' + (cls || 'info');
+    const ts = new Date().toLocaleTimeString('vi-VN');
+    div.textContent = `[${ts}] ${text}`;
+    consoleEl.appendChild(div);
+    consoleEl.scrollTop = consoleEl.scrollHeight;
+    while (consoleEl.children.length > 500) consoleEl.removeChild(consoleEl.firstChild);
+}
+function clearConsole() { consoleEl.innerHTML = ''; }
+window.clearConsole = clearConsole;
+
+// ===== File Upload =====
+const dropZone = $('dropZone');
+const fileInput = $('fileInput');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+function handleFile(file) {
+    if (!file.name.endsWith('.bin')) { log('error', 'Chỉ chấp nhận file .bin!'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+        firmwareBuffer = new Uint8Array(reader.result);
+        log('success', `📦 Loaded: ${file.name} (${(file.size/1024).toFixed(1)} KB)`);
+        
+        // Update UI
+        dropZone.classList.add('has-file');
+        $('dropIcon').textContent = '✅';
+        $('dropLabel').textContent = file.name;
+        $('dropFilename').textContent = `${(file.size/1024).toFixed(1)} KB`;
+        $('dropFilename').style.display = 'block';
+        
+        // Analyze binary
+        analyzeFirmware();
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// ===== Binary Analysis =====
+function findStringInBinary(buffer, searchStr) {
+    const encoder = new TextEncoder();
+    const searchBytes = encoder.encode(searchStr);
+    for (let i = 0; i < buffer.length - searchBytes.length; i++) {
+        let found = true;
+        for (let j = 0; j < searchBytes.length; j++) {
+            if (buffer[i + j] !== searchBytes[j]) { found = false; break; }
+        }
+        if (found) return i;
+    }
+    return -1;
+}
+
+function findAllStringsInBinary(buffer, searchStr) {
+    const encoder = new TextEncoder();
+    const searchBytes = encoder.encode(searchStr);
+    const positions = [];
+    for (let i = 0; i < buffer.length - searchBytes.length; i++) {
+        let found = true;
+        for (let j = 0; j < searchBytes.length; j++) {
+            if (buffer[i + j] !== searchBytes[j]) { found = false; break; }
+        }
+        if (found) { positions.push(i); i += searchBytes.length - 1; }
+    }
+    return positions;
+}
+
+function extractString(buffer, offset, maxLen = 32) {
+    let str = '';
+    for (let i = 0; i < maxLen && buffer[offset + i] !== 0; i++) {
+        str += String.fromCharCode(buffer[offset + i]);
+    }
+    return str;
+}
+
+function analyzeFirmware() {
+    if (!firmwareBuffer) return;
+    
+    // Find Device ID (try placeholder first, then scan common patterns)
+    let deviceId = null;
+    let idOffset = findStringInBinary(firmwareBuffer, PLACEHOLDER);
+    
+    if (idOffset >= 0) {
+        deviceId = PLACEHOLDER;
+        log('info', `🏷️ Placeholder found at offset 0x${idOffset.toString(16)}`);
+    } else {
+        // Try to find device ID by scanning for common patterns
+        // Look for strings that match known device ID formats
+        const patterns = ['A-TPN-', 'A-NAVIS-', 'A-TEMP-', 'A-DIXELL-', 'A-OMRON-', 'A-TEDCO-', 
+                          'B-TPN-', 'ESP-32', 'POMS-', 'RO-', 'PLACEHOLDER'];
+        for (const pat of patterns) {
+            idOffset = findStringInBinary(firmwareBuffer, pat);
+            if (idOffset >= 0) {
+                deviceId = extractString(firmwareBuffer, idOffset);
+                log('info', `🏷️ Device ID found: "${deviceId}" at offset 0x${idOffset.toString(16)}`);
+                break;
+            }
+        }
+    }
+    
+    if (!deviceId) {
+        log('warn', '⚠️ Không tìm thấy Device ID trong binary. Nhập thủ công.');
+    }
+    
+    originalDeviceId = deviceId;
+    
+    // Find FW version
+    let version = '?';
+    const vPos = findStringInBinary(firmwareBuffer, 'V4NEW');
+    if (vPos >= 0) {
+        // Scan backward to find start of version string
+        let start = vPos;
+        while (start > 0 && firmwareBuffer[start - 1] >= 0x20 && firmwareBuffer[start - 1] < 0x7f) start--;
+        version = extractString(firmwareBuffer, start, 20);
+    }
+    
+    // ESP32 image header check
+    const magic = firmwareBuffer[0];
+    const hashAppended = (firmwareBuffer[23] & 0x01) === 1;
+    
+    // Update UI
+    $('fwInfo').style.display = 'block';
+    $('infoDeviceId').textContent = deviceId || 'Not found';
+    $('infoSize').textContent = `${(firmwareBuffer.length / 1024).toFixed(1)} KB`;
+    $('infoVersion').textContent = version;
+    $('infoChecksum').textContent = `Magic: 0x${magic.toString(16).toUpperCase()}, SHA256: ${hashAppended ? 'Yes' : 'No'}`;
+    
+    // Set device ID input
+    const savedId = localStorage.getItem('last_device_id');
+    if (savedId) {
+        $('deviceIdInput').value = savedId;
+    } else if (deviceId && deviceId !== PLACEHOLDER) {
+        $('deviceIdInput').value = deviceId;
+    }
+    
+    $('maxIdLen').textContent = deviceId ? deviceId.length : '24';
+    $('flashBtn').disabled = false;
+    $('statusText').textContent = 'Sẵn sàng flash!';
+    
+    renderHistory();
+}
+
+// ===== Binary Patching =====
+function patchDeviceId(buffer, oldId, newId) {
+    const positions = findAllStringsInBinary(buffer, oldId);
+    if (positions.length === 0) {
+        log('error', `❌ Không tìm thấy "${oldId}" trong binary!`);
+        return false;
+    }
+    
+    const encoder = new TextEncoder();
+    const newBytes = encoder.encode(newId);
+    const oldBytes = encoder.encode(oldId);
+    
+    if (newBytes.length > oldBytes.length) {
+        log('error', `❌ ID mới (${newBytes.length} chars) dài hơn ID cũ (${oldBytes.length} chars)!`);
+        return false;
+    }
+    
+    for (const pos of positions) {
+        // Write new ID
+        for (let i = 0; i < oldBytes.length; i++) {
+            buffer[pos + i] = i < newBytes.length ? newBytes[i] : 0; // null-pad
+        }
+        log('info', `✏️ Patched at offset 0x${pos.toString(16)}: "${oldId}" → "${newId}"`);
+    }
+    
+    log('success', `✅ Patched ${positions.length} occurrence(s)`);
+    return true;
+}
+
+function recalcChecksum(buffer) {
+    // ESP32 image format:
+    // - First byte = 0xE9 (magic)
+    // - Byte 1 = segment count
+    // - After all segments: XOR checksum on 16-byte aligned boundary
+    // - If hash_appended (byte 23 bit 0): 32-byte SHA-256 after checksum
+    
+    if (buffer[0] !== 0xE9) {
+        log('warn', '⚠️ Not a valid ESP32 image (magic != 0xE9)');
+        return;
+    }
+    
+    const segCount = buffer[1];
+    const hashAppended = (buffer[23] & 0x01) === 1;
+    
+    // Parse segments to find data area
+    let offset = 24; // after header
+    let xorVal = 0xEF; // initial XOR value
+    
+    for (let seg = 0; seg < segCount; seg++) {
+        if (offset + 8 > buffer.length) break;
+        const segAddr = buffer[offset] | (buffer[offset+1] << 8) | (buffer[offset+2] << 16) | (buffer[offset+3] << 24);
+        const segLen = buffer[offset+4] | (buffer[offset+5] << 8) | (buffer[offset+6] << 16) | (buffer[offset+7] << 24);
+        offset += 8; // skip segment header
+        
+        // XOR all data bytes in this segment
+        for (let i = 0; i < segLen && (offset + i) < buffer.length; i++) {
+            xorVal ^= buffer[offset + i];
+        }
+        offset += segLen;
+    }
+    
+    // Checksum is at the next 16-byte aligned position
+    const checksumOffset = (offset % 16 === 0) ? offset : offset + (16 - (offset % 16));
+    if (checksumOffset < buffer.length) {
+        const oldChecksum = buffer[checksumOffset];
+        buffer[checksumOffset] = xorVal;
+        log('info', `🔧 XOR checksum: 0x${oldChecksum.toString(16)} → 0x${xorVal.toString(16)} at offset 0x${checksumOffset.toString(16)}`);
+    }
+    
+    // SHA-256 recalculation
+    if (hashAppended) {
+        const shaStart = checksumOffset + 1;
+        if (shaStart + 32 <= buffer.length) {
+            // We need to hash everything before the SHA-256 hash
+            const dataToHash = buffer.slice(0, shaStart);
+            crypto.subtle.digest('SHA-256', dataToHash).then(hash => {
+                const hashBytes = new Uint8Array(hash);
+                for (let i = 0; i < 32; i++) {
+                    buffer[shaStart + i] = hashBytes[i];
+                }
+                log('info', `🔧 SHA-256 recalculated`);
+            });
+        }
+    }
+}
+
+// ===== Flash =====
+async function loadStaticBin(url) {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Failed to load ${url}: ${resp.status}`);
+    return new Uint8Array(await resp.arrayBuffer());
+}
+
+window.startFlash = async function() {
+    const newId = $('deviceIdInput').value.trim();
+    if (!newId) { log('error', 'Nhập Device ID trước!'); return; }
+    if (!firmwareBuffer) { log('error', 'Upload firmware trước!'); return; }
+    
+    // Show confirmation dialog
+    $('confirmDeviceId').textContent = newId;
+    $('confirmDetails').textContent = `File: ${(firmwareBuffer.length/1024).toFixed(1)} KB | Full flash (bootloader + partition + app)`;
+    $('confirmDialog').style.display = 'flex';
+};
+
+window.confirmFlash = async function() {
+    $('confirmDialog').style.display = 'none';
+    const newId = $('deviceIdInput').value.trim();
+    
+    // Save to history
+    localStorage.setItem('last_device_id', newId);
+    saveHistory(newId);
+    
+    // Patch binary
+    const patchedBuffer = new Uint8Array(firmwareBuffer); // clone
+    if (originalDeviceId && originalDeviceId !== newId) {
+        log('info', `✏️ Patching Device ID: "${originalDeviceId}" → "${newId}"`);
+        if (!patchDeviceId(patchedBuffer, originalDeviceId, newId)) return;
+        recalcChecksum(patchedBuffer);
+        await new Promise(r => setTimeout(r, 100)); // wait for SHA-256
+    } else if (!originalDeviceId) {
+        log('warn', '⚠️ Device ID not found in binary — flashing without patching');
+    } else {
+        log('info', '🏷️ Device ID unchanged, no patching needed');
+    }
+    
+    // Load static binaries
+    log('info', '📥 Loading bootloader, partition table, OTA data...');
+    let bootloader, partitionTable, otaData;
+    try {
+        [bootloader, partitionTable, otaData] = await Promise.all([
+            loadStaticBin('firmware/bootloader.bin'),
+            loadStaticBin('firmware/partition-table.bin'),
+            loadStaticBin('firmware/ota_data_initial.bin'),
+        ]);
+        log('success', `📦 Loaded: bootloader (${bootloader.length}B), partition (${partitionTable.length}B), ota_data (${otaData.length}B)`);
+    } catch (e) {
+        log('error', `❌ Failed to load static binaries: ${e.message}`);
+        return;
+    }
+    
+    // Connect to ESP32
+    $('flashBtn').disabled = true;
+    $('statusText').textContent = 'Đang kết nối...';
+    $('progressBar').style.display = 'block';
+    
+    try {
+        if (!transport) {
+            const port = await navigator.serial.requestPort();
+            transport = new Transport(port, true);
+        }
+        
+        log('info', '🔌 Connecting to ESP32...');
+        const loaderOptions = {
+            transport,
+            baudrate: 460800,
+            romBaudrate: 115200,
+            terminal: {
+                clean() {},
+                writeLine(data) { log('info', data); },
+                write(data) {}
+            }
+        };
+        
+        esploader = new ESPLoader(loaderOptions);
+        const chip = await esploader.main();
+        log('success', `✅ Connected: ${chip}`);
+        
+        $('disconnectBtn').style.display = 'inline-flex';
+        
+        // Prepare flash data
+        const flashData = [
+            { data: arrayToStr(bootloader), address: FLASH_OFFSETS.bootloader },
+            { data: arrayToStr(partitionTable), address: FLASH_OFFSETS.partition },
+            { data: arrayToStr(otaData), address: FLASH_OFFSETS.otadata },
+            { data: arrayToStr(patchedBuffer), address: FLASH_OFFSETS.app },
+        ];
+        
+        const totalSize = bootloader.length + partitionTable.length + otaData.length + patchedBuffer.length;
+        log('info', `📝 Flash layout: bootloader@0x1000, partition@0x8000, ota@0xD000, app@0x10000`);
+        log('info', `📊 Total: ${(totalSize/1024).toFixed(1)} KB`);
+        $('statusText').textContent = `Flashing ${(totalSize/1024).toFixed(0)} KB...`;
+        
+        // Flash
+        const flashOptions = {
+            fileArray: flashData,
+            flashSize: "keep",
+            flashMode: "keep",
+            flashFreq: "keep",
+            eraseAll: false,
+            compress: true,
+            reportProgress(fileIndex, written, total) {
+                const names = ['Bootloader', 'Partition', 'OTA Data', 'App'];
+                const pct = Math.round((written / total) * 100);
+                $('progressFill').style.width = `${(fileIndex * 25) + (pct * 0.25)}%`;
+                $('statusText').textContent = `${names[fileIndex]}: ${pct}%`;
+            }
+        };
+        
+        await esploader.writeFlash(flashOptions);
+        
+        $('progressFill').style.width = '100%';
+        log('success', `✅ Flash hoàn tất! Device ID: ${newId}`);
+        $('statusText').textContent = `✅ Flash thành công! Device ID: ${newId}`;
+        
+        // Hard reset
+        await transport.setDTR(false);
+        await new Promise(r => setTimeout(r, 100));
+        await transport.setDTR(true);
+        log('info', '🔄 Device reset');
+        
+    } catch (e) {
+        log('error', `❌ Flash failed: ${e.message || e}`);
+        $('statusText').textContent = 'Flash thất bại!';
+    } finally {
+        $('flashBtn').disabled = false;
+    }
+};
+
+window.cancelFlash = function() {
+    $('confirmDialog').style.display = 'none';
+};
+
+window.disconnect = async function() {
+    try {
+        if (transport) {
+            await transport.disconnect();
+            transport = null;
+            esploader = null;
+        }
+        $('disconnectBtn').style.display = 'none';
+        log('info', '⏏ Disconnected');
+        $('statusText').textContent = 'Đã ngắt kết nối.';
+    } catch (e) {
+        log('error', `Disconnect error: ${e}`);
+    }
+};
+
+function arrayToStr(arr) {
+    let str = '';
+    for (let i = 0; i < arr.length; i++) str += String.fromCharCode(arr[i]);
+    return str;
+}
+
+// ===== History =====
+function saveHistory(id) {
+    if (!id) return;
+    let h = JSON.parse(localStorage.getItem('flash_history') || '[]');
+    h = [id, ...h.filter(x => x !== id)].slice(0, 10);
+    localStorage.setItem('flash_history', JSON.stringify(h));
+    renderHistory();
+}
+
+function renderHistory() {
+    const h = JSON.parse(localStorage.getItem('flash_history') || '[]');
+    $('idHistory').innerHTML = h.map(id =>
+        `<button class="btn btn-sm" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);font-family:monospace;" onclick="document.getElementById('deviceIdInput').value='${id}'">${id}</button>`
+    ).join('');
+}
+
+renderHistory();
+log('info', '🚀 Navis Firmware Flasher ready');
+log('info', '📋 Steps: Upload .bin → Nhập Device ID → Flash');
+</script>
+</body>
+</html>
