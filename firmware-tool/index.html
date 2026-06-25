@@ -253,10 +253,10 @@ if (sessionStorage.getItem('fw_auth') === '1') {
     <p style="margin-top:6px;color:var(--text2);">Vui lòng mở trang này bằng Chrome/Edge.</p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/buffer@6.0.3/index.min.js"></script>
 <script type="module">
 import { ESPLoader, Transport } from 'https://unpkg.com/esptool-js@0.4.3/bundle.js';
-window.Buffer = window.buffer.Buffer; // polyfill for esptool-js
+import { Buffer } from 'https://esm.sh/buffer@6.0.3';
+window.Buffer = Buffer;
 
 const $ = id => document.getElementById(id);
 const consoleEl = $('console');
