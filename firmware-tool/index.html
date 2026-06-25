@@ -6,6 +6,7 @@
 <title>Navis Firmware Flasher</title>
 <meta name="description" content="Flash ESP32 firmware directly from your browser via USB">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script type="module" src="https://unpkg.com/esptool-js@0.4.3/bundle.js"></script>
 <style>
 :root {
@@ -214,6 +215,20 @@ if (sessionStorage.getItem('fw_auth') === '1') {
         <div id="idHistory" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
 
+    <!-- Flashed Devices & QR List -->
+    <div class="card">
+        <div class="card-title">📱 Lịch sử thiết bị đã Flash & In QR</div>
+        <div id="flashedList" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
+        <div class="btn-row">
+            <button class="btn btn-accent" id="printQRBtn" onclick="printFlashedQR()" disabled>
+                🖨️ Tạo & In QR A4
+            </button>
+            <button class="btn btn-red btn-sm" onclick="clearFlashedHistory()" style="background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25);font-size:12px;">
+                🗑️ Xóa lịch sử đã flash
+            </button>
+        </div>
+    </div>
+
     <!-- Flash & Monitor -->
     <div class="card">
         <div class="card-title">⚡ Flash & Monitor</div>
@@ -235,6 +250,12 @@ if (sessionStorage.getItem('fw_auth') === '1') {
         <div id="savedPortInfo" style="font-size:12px;color:var(--text2);margin-top:8px;display:none;align-items:center;gap:6px;">
             <span>🔌 Cổng COM đã lưu: <strong id="savedPortName" style="color:var(--accent2);font-family:monospace;">—</strong></span>
             <button class="btn btn-sm" style="padding:2px 6px;background:var(--bg3);color:var(--red);border:1px solid var(--border);font-size:10px;border-radius:4px;font-weight:500;" onclick="clearSavedPort()">Xóa ghi nhớ</button>
+        </div>
+        <!-- QR Code của thiết bị vừa flash thành công -->
+        <div id="flashSuccessQR" style="display:none;margin-top:16px;text-align:center;padding:16px;background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2);border-radius:8px;">
+            <div style="font-size:13px;color:var(--green);font-weight:600;margin-bottom:8px;">✅ Flash thành công! Mã QR thiết bị:</div>
+            <div id="successQRCode" style="display:inline-block;padding:8px;background:#fff;border-radius:6px;image-rendering:pixelated;"></div>
+            <div style="font-size:14px;font-weight:700;color:var(--accent2);margin-top:8px;font-family:monospace;" id="successQRLabel"></div>
         </div>
     </div>
 
@@ -565,6 +586,7 @@ async function loadStaticBin(url) {
 
 window.startFlash = async function() {
     if (!firmwareBuffer) { log('error', 'Firmware chưa load!'); return; }
+    $('flashSuccessQR').style.display = 'none';
     
     // Stop monitor first if running
     if (monitoring) {
@@ -704,6 +726,21 @@ window.confirmFlash = async function() {
         $('progressFill').style.width = '100%';
         log('success', `✅ Flash hoàn tất! Device ID: ${newId}`);
         $('statusText').textContent = `✅ Flash thành công! Device ID: ${newId}`;
+        
+        // Hiển thị QR Code của thiết bị vừa flash thành công
+        try {
+            const qr = qrcode(0, 'M');
+            qr.addData(`add#${newId}#master`);
+            qr.make();
+            $('successQRCode').innerHTML = qr.createImgTag(4, 0);
+            $('successQRLabel').textContent = newId;
+            $('flashSuccessQR').style.display = 'block';
+        } catch(qre) {
+            log('error', `Không thể tạo mã QR: ${qre.message}`);
+        }
+        
+        // Thêm thiết bị vào danh sách lịch sử đã flash
+        addFlashedDevice(newId);
         
         // Auto-increment Device ID
         if ($('autoIncrementCb').checked) {
@@ -916,6 +953,115 @@ async function autoLoadFirmware() {
         $('fwBadge').className = 'badge badge-err';
     }
 }
+
+// ===== Flashed Devices History & QR Code =====
+function addFlashedDevice(id) {
+    if (!id) return;
+    let list = JSON.parse(localStorage.getItem('flashed_devices_list') || '[]');
+    if (!list.includes(id)) {
+        list.push(id);
+        localStorage.setItem('flashed_devices_list', JSON.stringify(list));
+        renderFlashedList();
+    }
+}
+
+function renderFlashedList() {
+    const list = JSON.parse(localStorage.getItem('flashed_devices_list') || '[]');
+    const container = $('flashedList');
+    if (list.length === 0) {
+        container.innerHTML = '<div style="color:var(--text2);font-size:12px;padding:4px 0;">Chưa có thiết bị nào được flash thành công trong phiên này.</div>';
+        $('printQRBtn').disabled = true;
+    } else {
+        container.innerHTML = list.map((id, idx) => 
+            `<div style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(99,102,241,0.1);color:var(--accent2);border-radius:6px;font-size:12px;font-family:monospace;border:1px solid var(--border);">
+                <span>${id}</span>
+                <span style="color:var(--red);cursor:pointer;font-weight:700;margin-left:4px;font-size:14px;" onclick="removeFlashedDevice(${idx})">×</span>
+            </div>`
+        ).join('');
+        $('printQRBtn').disabled = false;
+    }
+}
+
+function removeFlashedDevice(idx) {
+    let list = JSON.parse(localStorage.getItem('flashed_devices_list') || '[]');
+    list.splice(idx, 1);
+    localStorage.setItem('flashed_devices_list', JSON.stringify(list));
+    renderFlashedList();
+}
+
+function clearFlashedHistory() {
+    if (confirm('Bạn có chắc chắn muốn xóa toàn bộ danh sách thiết bị đã flash?')) {
+        localStorage.removeItem('flashed_devices_list');
+        renderFlashedList();
+        log('info', '🧹 Đã xóa sạch lịch sử thiết bị đã flash');
+    }
+}
+
+function printFlashedQR() {
+    const list = JSON.parse(localStorage.getItem('flashed_devices_list') || '[]');
+    if (list.length === 0) return;
+    
+    const summary = `Danh sách đã flash (${list.length} thiết bị)`;
+    
+    // Generate QR items
+    const qrItems = list.map(id => {
+        const qr = qrcode(0, 'M');
+        qr.addData(`add#${id}#master`);
+        qr.make();
+        return { id, img: qr.createDataURL(4, 0) };
+    });
+    
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head>
+    <title>In mã QR thiết bị</title>
+    <style>
+        @page { size: A4; margin: 12mm 10mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px 4px;
+        }
+        .qr-item {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 6px 2px;
+            page-break-inside: avoid;
+        }
+        .qr-item img { width: 80px; height: 80px; image-rendering: pixelated; }
+        .qr-item .label {
+            font-size: 9px; font-weight: bold; margin-top: 3px;
+            text-align: center; word-break: break-all;
+        }
+        .page-title {
+            text-align: center; font-size: 11px; color: #666;
+            margin-bottom: 8px; padding-bottom: 4px;
+            border-bottom: 1px solid #ddd;
+        }
+        @media print { .no-print { display: none; } }
+    </style>
+    </head><body>
+    <div class="no-print" style="padding:12px;background:#f0f0f0;text-align:center;margin-bottom:12px;">
+        <strong>\${summary}</strong> &mdash; \${list.length} QR
+        &nbsp;&nbsp;
+        <button onclick="window.print()" style="padding:8px 20px;font-size:14px;cursor:pointer;background:#6366f1;color:#fff;border:none;border-radius:6px;">🖨️ In</button>
+    </div>
+    <div class="page-title">\${summary}</div>
+    <div class="grid">
+        \${qrItems.map(q => `<div class="qr-item"><img src="\${q.img}"><div class="label">\${q.id}</div></div>`).join('')}
+    </div>
+    </body></html>`);
+    win.document.close();
+    log('success', `📱 Mở trang in QR cho \${list.length} thiết bị`);
+}
+
+// Export functions to window so inline onclick works
+window.removeFlashedDevice = removeFlashedDevice;
+window.clearFlashedHistory = clearFlashedHistory;
+window.printFlashedQR = printFlashedQR;
+
+// Initialize flashed list UI
+renderFlashedList();
 
 autoLoadFirmware();
 log('info', '🚀 Navis Firmware Flasher ready');
