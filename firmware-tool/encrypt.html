@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navis Firmware Encryptor</title>
+<meta name="description" content="Mã hóa firmware ESP32 bằng AES-256-CBC trước khi tải lên server">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #0f0f13; --bg2: #1a1a24; --bg3: #24243a;
+    --text: #e8e8f0; --text2: #8888a8;
+    --accent: #6366f1; --accent2: #818cf8;
+    --green: #22c55e; --green2: #16a34a;
+    --orange: #f59e0b; --red: #ef4444;
+    --border: #2a2a3e; --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.header {
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+    text-align: center;
+}
+.header h1 { font-size: 22px; font-weight: 700; }
+.header h1 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.container { max-width: 600px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--accent); }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+/* Drop zone */
+.drop-zone {
+    border: 2px dashed var(--border); border-radius: var(--radius); padding: 40px 20px;
+    text-align: center; cursor: pointer; transition: all 0.3s;
+}
+.drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: rgba(99,102,241,.05); }
+.drop-zone.has-file { border-color: var(--green); border-style: solid; }
+.drop-zone .icon { font-size: 36px; margin-bottom: 8px; }
+.drop-zone .label { font-size: 14px; color: var(--text2); }
+.drop-zone .filename { font-size: 16px; font-weight: 600; color: var(--green); margin-top: 4px; }
+input[type="file"] { display: none; }
+
+/* Form */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.field input {
+    width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 15px; font-family: 'Inter', monospace;
+    font-weight: 600; transition: border-color 0.2s;
+}
+.field input:focus { outline: none; border-color: var(--accent); }
+
+/* Buttons */
+.btn {
+    padding: 12px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; display: inline-flex;
+    align-items: center; justify-content: center; gap: 8px;
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-accent { background: var(--accent); color: #fff; width: 100%; }
+.btn-accent:hover:not(:disabled) { background: var(--accent2); transform: translateY(-1px); }
+
+/* Console/Logs */
+.console {
+    background: #000; border-radius: 8px; padding: 12px; font-family: 'Courier New', monospace;
+    font-size: 12px; height: 160px; overflow-y: auto; line-height: 1.6;
+    border: 1px solid var(--border); margin-top: 10px;
+}
+.console .line { white-space: pre-wrap; word-break: break-all; }
+.console .success { color: var(--green); }
+.console .error { color: var(--red); }
+.console .info { color: var(--text2); }
+
+.nav-link {
+    text-align: center; margin-top: 10px; font-size: 13px;
+}
+.nav-link a {
+    color: var(--accent2); text-decoration: none; font-weight: 500;
+}
+.nav-link a:hover {
+    text-decoration: underline;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🔐 <span>Navis Firmware Encryptor</span></h1>
+    <p>Mã hóa file .bin thành .enc (AES-256-CBC) để cập nhật lên server</p>
+</div>
+
+<div class="container">
+    <!-- Cài đặt Key -->
+    <div class="card">
+        <div class="card-title">🔑 Thông tin Mã hóa</div>
+        <div class="field">
+            <label>Username</label>
+            <input type="text" id="username" value="admin" autocomplete="username">
+        </div>
+        <div class="field">
+            <label>Password</label>
+            <input type="password" id="password" value="13520918" autocomplete="current-password">
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px;">
+            Khóa mã hóa được sinh ra tự động từ <strong>SHA-256(Username + ":" + Password)</strong>. Thông tin này cần trùng khớp với tài khoản đăng nhập trên trang nạp flasher.
+        </div>
+    </div>
+
+    <!-- Chọn file bin -->
+    <div class="card">
+        <div class="card-title">📁 Chọn file Firmware .bin</div>
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <div class="icon" id="dropIcon">📁</div>
+            <div class="label" id="dropLabel">Kéo thả file <strong>.bin</strong> hoặc click để chọn</div>
+        </div>
+        <input type="file" id="fileInput" accept=".bin">
+        
+        <div style="margin-top:16px;">
+            <button class="btn btn-accent" id="encryptBtn" onclick="encryptFile()" disabled>
+                🔒 Mã hóa & Tải xuống file .enc
+            </button>
+        </div>
+    </div>
+
+    <!-- Logs -->
+    <div class="card">
+        <div class="card-title">📋 Trạng thái xử lý</div>
+        <div class="console" id="console"></div>
+    </div>
+
+    <div class="nav-link">
+        <a href="index.html">⬅️ Quay lại trang Nạp Firmware</a>
+    </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const consoleEl = $('console');
+let fileBuffer = null;
+let currentFilename = '';
+
+function log(cls, text) {
+    const div = document.createElement('div');
+    div.className = 'line ' + (cls || 'info');
+    const ts = new Date().toLocaleTimeString('vi-VN');
+    div.textContent = `[${ts}] ${text}`;
+    consoleEl.appendChild(div);
+    consoleEl.scrollTop = consoleEl.scrollHeight;
+}
+
+// ===== Drop Zone & File Input =====
+const dropZone = $('dropZone');
+const fileInput = $('fileInput');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+function handleFile(file) {
+    if (!file.name.endsWith('.bin')) {
+        log('error', 'Chỉ chấp nhận file .bin!');
+        return;
+    }
+    currentFilename = file.name;
+    const reader = new FileReader();
+    reader.onload = () => {
+        fileBuffer = new Uint8Array(reader.result);
+        log('success', `📥 Đã nạp file: ${file.name} (${(file.size/1024).toFixed(1)} KB)`);
+        
+        $('dropIcon').textContent = '✅';
+        $('dropLabel').innerHTML = `Đã chọn: <strong class="filename">${file.name}</strong>`;
+        $('encryptBtn').disabled = false;
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// ===== AES Encryption =====
+async function encryptFile() {
+    if (!fileBuffer) return;
+    
+    const user = $('username').value.trim();
+    const pass = $('password').value;
+    
+    if (!user || !pass) {
+        log('error', 'Username và Password không được để trống!');
+        return;
+    }
+    
+    log('info', '🔐 Bắt đầu mã hóa...');
+    $('encryptBtn').disabled = true;
+    
+    try {
+        const keyStr = user + ':' + pass;
+        
+        // 1. Tạo SHA-256 hash của username:password
+        const keyHashBytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(keyStr));
+        
+        // 2. Import làm khóa AES
+        const aesKey = await crypto.subtle.importKey(
+            'raw', 
+            keyHashBytes, 
+            { name: 'AES-CBC' }, 
+            false, 
+            ['encrypt']
+        );
+        
+        // 3. Sinh 16 bytes IV ngẫu nhiên
+        const iv = crypto.getRandomValues(new Uint8Array(16));
+        
+        // 4. Mã hóa bằng AES-CBC
+        const ciphertextBuffer = await crypto.subtle.encrypt(
+            { name: 'AES-CBC', iv: iv },
+            aesKey,
+            fileBuffer
+        );
+        
+        const ciphertext = new Uint8Array(ciphertextBuffer);
+        
+        // 5. Ghép [IV (16 bytes)][Ciphertext]
+        const output = new Uint8Array(iv.length + ciphertext.length);
+        output.set(iv, 0);
+        output.set(ciphertext, iv.length);
+        
+        log('success', `✅ Mã hóa thành công! Kích thước file đích: ${(output.length/1024).toFixed(1)} KB`);
+        
+        // 6. Kích hoạt Download
+        const outFilename = currentFilename + '.enc';
+        const blob = new Blob([output], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = outFilename;
+        document.body.appendChild(a);
+        a.click();
+        
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        log('success', `📥 Đã tải xuống file mã hóa: ${outFilename}`);
+        log('info', '💡 Bạn có thể chép đè file này vào thư mục firmware/DaiVietIoT.bin.enc trên server.');
+    } catch (e) {
+        log('error', `❌ Mã hóa thất bại: ${e.message || e}`);
+    } finally {
+        $('encryptBtn').disabled = false;
+    }
+}
+</script>
+
+</body>
+</html>
