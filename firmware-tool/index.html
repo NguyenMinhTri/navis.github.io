@@ -232,6 +232,10 @@ if (sessionStorage.getItem('fw_auth') === '1') {
             <div class="progress-fill" id="progressFill"></div>
         </div>
         <div id="statusText" style="font-size:13px;color:var(--text2);margin-top:8px;">Chờ firmware load...</div>
+        <div id="savedPortInfo" style="font-size:12px;color:var(--text2);margin-top:8px;display:none;align-items:center;gap:6px;">
+            <span>🔌 Cổng COM đã lưu: <strong id="savedPortName" style="color:var(--accent2);font-family:monospace;">—</strong></span>
+            <button class="btn btn-sm" style="padding:2px 6px;background:var(--bg3);color:var(--red);border:1px solid var(--border);font-size:10px;border-radius:4px;font-weight:500;" onclick="clearSavedPort()">Xóa ghi nhớ</button>
+        </div>
     </div>
 
     <!-- Console -->
@@ -291,6 +295,56 @@ if (!("serial" in navigator)) {
     $('mainContent').style.display = 'none';
     $('unsupported').style.display = 'block';
 }
+
+// ===== Port Memory helper =====
+async function selectPort() {
+    const ports = await navigator.serial.getPorts();
+    const savedVid = localStorage.getItem('last_com_vid');
+    const savedPid = localStorage.getItem('last_com_pid');
+    
+    if (savedVid && savedPid && ports.length > 0) {
+        const matched = ports.find(p => {
+            const info = p.getInfo();
+            return String(info.usbVendorId) === savedVid && String(info.usbProductId) === savedPid;
+        });
+        if (matched) {
+            log('info', `🔌 Tự động kết nối cổng COM đã lưu (VID: 0x${parseInt(savedVid).toString(16).toUpperCase()}, PID: 0x${parseInt(savedPid).toString(16).toUpperCase()})`);
+            return matched;
+        }
+    }
+    
+    const port = await navigator.serial.requestPort();
+    const info = port.getInfo();
+    if (info.usbVendorId && info.usbProductId) {
+        localStorage.setItem('last_com_vid', String(info.usbVendorId));
+        localStorage.setItem('last_com_pid', String(info.usbProductId));
+        updateSavedPortUI();
+    }
+    return port;
+}
+
+function updateSavedPortUI() {
+    const savedVid = localStorage.getItem('last_com_vid');
+    const savedPid = localStorage.getItem('last_com_pid');
+    if (savedVid && savedPid) {
+        $('savedPortName').textContent = `VID 0x${parseInt(savedVid).toString(16).toUpperCase()}, PID 0x${parseInt(savedPid).toString(16).toUpperCase()}`;
+        $('savedPortInfo').style.display = 'flex';
+    } else {
+        $('savedPortInfo').style.display = 'none';
+    }
+}
+
+function clearSavedPort() {
+    localStorage.removeItem('last_com_vid');
+    localStorage.removeItem('last_com_pid');
+    updateSavedPortUI();
+    log('info', '🧹 Đã xóa ghi nhớ cổng COM');
+}
+
+window.clearSavedPort = clearSavedPort;
+
+// Initialize saved port UI
+updateSavedPortUI();
 
 // ===== Console =====
 function log(cls, text) {
@@ -525,7 +579,7 @@ window.startFlash = async function() {
         log('info', '🔌 Kết nối ESP32 để đọc MAC address...');
         try {
             if (!transport) {
-                const port = await navigator.serial.requestPort();
+                const port = await selectPort();
                 transport = new Transport(port, true);
             }
             const loaderOptions = {
@@ -601,7 +655,7 @@ window.confirmFlash = async function() {
         if (!esploader) {
             // Disconnect old transport if port stuck open
             if (transport) { try { await transport.disconnect(); } catch(e){} transport = null; }
-            const port = await navigator.serial.requestPort();
+            const port = await selectPort();
             transport = new Transport(port, true);
             log('info', '🔌 Connecting to ESP32...');
             const loaderOptions = {
@@ -711,7 +765,7 @@ function stripAnsi(str) {
 async function startMonitor(existingPort) {
     if (monitoring) return;
     try {
-        monitorPort = existingPort || await navigator.serial.requestPort();
+        monitorPort = existingPort || await selectPort();
         if (!monitorPort.readable) {
             await monitorPort.open({ baudRate: 115200 });
         }
@@ -737,7 +791,16 @@ async function startMonitor(existingPort) {
                     lineBuffer = lines.pop(); // keep incomplete line
                     for (const line of lines) {
                         const clean = stripAnsi(line.trim());
-                        if (clean) log('info', clean);
+                        if (clean) {
+                            let cls = 'info';
+                            if (clean.length > 2 && clean[1] === ' ') {
+                                const c = clean[0];
+                                if (c === 'I') cls = 'success';
+                                else if (c === 'W') cls = 'warn';
+                                else if (c === 'E') cls = 'error';
+                            }
+                            log(cls, clean);
+                        }
                     }
                 }
             } catch (e) {
