@@ -253,8 +253,10 @@ if (sessionStorage.getItem('fw_auth') === '1') {
     <p style="margin-top:6px;color:var(--text2);">Vui lòng mở trang này bằng Chrome/Edge.</p>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/buffer@6.0.3/index.min.js"></script>
 <script type="module">
 import { ESPLoader, Transport } from 'https://unpkg.com/esptool-js@0.4.3/bundle.js';
+window.Buffer = window.buffer.Buffer; // polyfill for esptool-js
 
 const $ = id => document.getElementById(id);
 const consoleEl = $('console');
@@ -597,27 +599,23 @@ window.confirmFlash = async function() {
     $('progressBar').style.display = 'block';
     
     try {
-        if (!transport) {
+        // Reuse existing connection (from MAC read) or create new
+        if (!esploader) {
+            // Disconnect old transport if port stuck open
+            if (transport) { try { await transport.disconnect(); } catch(e){} transport = null; }
             const port = await navigator.serial.requestPort();
             transport = new Transport(port, true);
+            log('info', '🔌 Connecting to ESP32...');
+            const loaderOptions = {
+                transport, baudrate: 460800, romBaudrate: 115200,
+                terminal: { clean(){}, writeLine(data){ log('info', data); }, write(data){} }
+            };
+            esploader = new ESPLoader(loaderOptions);
+            const chip = await esploader.main();
+            log('success', `✅ Connected: ${chip}`);
+        } else {
+            log('info', '🔌 Reusing existing connection...');
         }
-        
-        log('info', '🔌 Connecting to ESP32...');
-        const loaderOptions = {
-            transport,
-            baudrate: 460800,
-            romBaudrate: 115200,
-            terminal: {
-                clean() {},
-                writeLine(data) { log('info', data); },
-                write(data) {}
-            }
-        };
-        
-        esploader = new ESPLoader(loaderOptions);
-        const chip = await esploader.main();
-        log('success', `✅ Connected: ${chip}`);
-        
         $('disconnectBtn').style.display = 'inline-flex';
         
         // Prepare flash data
@@ -655,15 +653,22 @@ window.confirmFlash = async function() {
         log('success', `✅ Flash hoàn tất! Device ID: ${newId}`);
         $('statusText').textContent = `✅ Flash thành công! Device ID: ${newId}`;
         
-        // Hard reset
-        await transport.setDTR(false);
-        await new Promise(r => setTimeout(r, 100));
-        await transport.setDTR(true);
+        // Hard reset & cleanup connection for next flash
+        try { await transport.setDTR(false); await new Promise(r => setTimeout(r, 100)); await transport.setDTR(true); } catch(e){}
         log('info', '🔄 Device reset');
+        try { await transport.disconnect(); } catch(e){}
+        transport = null;
+        esploader = null;
+        $('disconnectBtn').style.display = 'none';
         
     } catch (e) {
         log('error', `❌ Flash failed: ${e.message || e}`);
         $('statusText').textContent = 'Flash thất bại!';
+        // Cleanup on error too
+        try { if (transport) await transport.disconnect(); } catch(ex){}
+        transport = null;
+        esploader = null;
+        $('disconnectBtn').style.display = 'none';
     } finally {
         $('flashBtn').disabled = false;
     }
