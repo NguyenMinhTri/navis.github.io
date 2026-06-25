@@ -227,6 +227,24 @@ if (sessionStorage.getItem('fw_auth') === '1') {
                 🗑️ Xóa lịch sử đã flash
             </button>
         </div>
+        <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:14px;">
+            <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:600;">➕ Thêm mã QR thủ công để in:</div>
+            <div style="display:grid;grid-template-columns:3fr 1fr 1fr auto;gap:8px;align-items:flex-end;">
+                <div class="field" style="margin-bottom:0;">
+                    <label style="font-size:10px;">Prefix</label>
+                    <input type="text" id="manualPrefix" placeholder="Ví dụ: A-TPN-" style="padding:6px 10px;font-size:13px;">
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                    <label style="font-size:10px;">Từ</label>
+                    <input type="number" id="manualStart" value="1" min="1" style="padding:6px 10px;font-size:13px;width:100%;">
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                    <label style="font-size:10px;">Đến</label>
+                    <input type="number" id="manualEnd" value="10" min="1" style="padding:6px 10px;font-size:13px;width:100%;">
+                </div>
+                <button class="btn btn-green" style="padding:8px 14px;font-size:13px;height:34px;" onclick="addManualQR()">Thêm</button>
+            </div>
+        </div>
     </div>
 
     <!-- Flash & Monitor -->
@@ -1012,6 +1030,10 @@ function printFlashedQR() {
     });
     
     const win = window.open('', '_blank');
+    const qrGridHtml = qrItems.map(q => 
+        '<div class="qr-item"><img src="' + q.img + '"><div class="label">' + q.id + '</div></div>'
+    ).join('');
+    
     win.document.write(`<!DOCTYPE html><html><head>
     <title>In mã QR thiết bị</title>
     <style>
@@ -1042,23 +1064,59 @@ function printFlashedQR() {
     </style>
     </head><body>
     <div class="no-print" style="padding:12px;background:#f0f0f0;text-align:center;margin-bottom:12px;">
-        <strong>\${summary}</strong> &mdash; \${list.length} QR
+        <strong>${summary}</strong> &mdash; ${list.length} QR
         &nbsp;&nbsp;
         <button onclick="window.print()" style="padding:8px 20px;font-size:14px;cursor:pointer;background:#6366f1;color:#fff;border:none;border-radius:6px;">🖨️ In</button>
     </div>
-    <div class="page-title">\${summary}</div>
+    <div class="page-title">${summary}</div>
     <div class="grid">
-        \${qrItems.map(q => `<div class="qr-item"><img src="\${q.img}"><div class="label">\${q.id}</div></div>`).join('')}
+        ${qrGridHtml}
     </div>
     </body></html>`);
     win.document.close();
-    log('success', `📱 Mở trang in QR cho \${list.length} thiết bị`);
+    log('success', `📱 Mở trang in QR cho ${list.length} thiết bị`);
+}
+
+function addManualQR() {
+    const prefix = document.getElementById('manualPrefix').value.trim();
+    const start = parseInt(document.getElementById('manualStart').value) || 1;
+    const end = parseInt(document.getElementById('manualEnd').value) || 1;
+    
+    if (!prefix) {
+        log('error', 'Vui lòng nhập Prefix!');
+        return;
+    }
+    if (end < start) {
+        log('error', 'Giá trị "Đến" phải lớn hơn hoặc bằng "Từ"!');
+        return;
+    }
+    
+    let list = JSON.parse(localStorage.getItem('flashed_devices_list') || '[]');
+    let count = 0;
+    for (let i = start; i <= end; i++) {
+        const id = prefix + i;
+        if (!list.includes(id)) {
+            list.push(id);
+            count++;
+        }
+    }
+    
+    if (count > 0) {
+        localStorage.setItem('flashed_devices_list', JSON.stringify(list));
+        renderFlashedList();
+        log('success', `➕ Đã thêm thủ công ${count} mã QR (${prefix}${start} → ${prefix}${end}) vào danh sách in`);
+    } else {
+        log('warn', 'Các thiết bị này đã tồn tại trong danh sách.');
+    }
+    
+    document.getElementById('manualPrefix').value = '';
 }
 
 // Export functions to window so inline onclick works
 window.removeFlashedDevice = removeFlashedDevice;
 window.clearFlashedHistory = clearFlashedHistory;
 window.printFlashedQR = printFlashedQR;
+window.addManualQR = addManualQR;
 
 // Initialize flashed list UI
 renderFlashedList();
