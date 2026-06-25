@@ -122,34 +122,38 @@ input[type="file"] { display: none; }
 </div>
 
 <div class="container" id="mainContent">
-    <!-- Step 1: Upload -->
+    <!-- Firmware Status -->
     <div class="card">
-        <div class="card-title">📦 1. Firmware File</div>
-        <div class="drop-zone" id="dropZone" onclick="$('fileInput').click()">
-            <div class="icon" id="dropIcon">📁</div>
-            <div class="label" id="dropLabel">Kéo thả file <strong>.bin</strong> vào đây hoặc click để chọn</div>
-            <div class="filename" id="dropFilename" style="display:none"></div>
-        </div>
-        <input type="file" id="fileInput" accept=".bin">
-        <div id="fwInfo" style="display:none;margin-top:14px;">
+        <div class="card-title">📦 Firmware <span class="badge" id="fwBadge">Loading...</span></div>
+        <div id="fwInfo">
             <div class="info-grid">
-                <div class="info-item"><div class="label">Device ID (từ binary)</div><div class="value" id="infoDeviceId">—</div></div>
-                <div class="info-item"><div class="label">File Size</div><div class="value" id="infoSize">—</div></div>
+                <div class="info-item"><div class="label">File</div><div class="value" id="infoFile">—</div></div>
+                <div class="info-item"><div class="label">Size</div><div class="value" id="infoSize">—</div></div>
                 <div class="info-item"><div class="label">FW Version</div><div class="value" id="infoVersion">—</div></div>
                 <div class="info-item"><div class="label">Checksum</div><div class="value" id="infoChecksum">—</div></div>
             </div>
         </div>
+        <details style="margin-top:12px;">
+            <summary style="cursor:pointer;font-size:12px;color:var(--text2);">📁 Dùng file .bin khác (tùy chọn)</summary>
+            <div style="margin-top:10px;">
+                <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <div class="icon" id="dropIcon">📁</div>
+                    <div class="label" id="dropLabel">Kéo thả file <strong>.bin</strong> hoặc click để chọn</div>
+                </div>
+                <input type="file" id="fileInput" accept=".bin">
+            </div>
+        </details>
     </div>
 
-    <!-- Step 2: Device ID -->
+    <!-- Device ID -->
     <div class="card">
-        <div class="card-title">🏷️ 2. Device ID</div>
+        <div class="card-title">🏷️ Device ID</div>
         <div class="field">
-            <label>Nhập Device ID mới (hoặc giữ nguyên)</label>
-            <input type="text" id="deviceIdInput" placeholder="VD: A-NAVIS-1" maxlength="24" autocomplete="off">
+            <label>Nhập Device ID (để trống = tự lấy NM03-MAC)</label>
+            <input type="text" id="deviceIdInput" placeholder="Để trống → NM03-AABBCCDDEEFF" maxlength="23" autocomplete="off">
         </div>
         <div style="font-size:12px;color:var(--text2);">
-            Tối đa <span id="maxIdLen">24</span> ký tự. ID sẽ được ghi trực tiếp vào binary trước khi flash.
+            Tối đa 23 ký tự. Nếu để trống, tự đọc MAC address từ ESP32 → <strong>NM03-XXXXXXXXXXXX</strong>
         </div>
         <div id="idHistory" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
@@ -255,14 +259,14 @@ function handleFile(file) {
     const reader = new FileReader();
     reader.onload = () => {
         firmwareBuffer = new Uint8Array(reader.result);
-        log('success', `📦 Loaded: ${file.name} (${(file.size/1024).toFixed(1)} KB)`);
+        log('success', `📦 Custom: ${file.name} (${(file.size/1024).toFixed(1)} KB)`);
         
         // Update UI
-        dropZone.classList.add('has-file');
         $('dropIcon').textContent = '✅';
         $('dropLabel').textContent = file.name;
-        $('dropFilename').textContent = `${(file.size/1024).toFixed(1)} KB`;
-        $('dropFilename').style.display = 'block';
+        $('infoFile').textContent = file.name;
+        $('fwBadge').textContent = 'Custom';
+        $('fwBadge').className = 'badge badge-ok';
         
         // Analyze binary
         analyzeFirmware();
@@ -352,21 +356,16 @@ function analyzeFirmware() {
     const hashAppended = (firmwareBuffer[23] & 0x01) === 1;
     
     // Update UI
-    $('fwInfo').style.display = 'block';
-    $('infoDeviceId').textContent = deviceId || 'Not found';
     $('infoSize').textContent = `${(firmwareBuffer.length / 1024).toFixed(1)} KB`;
     $('infoVersion').textContent = version;
     $('infoChecksum').textContent = `Magic: 0x${magic.toString(16).toUpperCase()}, SHA256: ${hashAppended ? 'Yes' : 'No'}`;
     
-    // Set device ID input
-    const savedId = localStorage.getItem('last_device_id');
-    if (savedId) {
-        $('deviceIdInput').value = savedId;
-    } else if (deviceId && deviceId !== PLACEHOLDER) {
-        $('deviceIdInput').value = deviceId;
+    // Set device ID input (from history, don't overwrite if user typed)
+    if (!$('deviceIdInput').value) {
+        const savedId = localStorage.getItem('last_device_id');
+        if (savedId) $('deviceIdInput').value = savedId;
     }
     
-    $('maxIdLen').textContent = deviceId ? deviceId.length : '24';
     $('flashBtn').disabled = false;
     $('statusText').textContent = 'Sẵn sàng flash!';
     
@@ -467,9 +466,38 @@ async function loadStaticBin(url) {
 }
 
 window.startFlash = async function() {
-    const newId = $('deviceIdInput').value.trim();
-    if (!newId) { log('error', 'Nhập Device ID trước!'); return; }
-    if (!firmwareBuffer) { log('error', 'Upload firmware trước!'); return; }
+    if (!firmwareBuffer) { log('error', 'Firmware chưa load!'); return; }
+    
+    let newId = $('deviceIdInput').value.trim();
+    
+    // Nếu chưa có ID → connect trước để đọc MAC
+    if (!newId) {
+        log('info', '🔌 Kết nối ESP32 để đọc MAC address...');
+        try {
+            if (!transport) {
+                const port = await navigator.serial.requestPort();
+                transport = new Transport(port, true);
+            }
+            const loaderOptions = {
+                transport, baudrate: 460800, romBaudrate: 115200,
+                terminal: { clean(){}, writeLine(data){ log('info', data); }, write(data){} }
+            };
+            esploader = new ESPLoader(loaderOptions);
+            const chip = await esploader.main();
+            log('success', `✅ Connected: ${chip}`);
+            $('disconnectBtn').style.display = 'inline-flex';
+            
+            // Đọc MAC address
+            const mac = await esploader.readMac();
+            const macHex = mac.split(':').join('').toUpperCase();
+            newId = 'NM03-' + macHex;
+            $('deviceIdInput').value = newId;
+            log('success', `🏷️ MAC: ${mac} → Device ID: ${newId}`);
+        } catch (e) {
+            log('error', `❌ Không thể đọc MAC: ${e.message}`);
+            return;
+        }
+    }
     
     // Show confirmation dialog
     $('confirmDeviceId').textContent = newId;
@@ -633,8 +661,31 @@ function renderHistory() {
 }
 
 renderHistory();
+
+// ===== Auto-load firmware từ server =====
+async function autoLoadFirmware() {
+    log('info', '📥 Loading firmware mặc định...');
+    $('fwBadge').textContent = 'Loading...';
+    $('fwBadge').className = 'badge badge-warn';
+    try {
+        const resp = await fetch('firmware/DaiVietIoT.bin');
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        firmwareBuffer = new Uint8Array(await resp.arrayBuffer());
+        log('success', `📦 Loaded: DaiVietIoT.bin (${(firmwareBuffer.length/1024).toFixed(1)} KB)`);
+        $('infoFile').textContent = 'DaiVietIoT.bin';
+        $('fwBadge').textContent = 'Ready';
+        $('fwBadge').className = 'badge badge-ok';
+        analyzeFirmware();
+    } catch (e) {
+        log('error', `❌ Không load được firmware: ${e.message}`);
+        $('fwBadge').textContent = 'Error';
+        $('fwBadge').className = 'badge badge-err';
+    }
+}
+
+autoLoadFirmware();
 log('info', '🚀 Navis Firmware Flasher ready');
-log('info', '📋 Steps: Upload .bin → Nhập Device ID → Flash');
+log('info', '📋 Nhập Device ID (hoặc để trống = tự MAC) → Flash');
 </script>
 </body>
 </html>
