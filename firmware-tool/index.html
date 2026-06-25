@@ -116,6 +116,55 @@ input[type="file"] { display: none; }
 </style>
 </head>
 <body>
+
+<!-- Login Gate -->
+<div id="loginGate" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:36px;max-width:360px;width:90%;text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">🔒</div>
+        <h2 style="font-size:20px;font-weight:700;margin-bottom:4px;">Firmware Flasher</h2>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:24px;">Nhập tài khoản để tiếp tục</p>
+        <div style="text-align:left;margin-bottom:12px;">
+            <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Username</label>
+            <input type="text" id="loginUser" autocomplete="username" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:Inter,sans-serif;">
+        </div>
+        <div style="text-align:left;margin-bottom:20px;">
+            <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Password</label>
+            <input type="password" id="loginPass" autocomplete="current-password" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:Inter,sans-serif;"
+                onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <div id="loginError" style="color:var(--red);font-size:13px;margin-bottom:12px;display:none;">Sai tài khoản hoặc mật khẩu!</div>
+        <button onclick="doLogin()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;transition:background .2s;"
+            onmouseover="this.style.background='var(--accent2)'" onmouseout="this.style.background='var(--accent)'">Đăng nhập</button>
+    </div>
+</div>
+<script>
+// Hash: SHA-256 of "admin:13520918"
+const VALID_HASH = 'b02c1fdc983a3cf1be910284eb20d7f5790017b4cb36f7a62686ddfdf8d60643';
+async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+async function doLogin() {
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value;
+    const hash = await sha256(u + ':' + p);
+    if (hash === VALID_HASH) {
+        sessionStorage.setItem('fw_auth', '1');
+        document.getElementById('loginGate').style.display = 'none';
+        document.getElementById('appContent').style.display = 'block';
+    } else {
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('loginPass').value = '';
+        document.getElementById('loginPass').focus();
+    }
+}
+// Auto-login if session valid
+if (sessionStorage.getItem('fw_auth') === '1') {
+    document.getElementById('loginGate').style.display = 'none';
+}
+</script>
+
+<div id="appContent" style="display:none;">
 <div class="header">
     <h1>⚡ <span>Navis Firmware Flasher</span></h1>
     <p>Flash ESP32 firmware trực tiếp từ trình duyệt qua USB</p>
@@ -686,6 +735,14 @@ async function autoLoadFirmware() {
 autoLoadFirmware();
 log('info', '🚀 Navis Firmware Flasher ready');
 log('info', '📋 Nhập Device ID (hoặc để trống = tự MAC) → Flash');
+</script>
+</div><!-- /appContent -->
+
+<script>
+// Show appContent if already authed
+if (sessionStorage.getItem('fw_auth') === '1') {
+    document.getElementById('appContent').style.display = 'block';
+}
 </script>
 </body>
 </html>
