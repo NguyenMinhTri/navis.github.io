@@ -150,6 +150,7 @@ async function doLogin() {
     const hash = await sha256(u + ':' + p);
     if (hash === VALID_HASH) {
         sessionStorage.setItem('fw_auth', '1');
+        sessionStorage.setItem('fw_key', u + ':' + p); // for AES decrypt
         document.getElementById('loginGate').style.display = 'none';
         document.getElementById('appContent').style.display = 'block';
     } else {
@@ -711,22 +712,38 @@ function renderHistory() {
 
 renderHistory();
 
-// ===== Auto-load firmware từ server =====
+// ===== AES Decrypt =====
+async function decryptFirmware(encData) {
+    const keyStr = sessionStorage.getItem('fw_key');
+    if (!keyStr) throw new Error('Chưa đăng nhập!');
+    // Derive AES-256 key from SHA-256(password) — same as PowerShell encryption
+    const keyHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(keyStr));
+    const aesKey = await crypto.subtle.importKey('raw', keyHash, {name: 'AES-CBC'}, false, ['decrypt']);
+    // Format: [16 bytes IV][encrypted data]
+    const iv = encData.slice(0, 16);
+    const ciphertext = encData.slice(16);
+    const decrypted = await crypto.subtle.decrypt({name: 'AES-CBC', iv}, aesKey, ciphertext);
+    return new Uint8Array(decrypted);
+}
+
+// ===== Auto-load firmware từ server (encrypted) =====
 async function autoLoadFirmware() {
-    log('info', '📥 Loading firmware mặc định...');
+    log('info', '📥 Loading firmware (encrypted)...');
     $('fwBadge').textContent = 'Loading...';
     $('fwBadge').className = 'badge badge-warn';
     try {
-        const resp = await fetch('firmware/DaiVietIoT.bin');
+        const resp = await fetch('firmware/DaiVietIoT.bin.enc');
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        firmwareBuffer = new Uint8Array(await resp.arrayBuffer());
-        log('success', `📦 Loaded: DaiVietIoT.bin (${(firmwareBuffer.length/1024).toFixed(1)} KB)`);
+        const encData = new Uint8Array(await resp.arrayBuffer());
+        log('info', `🔐 Downloaded ${(encData.length/1024).toFixed(1)} KB encrypted, decrypting...`);
+        firmwareBuffer = await decryptFirmware(encData);
+        log('success', `📦 Decrypted: DaiVietIoT.bin (${(firmwareBuffer.length/1024).toFixed(1)} KB)`);
         $('infoFile').textContent = 'DaiVietIoT.bin';
         $('fwBadge').textContent = 'Ready';
         $('fwBadge').className = 'badge badge-ok';
         analyzeFirmware();
     } catch (e) {
-        log('error', `❌ Không load được firmware: ${e.message}`);
+        log('error', `❌ Decrypt/load failed: ${e.message}`);
         $('fwBadge').textContent = 'Error';
         $('fwBadge').className = 'badge badge-err';
     }
