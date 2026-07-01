@@ -286,22 +286,45 @@ if (sessionStorage.getItem('fw_auth') === '1') {
         <div class="card-title">☁️ OTA Update (Cập nhật từ xa)</div>
         <div class="field">
             <label>Device ID cần gửi OTA</label>
-            <input type="text" id="otaDeviceId" placeholder="Nhập Device ID thiết bị cần cập nhật OTA" maxlength="40" autocomplete="off">
+            <input type="text" id="otaDeviceId" placeholder="VD: A-NAVIS-1" maxlength="40" autocomplete="off">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field">
+                <label>FW Version (string)</label>
+                <input type="text" id="otaVersion" placeholder="VD: 20.46 V4NEW2" autocomplete="off">
+            </div>
+            <div class="field">
+                <label>FW Version NUM (int)</label>
+                <input type="number" id="otaVersionNum" placeholder="VD: 31" min="0" autocomplete="off">
+            </div>
         </div>
         <div class="field">
-            <label>Firmware URL (để trống = tự tra từ Firebase)</label>
+            <label>Chọn file firmware (.bin)</label>
+            <input type="file" id="otaBinFile" accept=".bin" style="font-size:13px;">
+        </div>
+        <div class="field">
+            <label>Hoặc Firmware URL (nếu đã upload)</label>
             <input type="text" id="otaFwUrl" placeholder="http://storage.googleapis.com/..." style="font-size:12px;" autocomplete="off">
         </div>
         <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">
-            Gửi lệnh OTA tới thiết bị qua Cloud API. Firmware phải đã upload lên Firebase (qua local tool).
+            Upload .bin lên Firebase Storage qua API V3 bảo mật. Hoặc nhập URL nếu đã upload trước đó.
         </div>
-        <div class="btn-row">
-            <button class="btn btn-accent" onclick="startOTA()">
+        <div class="btn-row" style="flex-wrap:wrap;gap:8px;">
+            <button class="btn btn-green" onclick="otaUploadJSON()">
+                ☁️ Upload + JSON
+            </button>
+            <button class="btn btn-accent" onclick="otaSendOTA()">
                 📡 Send OTA
             </button>
             <button class="btn btn-sm" onclick="getDeviceState()" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);">
                 🔍 Kiểm tra thiết bị
             </button>
+        </div>
+        <div id="otaProgress" style="display:none;margin-top:12px;">
+            <div style="background:var(--bg);border-radius:6px;overflow:hidden;height:6px;">
+                <div id="otaProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s;"></div>
+            </div>
+            <div id="otaProgressText" style="font-size:11px;color:var(--text2);margin-top:4px;text-align:center;"></div>
         </div>
         <div id="otaResult" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
     </div>
@@ -379,6 +402,25 @@ if (!("serial" in navigator)) {
 }
 
 // ===== Port Memory helper =====
+const USB_CHIP_NAMES = {
+    '0x10C4_0xEA60': 'CP2102/CP2104 (Silicon Labs)',
+    '0x1A86_0x7523': 'CH340/CH341',
+    '0x0403_0x6001': 'FTDI FT232R',
+    '0x0403_0x6010': 'FTDI FT2232',
+    '0x0403_0x6015': 'FTDI FT230X',
+    '0x1A86_0x55D4': 'CH9102',
+    '0x303A_0x1001': 'ESP32-S2 (native USB)',
+    '0x303A_0x0002': 'ESP32-S3 (native USB)',
+};
+
+function getPortLabel(vid, pid) {
+    const vidHex = '0x' + parseInt(vid).toString(16).toUpperCase().padStart(4, '0');
+    const pidHex = '0x' + parseInt(pid).toString(16).toUpperCase().padStart(4, '0');
+    const key = vidHex + '_' + pidHex;
+    const chipName = USB_CHIP_NAMES[key] || 'USB Serial';
+    return `${chipName} (${vidHex}:${pidHex})`;
+}
+
 async function selectPort() {
     const ports = await navigator.serial.getPorts();
     const savedVid = localStorage.getItem('last_com_vid');
@@ -390,8 +432,13 @@ async function selectPort() {
             return String(info.usbVendorId) === savedVid && String(info.usbProductId) === savedPid;
         });
         if (matched) {
-            log('info', `🔌 Tự động kết nối cổng COM đã lưu (VID: 0x${parseInt(savedVid).toString(16).toUpperCase()}, PID: 0x${parseInt(savedPid).toString(16).toUpperCase()})`);
+            const label = getPortLabel(savedVid, savedPid);
+            log('info', `🔌 Tự động kết nối: ${label}`);
             return matched;
+        } else {
+            // Port was saved but not found - device unplugged
+            log('warn', `⚠️ Cổng COM đã lưu (${getPortLabel(savedVid, savedPid)}) không còn tồn tại! Thiết bị có thể đã rút cáp USB.`);
+            log('info', '🔌 Vui lòng chọn cổng COM mới...');
         }
     }
     
@@ -405,11 +452,26 @@ async function selectPort() {
     return port;
 }
 
-function updateSavedPortUI() {
+async function updateSavedPortUI() {
     const savedVid = localStorage.getItem('last_com_vid');
     const savedPid = localStorage.getItem('last_com_pid');
     if (savedVid && savedPid) {
-        $('savedPortName').textContent = `VID 0x${parseInt(savedVid).toString(16).toUpperCase()}, PID 0x${parseInt(savedPid).toString(16).toUpperCase()}`;
+        const label = getPortLabel(savedVid, savedPid);
+        
+        // Check if port still connected
+        const ports = await navigator.serial.getPorts();
+        const exists = ports.some(p => {
+            const info = p.getInfo();
+            return String(info.usbVendorId) === savedVid && String(info.usbProductId) === savedPid;
+        });
+        
+        if (exists) {
+            $('savedPortName').textContent = label;
+            $('savedPortName').style.color = 'var(--accent2)';
+        } else {
+            $('savedPortName').textContent = label + ' ⚠️ (đã rút)';
+            $('savedPortName').style.color = 'var(--orange)';
+        }
         $('savedPortInfo').style.display = 'flex';
     } else {
         $('savedPortInfo').style.display = 'none';
@@ -1164,12 +1226,12 @@ window.addManualQR = addManualQR;
 // Initialize flashed list UI
 renderFlashedList();
 
-// ===== OTA Update =====
-const OTA_API_ENDPOINT = 'https://asia-east2-weatherstationiotdaiviet.cloudfunctions.net/HttpPostRequest/api/send-command';
-const OTA_STATE_ENDPOINT = 'https://asia-east2-weatherstationiotdaiviet.cloudfunctions.net/HttpPostRequest/api/get-state-iot';
-const FIRESTORE_PROJECT = 'weatherstationiotdaiviet';
+// ===== OTA Update (via HttpPostRequestV3) =====
+const API_V3_BASE = 'https://us-central1-weatherstationiotdaiviet.cloudfunctions.net/HttpPostRequestV3';
+const FW_AUTH_KEY = 'admin:13520918';
 
 let pendingOtaUrl = '';
+let pendingOtaAction = '';
 
 // Auto-fill OTA Device ID from the main Device ID input
 $('deviceIdInput').addEventListener('input', () => {
@@ -1178,94 +1240,155 @@ $('deviceIdInput').addEventListener('input', () => {
     }
 });
 
-async function lookupFirmwareUrl(deviceId) {
-    // Try Firestore REST API to get firmware URL
-    const url = `https://firestore.googleapis.com/v1/projects/${FIRESTORE_PROJECT}/databases/(default)/documents/ota_firmware/${deviceId}`;
-    try {
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const doc = await resp.json();
-        const fields = doc.fields;
-        if (fields && fields.firmware_url_http && fields.firmware_url_http.stringValue) {
-            return fields.firmware_url_http.stringValue;
-        }
-        throw new Error('Không tìm thấy firmware_url_http trong Firestore');
-    } catch (e) {
-        throw new Error(`Không tra được URL từ Firebase: ${e.message}. Vui lòng nhập URL thủ công.`);
+function otaShowProgress(show, percent, text) {
+    const el = $('otaProgress');
+    el.style.display = show ? 'block' : 'none';
+    if (show) {
+        $('otaProgressBar').style.width = percent + '%';
+        $('otaProgressText').textContent = text || '';
     }
 }
 
-window.startOTA = async function() {
+function otaShowResult(type, html) {
+    const r = $('otaResult');
+    r.style.display = 'block';
+    if (type === 'loading') { r.style.background = 'rgba(99,102,241,.1)'; r.style.color = 'var(--accent2)'; }
+    else if (type === 'success') { r.style.background = 'rgba(34,197,94,.1)'; r.style.color = 'var(--green)'; }
+    else if (type === 'error') { r.style.background = 'rgba(239,68,68,.1)'; r.style.color = 'var(--red)'; }
+    r.innerHTML = html;
+}
+
+async function otaDoUpload(endpoint) {
     const deviceId = $('otaDeviceId').value.trim();
-    if (!deviceId) {
-        log('error', '❌ Vui lòng nhập Device ID cần gửi OTA!');
+    if (!deviceId) { log('error', '❌ Vui lòng nhập Device ID!'); return; }
+
+    const fileInput = $('otaBinFile');
+    const existingUrl = $('otaFwUrl').value.trim();
+
+    // If no file selected but URL exists, use Send OTA with URL only
+    if (!fileInput.files.length && existingUrl && endpoint === '/api/ota-send-web') {
+        // Direct send command (no upload needed)
+        $('otaConfirmDeviceId').textContent = deviceId;
+        $('otaConfirmUrl').textContent = 'URL: ' + existingUrl;
+        $('otaConfirmDialog').style.display = 'flex';
+        pendingOtaUrl = existingUrl;
+        pendingOtaAction = 'send-only';
         return;
     }
-    
-    let fwUrl = $('otaFwUrl').value.trim();
-    
-    if (!fwUrl) {
-        // Try to look up from Firestore
-        log('info', `🔍 Đang tra firmware URL cho ${deviceId} từ Firebase...`);
-        try {
-            fwUrl = await lookupFirmwareUrl(deviceId);
-            $('otaFwUrl').value = fwUrl;
-            log('success', `✅ Tìm thấy: ${fwUrl}`);
-        } catch (e) {
-            log('error', `❌ ${e.message}`);
-            return;
-        }
+
+    if (!fileInput.files.length) {
+        log('error', '❌ Vui lòng chọn file .bin firmware!');
+        return;
     }
-    
+
+    const file = fileInput.files[0];
+    const version = $('otaVersion').value.trim();
+    const versionNum = $('otaVersionNum').value.trim();
+    const actionName = endpoint.includes('upload') ? 'Upload + JSON' : 'Send OTA';
+
     // Show confirm dialog
     $('otaConfirmDeviceId').textContent = deviceId;
-    $('otaConfirmUrl').textContent = `URL: ${fwUrl}`;
+    $('otaConfirmUrl').textContent = `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)` +
+        (version ? ` | FW: ${version}` : '') +
+        (versionNum ? ` | NUM: ${versionNum}` : '');
     $('otaConfirmDialog').style.display = 'flex';
-    pendingOtaUrl = fwUrl;
-};
+    pendingOtaUrl = '';
+    pendingOtaAction = endpoint;
+}
+
+window.otaUploadJSON = function() { otaDoUpload('/api/ota-upload-web'); };
+window.otaSendOTA = function() { otaDoUpload('/api/ota-send-web'); };
 
 window.confirmOTA = async function() {
     $('otaConfirmDialog').style.display = 'none';
     const deviceId = $('otaDeviceId').value.trim();
-    const fwUrl = pendingOtaUrl;
-    
-    log('info', `📡 Đang gửi OTA tới ${deviceId}...`);
-    log('info', `🔗 URL: ${fwUrl}`);
-    
-    const resultDiv = $('otaResult');
-    resultDiv.style.display = 'block';
-    resultDiv.style.background = 'rgba(99,102,241,.1)';
-    resultDiv.style.color = 'var(--accent2)';
-    resultDiv.innerHTML = `⏳ Đang gửi lệnh OTA tới <strong>${deviceId}</strong>...`;
-    
+
+    // Case 1: Send OTA command only (no file upload, use existing URL)
+    if (pendingOtaAction === 'send-only') {
+        log('info', `📡 Đang gửi OTA tới ${deviceId}...`);
+        otaShowResult('loading', `⏳ Đang gửi lệnh OTA tới <strong>${deviceId}</strong>...`);
+        try {
+            const resp = await fetch(API_V3_BASE + '/api/send-command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    deviceId: deviceId,
+                    data: '{"ota_url_update": ' + pendingOtaUrl
+                })
+            });
+            const respText = await resp.text();
+            if (resp.ok) {
+                log('success', `✅ OTA command sent to ${deviceId}!`);
+                otaShowResult('success', `✅ Đã gửi OTA tới <strong>${deviceId}</strong>!<br><span style="font-size:11px;color:var(--text2);">Thiết bị sẽ tự download firmware.</span>`);
+            } else { throw new Error(`HTTP ${resp.status}: ${respText}`); }
+        } catch (e) {
+            log('error', `❌ OTA failed: ${e.message}`);
+            otaShowResult('error', `❌ Gửi OTA thất bại: <strong>${e.message}</strong>`);
+        }
+        return;
+    }
+
+    // Case 2: Upload file .bin via Cloud Functions API V3 (JSON + base64)
+    const fileInput = $('otaBinFile');
+    if (!fileInput.files.length) { log('error', '❌ Không có file .bin!'); return; }
+    const file = fileInput.files[0];
+    const version = $('otaVersion').value.trim();
+    const versionNum = $('otaVersionNum').value.trim();
+    const actionName = pendingOtaAction.includes('upload') ? '☁️ Upload + JSON' : '📡 Send OTA';
+
+    log('info', `${actionName}: ${deviceId} (${file.name}, ${(file.size / 1024).toFixed(1)} KB)`);
+    otaShowProgress(true, 10, 'Đang đọc file...');
+    otaShowResult('loading', `⏳ ${actionName} cho <strong>${deviceId}</strong>...`);
+
     try {
-        const payload = {
-            deviceId: deviceId,
-            data: '{"ota_url_update": ' + fwUrl
-        };
-        
-        const resp = await fetch(OTA_API_ENDPOINT, {
+        // Read file → base64
+        otaShowProgress(true, 20, 'Đang encode base64...');
+        const arrayBuf = await file.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuf);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        const fileBase64 = btoa(binary);
+
+        otaShowProgress(true, 40, 'Đang upload lên Firebase Storage...');
+
+        const payload = { deviceId, fileBase64, fileName: file.name };
+        if (version) payload.version = version;
+        if (versionNum) payload.versionNum = versionNum;
+
+        const resp = await fetch(API_V3_BASE + pendingOtaAction, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-FW-Key': FW_AUTH_KEY },
             body: JSON.stringify(payload)
         });
-        
-        const respText = await resp.text();
-        
-        if (resp.ok) {
-            log('success', `✅ OTA command sent to ${deviceId}!`);
-            log('info', `📄 Response: ${respText}`);
-            resultDiv.style.background = 'rgba(34,197,94,.1)';
-            resultDiv.style.color = 'var(--green)';
-            resultDiv.innerHTML = `✅ Đã gửi lệnh OTA thành công tới <strong>${deviceId}</strong>!<br><span style="font-size:11px;color:var(--text2);">Thiết bị sẽ tự download và cập nhật firmware.</span>`;
+
+        otaShowProgress(true, 80, 'Đang xử lý...');
+        const data = await resp.json();
+
+        if (data.success) {
+            otaShowProgress(true, 100, 'Hoàn tất!');
+            setTimeout(() => otaShowProgress(false), 2000);
+
+            log('success', `✅ ${actionName} thành công: ${deviceId}`);
+            log('info', `📦 File: ${data.filename}`);
+            log('info', `🔗 URL: ${data.firmware_url}`);
+            if (data.version_num) log('info', `🔢 Version NUM: ${data.version_num}`);
+
+            $('otaFwUrl').value = data.firmware_url;
+
+            let resultHtml = `✅ <strong>${actionName}</strong> thành công!<br>`;
+            resultHtml += `<span style="font-size:12px;color:var(--text);">• Device: ${data.device_id}</span><br>`;
+            resultHtml += `<span style="font-size:12px;color:var(--text);">• File: ${data.filename}</span><br>`;
+            if (data.version_num) resultHtml += `<span style="font-size:12px;color:var(--text);">• Version NUM: ${data.version_num}</span><br>`;
+            resultHtml += `<span style="font-size:11px;word-break:break-all;color:var(--text2);">${data.firmware_url}</span>`;
+
+            otaShowResult('success', resultHtml);
         } else {
-            throw new Error(`HTTP ${resp.status}: ${respText}`);
+            throw new Error(data.error || 'Unknown error');
         }
     } catch (e) {
-        log('error', `❌ OTA failed: ${e.message}`);
-        resultDiv.style.background = 'rgba(239,68,68,.1)';
-        resultDiv.style.color = 'var(--red)';
-        resultDiv.innerHTML = `❌ Gửi OTA thất bại: <strong>${e.message}</strong>`;
+        otaShowProgress(false);
+        log('error', `❌ ${actionName} thất bại: ${e.message}`);
+        otaShowResult('error', `❌ ${actionName} thất bại: <strong>${e.message}</strong>`);
     }
 };
 
@@ -1275,48 +1398,37 @@ window.cancelOTA = function() {
 
 window.getDeviceState = async function() {
     const deviceId = $('otaDeviceId').value.trim();
-    if (!deviceId) {
-        log('error', '❌ Vui lòng nhập Device ID để kiểm tra!');
-        return;
-    }
-    
+    if (!deviceId) { log('error', '❌ Vui lòng nhập Device ID!'); return; }
+
     log('info', `🔍 Đang kiểm tra trạng thái ${deviceId}...`);
-    const resultDiv = $('otaResult');
-    resultDiv.style.display = 'block';
-    resultDiv.style.background = 'rgba(99,102,241,.1)';
-    resultDiv.style.color = 'var(--accent2)';
-    resultDiv.innerHTML = `⏳ Đang kiểm tra <strong>${deviceId}</strong>...`;
-    
+    otaShowResult('loading', `⏳ Đang kiểm tra <strong>${deviceId}</strong>...`);
+
     try {
-        const url = `${OTA_STATE_ENDPOINT}?deviceId=${encodeURIComponent(deviceId)}`;
-        const resp = await fetch(url);
+        const resp = await fetch(`${API_V3_BASE}/api/get-state-iot?deviceId=${encodeURIComponent(deviceId)}`);
         const data = await resp.json();
-        
+
         log('success', `✅ Trạng thái ${deviceId}:`);
-        
-        // Extract useful info
+
         const stateInfo = [];
-        if (data.Fw2 !== undefined) stateInfo.push(`FW Version NUM: ${data.Fw2}`);
-        if (data.wifi !== undefined) stateInfo.push(`WiFi: ${data.wifi}`);
-        if (data.ip !== undefined) stateInfo.push(`IP: ${data.ip}`);
-        if (data.rssi !== undefined) stateInfo.push(`RSSI: ${data.rssi}`);
-        if (data.Fw !== undefined) stateInfo.push(`FW: ${data.Fw}`);
-        if (data.updatedAt !== undefined) stateInfo.push(`Updated: ${data.updatedAt}`);
-        
+        if (data.fw) stateInfo.push(`FW: ${data.fw}`);
+        if (data.heap) stateInfo.push(`Heap: ${data.heap}`);
+        if (data.reset !== null && data.reset !== undefined) stateInfo.push(`Reset: ${data.reset}`);
+        if (data.online !== undefined) stateInfo.push(`Online: ${data.online ? '🟢 Có' : '🔴 Không'}`);
+        if (data.time) stateInfo.push(`Last seen: ${new Date(data.time).toLocaleString('vi-VN')}`);
+        if (data.raw) stateInfo.push(`Raw: ${data.raw}`);
+
         if (stateInfo.length > 0) {
             stateInfo.forEach(s => log('info', `   📋 ${s}`));
-            resultDiv.style.background = 'rgba(34,197,94,.1)';
-            resultDiv.style.color = 'var(--green)';
-            resultDiv.innerHTML = `✅ <strong>${deviceId}</strong> đang online!<br>` + stateInfo.map(s => `<span style="font-size:12px;color:var(--text);">• ${s}</span>`).join('<br>');
+            const isOnline = data.online;
+            otaShowResult(isOnline ? 'success' : 'loading',
+                `${isOnline ? '🟢' : '🔴'} <strong>${deviceId}</strong> ${isOnline ? 'ONLINE' : 'OFFLINE'}<br>` +
+                stateInfo.map(s => `<span style="font-size:12px;color:var(--text);">• ${s}</span>`).join('<br>'));
         } else {
-            log('info', `📄 Raw: ${JSON.stringify(data)}`);
-            resultDiv.innerHTML = `📋 <strong>${deviceId}</strong>: ${JSON.stringify(data).substring(0, 200)}`;
+            otaShowResult('loading', `📋 <strong>${deviceId}</strong>: ${JSON.stringify(data).substring(0, 300)}`);
         }
     } catch (e) {
         log('error', `❌ Kiểm tra thất bại: ${e.message}`);
-        resultDiv.style.background = 'rgba(239,68,68,.1)';
-        resultDiv.style.color = 'var(--red)';
-        resultDiv.innerHTML = `❌ Không kiểm tra được: <strong>${e.message}</strong>`;
+        otaShowResult('error', `❌ Không kiểm tra được: <strong>${e.message}</strong>`);
     }
 };
 
