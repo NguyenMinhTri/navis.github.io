@@ -284,9 +284,10 @@ if (sessionStorage.getItem('fw_auth') === '1') {
     <!-- OTA Update -->
     <div class="card">
         <div class="card-title">☁️ OTA Update (Cập nhật từ xa)</div>
-        <div class="field">
-            <label>Device ID cần gửi OTA</label>
-            <input type="text" id="otaDeviceId" placeholder="VD: A-NAVIS-1" maxlength="40" autocomplete="off">
+        <div style="padding:8px 12px;background:var(--bg);border-radius:8px;margin-bottom:10px;font-size:13px;display:flex;align-items:center;gap:8px;">
+            <span style="color:var(--text2);">Device ID:</span>
+            <strong id="otaDeviceIdDisplay" style="color:var(--accent2);">—</strong>
+            <span style="font-size:11px;color:var(--text2);margin-left:auto;">← dùng chung ô Device ID ở trên</span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <div class="field">
@@ -1233,12 +1234,12 @@ const FW_AUTH_KEY = 'admin:13520918';
 let pendingOtaUrl = '';
 let pendingOtaAction = '';
 
-// Auto-fill OTA Device ID from the main Device ID input
+// Sync OTA Device ID display from main Device ID input
 $('deviceIdInput').addEventListener('input', () => {
-    if (!$('otaDeviceId').value) {
-        $('otaDeviceId').value = $('deviceIdInput').value.trim();
-    }
+    $('otaDeviceIdDisplay').textContent = $('deviceIdInput').value.trim() || '—';
 });
+// Init on load
+$('otaDeviceIdDisplay').textContent = $('deviceIdInput').value.trim() || '—';
 
 function otaShowProgress(show, percent, text) {
     const el = $('otaProgress');
@@ -1259,7 +1260,7 @@ function otaShowResult(type, html) {
 }
 
 async function otaDoUpload(endpoint) {
-    const deviceId = $('otaDeviceId').value.trim();
+    const deviceId = $('deviceIdInput').value.trim();
     if (!deviceId) { log('error', '❌ Vui lòng nhập Device ID!'); return; }
 
     const fileInput = $('otaBinFile');
@@ -1301,7 +1302,7 @@ window.otaSendOTA = function() { otaDoUpload('/api/ota-send-web'); };
 
 window.confirmOTA = async function() {
     $('otaConfirmDialog').style.display = 'none';
-    const deviceId = $('otaDeviceId').value.trim();
+    const deviceId = $('deviceIdInput').value.trim();
 
     // Case 1: Send OTA command only (no file upload, use existing URL)
     if (pendingOtaAction === 'send-only') {
@@ -1397,7 +1398,7 @@ window.cancelOTA = function() {
 };
 
 window.getDeviceState = async function() {
-    const deviceId = $('otaDeviceId').value.trim();
+    const deviceId = $('deviceIdInput').value.trim();
     if (!deviceId) { log('error', '❌ Vui lòng nhập Device ID!'); return; }
 
     log('info', `🔍 Đang kiểm tra trạng thái ${deviceId}...`);
