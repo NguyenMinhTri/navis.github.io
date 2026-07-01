@@ -281,10 +281,49 @@ if (sessionStorage.getItem('fw_auth') === '1') {
         </div>
     </div>
 
+    <!-- OTA Update -->
+    <div class="card">
+        <div class="card-title">☁️ OTA Update (Cập nhật từ xa)</div>
+        <div class="field">
+            <label>Device ID cần gửi OTA</label>
+            <input type="text" id="otaDeviceId" placeholder="Nhập Device ID thiết bị cần cập nhật OTA" maxlength="40" autocomplete="off">
+        </div>
+        <div class="field">
+            <label>Firmware URL (để trống = tự tra từ Firebase)</label>
+            <input type="text" id="otaFwUrl" placeholder="http://storage.googleapis.com/..." style="font-size:12px;" autocomplete="off">
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">
+            Gửi lệnh OTA tới thiết bị qua Cloud API. Firmware phải đã upload lên Firebase (qua local tool).
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-accent" onclick="startOTA()">
+                📡 Send OTA
+            </button>
+            <button class="btn btn-sm" onclick="getDeviceState()" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);">
+                🔍 Kiểm tra thiết bị
+            </button>
+        </div>
+        <div id="otaResult" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
+    </div>
+
     <!-- Console -->
     <div class="card">
         <div class="card-title">📋 Console <button class="btn btn-sm" style="margin-left:auto;background:var(--bg);color:var(--text2);border:1px solid var(--border);" onclick="clearConsole()">Clear</button></div>
         <div class="console" id="console"></div>
+    </div>
+</div>
+
+<!-- OTA Confirm Dialog (hidden) -->
+<div class="confirm-overlay" id="otaConfirmDialog" style="display:none;">
+    <div class="confirm-box">
+        <h3>📡 Xác nhận OTA Update</h3>
+        <div class="confirm-info">Gửi lệnh cập nhật firmware OTA tới thiết bị:</div>
+        <div class="confirm-id" id="otaConfirmDeviceId"></div>
+        <div class="confirm-info" id="otaConfirmUrl" style="word-break:break-all;font-size:11px;color:var(--text2);"></div>
+        <div class="btn-row" style="justify-content:center;margin-top:20px;">
+            <button class="btn btn-accent" onclick="confirmOTA()">📡 Gửi OTA</button>
+            <button class="btn" style="background:var(--bg);color:var(--text2);border:1px solid var(--border);" onclick="cancelOTA()">Hủy</button>
+        </div>
     </div>
 </div>
 
@@ -1124,6 +1163,162 @@ window.addManualQR = addManualQR;
 
 // Initialize flashed list UI
 renderFlashedList();
+
+// ===== OTA Update =====
+const OTA_API_ENDPOINT = 'https://asia-east2-weatherstationiotdaiviet.cloudfunctions.net/HttpPostRequest/api/send-command';
+const OTA_STATE_ENDPOINT = 'https://asia-east2-weatherstationiotdaiviet.cloudfunctions.net/HttpPostRequest/api/get-state-iot';
+const FIRESTORE_PROJECT = 'weatherstationiotdaiviet';
+
+let pendingOtaUrl = '';
+
+// Auto-fill OTA Device ID from the main Device ID input
+$('deviceIdInput').addEventListener('input', () => {
+    if (!$('otaDeviceId').value) {
+        $('otaDeviceId').value = $('deviceIdInput').value.trim();
+    }
+});
+
+async function lookupFirmwareUrl(deviceId) {
+    // Try Firestore REST API to get firmware URL
+    const url = `https://firestore.googleapis.com/v1/projects/${FIRESTORE_PROJECT}/databases/(default)/documents/ota_firmware/${deviceId}`;
+    try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const doc = await resp.json();
+        const fields = doc.fields;
+        if (fields && fields.firmware_url_http && fields.firmware_url_http.stringValue) {
+            return fields.firmware_url_http.stringValue;
+        }
+        throw new Error('Không tìm thấy firmware_url_http trong Firestore');
+    } catch (e) {
+        throw new Error(`Không tra được URL từ Firebase: ${e.message}. Vui lòng nhập URL thủ công.`);
+    }
+}
+
+window.startOTA = async function() {
+    const deviceId = $('otaDeviceId').value.trim();
+    if (!deviceId) {
+        log('error', '❌ Vui lòng nhập Device ID cần gửi OTA!');
+        return;
+    }
+    
+    let fwUrl = $('otaFwUrl').value.trim();
+    
+    if (!fwUrl) {
+        // Try to look up from Firestore
+        log('info', `🔍 Đang tra firmware URL cho ${deviceId} từ Firebase...`);
+        try {
+            fwUrl = await lookupFirmwareUrl(deviceId);
+            $('otaFwUrl').value = fwUrl;
+            log('success', `✅ Tìm thấy: ${fwUrl}`);
+        } catch (e) {
+            log('error', `❌ ${e.message}`);
+            return;
+        }
+    }
+    
+    // Show confirm dialog
+    $('otaConfirmDeviceId').textContent = deviceId;
+    $('otaConfirmUrl').textContent = `URL: ${fwUrl}`;
+    $('otaConfirmDialog').style.display = 'flex';
+    pendingOtaUrl = fwUrl;
+};
+
+window.confirmOTA = async function() {
+    $('otaConfirmDialog').style.display = 'none';
+    const deviceId = $('otaDeviceId').value.trim();
+    const fwUrl = pendingOtaUrl;
+    
+    log('info', `📡 Đang gửi OTA tới ${deviceId}...`);
+    log('info', `🔗 URL: ${fwUrl}`);
+    
+    const resultDiv = $('otaResult');
+    resultDiv.style.display = 'block';
+    resultDiv.style.background = 'rgba(99,102,241,.1)';
+    resultDiv.style.color = 'var(--accent2)';
+    resultDiv.innerHTML = `⏳ Đang gửi lệnh OTA tới <strong>${deviceId}</strong>...`;
+    
+    try {
+        const payload = {
+            deviceId: deviceId,
+            data: '{"ota_url_update": ' + fwUrl
+        };
+        
+        const resp = await fetch(OTA_API_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const respText = await resp.text();
+        
+        if (resp.ok) {
+            log('success', `✅ OTA command sent to ${deviceId}!`);
+            log('info', `📄 Response: ${respText}`);
+            resultDiv.style.background = 'rgba(34,197,94,.1)';
+            resultDiv.style.color = 'var(--green)';
+            resultDiv.innerHTML = `✅ Đã gửi lệnh OTA thành công tới <strong>${deviceId}</strong>!<br><span style="font-size:11px;color:var(--text2);">Thiết bị sẽ tự download và cập nhật firmware.</span>`;
+        } else {
+            throw new Error(`HTTP ${resp.status}: ${respText}`);
+        }
+    } catch (e) {
+        log('error', `❌ OTA failed: ${e.message}`);
+        resultDiv.style.background = 'rgba(239,68,68,.1)';
+        resultDiv.style.color = 'var(--red)';
+        resultDiv.innerHTML = `❌ Gửi OTA thất bại: <strong>${e.message}</strong>`;
+    }
+};
+
+window.cancelOTA = function() {
+    $('otaConfirmDialog').style.display = 'none';
+};
+
+window.getDeviceState = async function() {
+    const deviceId = $('otaDeviceId').value.trim();
+    if (!deviceId) {
+        log('error', '❌ Vui lòng nhập Device ID để kiểm tra!');
+        return;
+    }
+    
+    log('info', `🔍 Đang kiểm tra trạng thái ${deviceId}...`);
+    const resultDiv = $('otaResult');
+    resultDiv.style.display = 'block';
+    resultDiv.style.background = 'rgba(99,102,241,.1)';
+    resultDiv.style.color = 'var(--accent2)';
+    resultDiv.innerHTML = `⏳ Đang kiểm tra <strong>${deviceId}</strong>...`;
+    
+    try {
+        const url = `${OTA_STATE_ENDPOINT}?deviceId=${encodeURIComponent(deviceId)}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        
+        log('success', `✅ Trạng thái ${deviceId}:`);
+        
+        // Extract useful info
+        const stateInfo = [];
+        if (data.Fw2 !== undefined) stateInfo.push(`FW Version NUM: ${data.Fw2}`);
+        if (data.wifi !== undefined) stateInfo.push(`WiFi: ${data.wifi}`);
+        if (data.ip !== undefined) stateInfo.push(`IP: ${data.ip}`);
+        if (data.rssi !== undefined) stateInfo.push(`RSSI: ${data.rssi}`);
+        if (data.Fw !== undefined) stateInfo.push(`FW: ${data.Fw}`);
+        if (data.updatedAt !== undefined) stateInfo.push(`Updated: ${data.updatedAt}`);
+        
+        if (stateInfo.length > 0) {
+            stateInfo.forEach(s => log('info', `   📋 ${s}`));
+            resultDiv.style.background = 'rgba(34,197,94,.1)';
+            resultDiv.style.color = 'var(--green)';
+            resultDiv.innerHTML = `✅ <strong>${deviceId}</strong> đang online!<br>` + stateInfo.map(s => `<span style="font-size:12px;color:var(--text);">• ${s}</span>`).join('<br>');
+        } else {
+            log('info', `📄 Raw: ${JSON.stringify(data)}`);
+            resultDiv.innerHTML = `📋 <strong>${deviceId}</strong>: ${JSON.stringify(data).substring(0, 200)}`;
+        }
+    } catch (e) {
+        log('error', `❌ Kiểm tra thất bại: ${e.message}`);
+        resultDiv.style.background = 'rgba(239,68,68,.1)';
+        resultDiv.style.color = 'var(--red)';
+        resultDiv.innerHTML = `❌ Không kiểm tra được: <strong>${e.message}</strong>`;
+    }
+};
 
 autoLoadFirmware();
 log('info', '🚀 Navis Firmware Flasher ready');
