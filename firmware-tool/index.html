@@ -629,14 +629,25 @@ function analyzeFirmware() {
     
     originalDeviceId = deviceId;
     
-    // Find FW version
+    // Find FW version string (e.g. "20.52 V4NEW2")
     let version = '?';
     const vPos = findStringInBinary(firmwareBuffer, 'V4NEW');
     if (vPos >= 0) {
-        // Scan backward to find start of version string
         let start = vPos;
         while (start > 0 && firmwareBuffer[start - 1] >= 0x20 && firmwareBuffer[start - 1] < 0x7f) start--;
         version = extractString(firmwareBuffer, start, 20);
+    }
+    
+    // Find FW_VERSION_NUM from marker "FWNUM:XX" in binary
+    let versionNum = 0;
+    const numPos = findStringInBinary(firmwareBuffer, 'FWNUM:');
+    if (numPos >= 0) {
+        const numStr = extractString(firmwareBuffer, numPos + 6, 10).replace(/[^0-9]/g, '');
+        versionNum = parseInt(numStr) || 0;
+        log('info', `🔢 FW_VERSION_NUM: ${versionNum} (found at 0x${numPos.toString(16)})`);
+    } else {
+        versionNum = 40; // default
+        log('info', `🔢 FW_VERSION_NUM: ${versionNum} (mặc định)`);
     }
     
     // ESP32 image header check
@@ -645,8 +656,12 @@ function analyzeFirmware() {
     
     // Update UI
     $('infoSize').textContent = `${(firmwareBuffer.length / 1024).toFixed(1)} KB`;
-    $('infoVersion').textContent = version;
+    $('infoVersion').textContent = version + (versionNum ? ` (NUM: ${versionNum})` : '');
     $('infoChecksum').textContent = `Magic: 0x${magic.toString(16).toUpperCase()}, SHA256: ${hashAppended ? 'Yes' : 'No'}`;
+    
+    // Auto-fill OTA version fields
+    if (version !== '?') $('otaVersion').value = version;
+    if (versionNum > 0) $('otaVersionNum').value = versionNum;
     
     // Set device ID input (from history, don't overwrite if user typed)
     if (!$('deviceIdInput').value) {
@@ -1456,14 +1471,16 @@ window.confirmOTA = async function() {
             log('success', `✅ ${actionName} thành công: ${deviceId}`);
             log('info', `📦 File: ${data.filename}`);
             log('info', `🔗 URL: ${data.firmware_url}`);
-            if (data.version_num) log('info', `🔢 Version NUM: ${data.version_num}`);
+            log('info', `🔢 Version NUM: ${data.version_num}`);
+            if (data.json_url) log('info', `📋 JSON: ${data.json_url}`);
 
             $('otaFwUrl').value = data.firmware_url;
 
             let resultHtml = `✅ <strong>${actionName}</strong> thành công!<br>`;
             resultHtml += `<span style="font-size:12px;color:var(--text);">• Device: ${data.device_id}</span><br>`;
             resultHtml += `<span style="font-size:12px;color:var(--text);">• File: ${data.filename}</span><br>`;
-            if (data.version_num) resultHtml += `<span style="font-size:12px;color:var(--text);">• Version NUM: ${data.version_num}</span><br>`;
+            resultHtml += `<span style="font-size:12px;color:var(--text);">• Version NUM: ${data.version_num}</span><br>`;
+            if (data.json_url) resultHtml += `<span style="font-size:11px;word-break:break-all;color:var(--accent2);">📋 JSON: ${data.json_url}</span><br>`;
             resultHtml += `<span style="font-size:11px;word-break:break-all;color:var(--text2);">${data.firmware_url}</span>`;
 
             otaShowResult('success', resultHtml);
