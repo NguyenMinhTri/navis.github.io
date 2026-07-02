@@ -282,6 +282,20 @@ if (sessionStorage.getItem('fw_auth') === '1') {
         </div>
     </div>
 
+    <!-- Serial Monitor (standalone) -->
+    <div class="card">
+        <div class="card-title">📟 Serial Monitor</div>
+        <div class="btn-row">
+            <button class="btn btn-accent" id="standaloneMonitorBtn" onclick="toggleMonitor()">
+                📟 Start Monitor
+            </button>
+            <button class="btn btn-red btn-sm" id="standaloneDisconnectBtn" onclick="disconnect()" style="display:none;">
+                ⏏ Ngắt kết nối
+            </button>
+        </div>
+        <div id="monitorStatus" style="font-size:12px;color:var(--text2);margin-top:8px;">Chọn cổng COM để bắt đầu đọc Serial log (115200 baud).</div>
+    </div>
+
     <!-- OTA Update -->
     <div class="card">
         <div class="card-title">☁️ OTA Update (Cập nhật từ xa)</div>
@@ -933,11 +947,7 @@ async function startMonitor(existingPort) {
             await monitorPort.open({ baudRate: 115200 });
         }
         monitoring = true;
-        $('monitorBtn').textContent = '⏹ Stop Monitor';
-        $('monitorBtn').style.display = 'inline-flex';
-        $('monitorBtn').className = 'btn btn-red';
-        $('disconnectBtn').style.display = 'inline-flex';
-        $('statusText').textContent = '📟 Monitoring...';
+        updateMonitorUI(true);
         log('success', '📟 Serial Monitor started (115200 baud)');
         
         const decoder = new TextDecoder();
@@ -977,8 +987,7 @@ async function startMonitor(existingPort) {
         log('error', `❌ Monitor failed: ${e.message}`);
     }
     monitoring = false;
-    $('monitorBtn').textContent = '📟 Start Monitor';
-    $('monitorBtn').className = 'btn btn-accent';
+    updateMonitorUI(false);
 }
 
 async function stopMonitor() {
@@ -987,9 +996,36 @@ async function stopMonitor() {
     try { if (monitorPort && monitorPort.readable) { await monitorPort.close(); } } catch(e){}
     monitorPort = null;
     monitorReader = null;
-    $('monitorBtn').textContent = '📟 Start Monitor';
-    $('monitorBtn').className = 'btn btn-accent';
+    updateMonitorUI(false);
     log('info', '⏹ Monitor stopped');
+}
+
+function updateMonitorUI(isRunning) {
+    // Update both monitor buttons (Flash card + standalone card)
+    const btns = [$('monitorBtn'), $('standaloneMonitorBtn')];
+    btns.forEach(btn => {
+        if (!btn) return;
+        if (isRunning) {
+            btn.textContent = '⏹ Stop Monitor';
+            btn.className = 'btn btn-red';
+            btn.style.display = 'inline-flex';
+        } else {
+            btn.textContent = '📟 Start Monitor';
+            btn.className = 'btn btn-accent';
+        }
+    });
+    // Disconnect buttons
+    const disconnBtns = [$('disconnectBtn'), $('standaloneDisconnectBtn')];
+    disconnBtns.forEach(btn => {
+        if (btn) btn.style.display = isRunning ? 'inline-flex' : 'none';
+    });
+    // Status texts
+    if (isRunning) {
+        $('statusText').textContent = '📟 Monitoring...';
+        if ($('monitorStatus')) $('monitorStatus').textContent = '📟 Đang đọc Serial... (115200 baud)';
+    } else {
+        if ($('monitorStatus')) $('monitorStatus').textContent = 'Chọn cổng COM để bắt đầu đọc Serial log (115200 baud).';
+    }
 }
 
 window.toggleMonitor = async function() {
