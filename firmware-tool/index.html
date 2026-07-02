@@ -429,12 +429,13 @@ const USB_CHIP_NAMES = {
     '0x303A_0x0002': 'ESP32-S3 (native USB)',
 };
 
-function getPortLabel(vid, pid) {
+function getPortLabel(vid, pid, comNum) {
     const vidHex = '0x' + parseInt(vid).toString(16).toUpperCase().padStart(4, '0');
     const pidHex = '0x' + parseInt(pid).toString(16).toUpperCase().padStart(4, '0');
     const key = vidHex + '_' + pidHex;
     const chipName = USB_CHIP_NAMES[key] || 'USB Serial';
-    return `${chipName} (${vidHex}:${pidHex})`;
+    const comStr = comNum ? `COM${comNum}` : '';
+    return comStr ? `${comStr} — ${chipName} (${vidHex}:${pidHex})` : `${chipName} (${vidHex}:${pidHex})`;
 }
 
 async function selectPort() {
@@ -443,17 +444,18 @@ async function selectPort() {
     const savedPid = localStorage.getItem('last_com_pid');
     
     if (savedVid && savedPid && ports.length > 0) {
-        const matched = ports.find(p => {
+        const matchIdx = ports.findIndex(p => {
             const info = p.getInfo();
             return String(info.usbVendorId) === savedVid && String(info.usbProductId) === savedPid;
         });
-        if (matched) {
-            const label = getPortLabel(savedVid, savedPid);
+        if (matchIdx >= 0) {
+            const comNum = matchIdx + 1;
+            localStorage.setItem('last_com_num', String(comNum));
+            const label = getPortLabel(savedVid, savedPid, comNum);
             log('info', `🔌 Tự động kết nối: ${label}`);
-            return matched;
+            return ports[matchIdx];
         } else {
-            // Port was saved but not found - device unplugged
-            log('warn', `⚠️ Cổng COM đã lưu (${getPortLabel(savedVid, savedPid)}) không còn tồn tại! Thiết bị có thể đã rút cáp USB.`);
+            log('warn', `⚠️ Cổng COM đã lưu (${getPortLabel(savedVid, savedPid, localStorage.getItem('last_com_num'))}) không còn tồn tại! Thiết bị có thể đã rút cáp USB.`);
             log('info', '🔌 Vui lòng chọn cổng COM mới...');
         }
     }
@@ -463,6 +465,11 @@ async function selectPort() {
     if (info.usbVendorId && info.usbProductId) {
         localStorage.setItem('last_com_vid', String(info.usbVendorId));
         localStorage.setItem('last_com_pid', String(info.usbProductId));
+        // Find COM number from port index
+        const allPorts = await navigator.serial.getPorts();
+        const idx = allPorts.indexOf(port);
+        const comNum = idx >= 0 ? idx + 1 : allPorts.length;
+        localStorage.setItem('last_com_num', String(comNum));
         updateSavedPortUI();
     }
     return port;
@@ -471,8 +478,9 @@ async function selectPort() {
 async function updateSavedPortUI() {
     const savedVid = localStorage.getItem('last_com_vid');
     const savedPid = localStorage.getItem('last_com_pid');
+    const savedComNum = localStorage.getItem('last_com_num');
     if (savedVid && savedPid) {
-        const label = getPortLabel(savedVid, savedPid);
+        const label = getPortLabel(savedVid, savedPid, savedComNum);
         
         // Check if port still connected
         const ports = await navigator.serial.getPorts();
@@ -497,6 +505,7 @@ async function updateSavedPortUI() {
 function clearSavedPort() {
     localStorage.removeItem('last_com_vid');
     localStorage.removeItem('last_com_pid');
+    localStorage.removeItem('last_com_num');
     updateSavedPortUI();
     log('info', '🧹 Đã xóa ghi nhớ cổng COM');
 }
