@@ -1399,14 +1399,32 @@ window.confirmOTA = async function() {
     }
 
     log('info', `${actionName}: ${deviceId} (${fileName}, ${(bytes.length / 1024).toFixed(1)} KB)`);
-    otaShowProgress(true, 10, 'Đang đọc file...');
+    otaShowProgress(true, 5, 'Đang chuẩn bị firmware...');
     otaShowResult('loading', `⏳ ${actionName} cho <strong>${deviceId}</strong>...`);
 
     try {
-        // Encode → base64
-        otaShowProgress(true, 20, 'Đang encode base64...');
+        // Patch Device ID in firmware binary (same as Flash)
+        const patchedBuffer = new Uint8Array(bytes); // clone to avoid modifying original
+        if (originalDeviceId && originalDeviceId !== deviceId) {
+            otaShowProgress(true, 10, `Đang patch Device ID: ${originalDeviceId} → ${deviceId}...`);
+            log('info', `✏️ Patching Device ID: "${originalDeviceId}" → "${deviceId}"`);
+            if (!patchDeviceId(patchedBuffer, originalDeviceId, deviceId)) {
+                otaShowProgress(false);
+                otaShowResult('error', `❌ Không patch được Device ID trong firmware!`);
+                return;
+            }
+            recalcChecksum(patchedBuffer, originalDeviceId, deviceId);
+            log('success', `✅ Đã patch Device ID thành công`);
+        } else if (!originalDeviceId) {
+            log('warn', '⚠️ Không tìm thấy Device ID gốc trong firmware — upload nguyên bản');
+        } else {
+            log('info', '🏷️ Device ID giống gốc, không cần patch');
+        }
+
+        // Encode patched buffer → base64
+        otaShowProgress(true, 25, 'Đang encode base64...');
         let binary = '';
-        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        for (let i = 0; i < patchedBuffer.length; i++) binary += String.fromCharCode(patchedBuffer[i]);
         const fileBase64 = btoa(binary);
 
         otaShowProgress(true, 40, 'Đang upload lên Firebase Storage...');
