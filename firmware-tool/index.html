@@ -680,7 +680,7 @@ function patchDeviceId(buffer, oldId, newId) {
     return true;
 }
 
-function recalcChecksum(buffer, oldId, newId) {
+async function recalcChecksum(buffer, oldId, newId) {
     // ESP32 binary checksum: XOR of all segment data bytes, initial 0xEF
     // Position: end of file - 33 (if SHA-256 appended) or end of file - 1
     // Delta approach: new_checksum = old_checksum ^ XOR(old_bytes ^ new_bytes)
@@ -709,11 +709,10 @@ function recalcChecksum(buffer, oldId, newId) {
     if (hashAppended) {
         const shaStart = checksumPos + 1;
         const dataToHash = buffer.slice(0, shaStart);
-        crypto.subtle.digest('SHA-256', dataToHash).then(hash => {
-            const hb = new Uint8Array(hash);
-            for (let i = 0; i < 32; i++) buffer[shaStart + i] = hb[i];
-            log('info', `🔧 SHA-256 recalculated`);
-        });
+        const hash = await crypto.subtle.digest('SHA-256', dataToHash);
+        const hb = new Uint8Array(hash);
+        for (let i = 0; i < 32; i++) buffer[shaStart + i] = hb[i];
+        log('info', `🔧 SHA-256 recalculated`);
     }
 }
 
@@ -784,8 +783,7 @@ window.confirmFlash = async function() {
     if (originalDeviceId && originalDeviceId !== newId) {
         log('info', `✏️ Patching Device ID: "${originalDeviceId}" → "${newId}"`);
         if (!patchDeviceId(patchedBuffer, originalDeviceId, newId)) return;
-        recalcChecksum(patchedBuffer, originalDeviceId, newId);
-        await new Promise(r => setTimeout(r, 100)); // wait for SHA-256
+        await recalcChecksum(patchedBuffer, originalDeviceId, newId);
     } else if (!originalDeviceId) {
         log('warn', '⚠️ Device ID not found in binary — flashing without patching');
     } else {
@@ -1413,7 +1411,7 @@ window.confirmOTA = async function() {
                 otaShowResult('error', `❌ Không patch được Device ID trong firmware!`);
                 return;
             }
-            recalcChecksum(patchedBuffer, originalDeviceId, deviceId);
+            await recalcChecksum(patchedBuffer, originalDeviceId, deviceId);
             log('success', `✅ Đã patch Device ID thành công`);
         } else if (!originalDeviceId) {
             log('warn', '⚠️ Không tìm thấy Device ID gốc trong firmware — upload nguyên bản');
