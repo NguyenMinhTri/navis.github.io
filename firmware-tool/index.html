@@ -182,6 +182,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
                 <div class="info-item"><div class="label">Size</div><div class="value" id="infoSize">—</div></div>
                 <div class="info-item"><div class="label">FW Version</div><div class="value" id="infoVersion">—</div></div>
                 <div class="info-item"><div class="label">Checksum</div><div class="value" id="infoChecksum">—</div></div>
+                <div class="info-item"><div class="label">Ngày tạo file</div><div class="value" id="infoDate">—</div></div>
             </div>
         </div>
         <details style="margin-top:12px;">
@@ -201,7 +202,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
         <div class="card-title">🏷️ Device ID</div>
         <div class="field">
             <label>Nhập Device ID (để trống = tự lấy NM03-MAC)</label>
-            <input type="text" id="deviceIdInput" placeholder="Để trống → NM03-AABBCCDDEEFF" maxlength="23" autocomplete="off">
+            <input type="text" id="deviceIdInput" placeholder="Để trống → NM03-AABBCCDDEEFF" maxlength="23" autocomplete="off" onblur="this.value=this.value.trim()">
         </div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text);">
@@ -528,6 +529,7 @@ function handleFile(file) {
         $('dropIcon').textContent = '✅';
         $('dropLabel').textContent = file.name;
         $('infoFile').textContent = file.name;
+        $('infoDate').textContent = new Date(file.lastModified).toLocaleString('vi-VN');
         $('fwBadge').textContent = 'Custom';
         $('fwBadge').className = 'badge badge-ok';
         
@@ -1068,6 +1070,8 @@ async function autoLoadFirmware() {
         firmwareBuffer = await decryptFirmware(encData);
         log('success', `📦 Decrypted: DaiVietIoT.bin (${(firmwareBuffer.length/1024).toFixed(1)} KB)`);
         $('infoFile').textContent = 'DaiVietIoT.bin';
+        const lastMod = resp.headers.get('Last-Modified');
+        $('infoDate').textContent = lastMod ? new Date(lastMod).toLocaleString('vi-VN') : new Date().toLocaleString('vi-VN');
         $('fwBadge').textContent = 'Ready';
         $('fwBadge').className = 'badge badge-ok';
         analyzeFirmware();
@@ -1265,10 +1269,14 @@ async function otaDoUpload(endpoint) {
 
     const fileInput = $('otaBinFile');
     const existingUrl = $('otaFwUrl').value.trim();
+    const hasFile = fileInput.files.length > 0;
+    const hasFirmwareBuffer = !!firmwareBuffer;
+    const version = $('otaVersion').value.trim();
+    const versionNum = $('otaVersionNum').value.trim();
+    const actionName = endpoint.includes('upload') ? 'Upload + JSON' : 'Send OTA';
 
     // If no file selected but URL exists, use Send OTA with URL only
-    if (!fileInput.files.length && existingUrl && endpoint === '/api/ota-send-web') {
-        // Direct send command (no upload needed)
+    if (!hasFile && !hasFirmwareBuffer && existingUrl && endpoint === '/api/ota-send-web') {
         $('otaConfirmDeviceId').textContent = deviceId;
         $('otaConfirmUrl').textContent = 'URL: ' + existingUrl;
         $('otaConfirmDialog').style.display = 'flex';
@@ -1277,19 +1285,23 @@ async function otaDoUpload(endpoint) {
         return;
     }
 
-    if (!fileInput.files.length) {
-        log('error', '❌ Vui lòng chọn file .bin firmware!');
+    // Determine file source: user-selected .bin file > already-loaded firmwareBuffer
+    let fileName, fileSize;
+    if (hasFile) {
+        fileName = fileInput.files[0].name;
+        fileSize = fileInput.files[0].size;
+    } else if (hasFirmwareBuffer) {
+        fileName = $('infoFile').textContent || 'DaiVietIoT.bin';
+        fileSize = firmwareBuffer.length;
+        log('info', `📦 Dùng firmware đã load: ${fileName} (${(fileSize / 1024).toFixed(1)} KB)`);
+    } else {
+        log('error', '❌ Chưa có firmware! Chọn file .bin hoặc đợi firmware tự load.');
         return;
     }
 
-    const file = fileInput.files[0];
-    const version = $('otaVersion').value.trim();
-    const versionNum = $('otaVersionNum').value.trim();
-    const actionName = endpoint.includes('upload') ? 'Upload + JSON' : 'Send OTA';
-
     // Show confirm dialog
     $('otaConfirmDeviceId').textContent = deviceId;
-    $('otaConfirmUrl').textContent = `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)` +
+    $('otaConfirmUrl').textContent = `File: ${fileName} (${(fileSize / 1024).toFixed(1)} KB)` +
         (version ? ` | FW: ${version}` : '') +
         (versionNum ? ` | NUM: ${versionNum}` : '');
     $('otaConfirmDialog').style.display = 'flex';
@@ -1331,28 +1343,39 @@ window.confirmOTA = async function() {
 
     // Case 2: Upload file .bin via Cloud Functions API V3 (JSON + base64)
     const fileInput = $('otaBinFile');
-    if (!fileInput.files.length) { log('error', '❌ Không có file .bin!'); return; }
-    const file = fileInput.files[0];
+    const hasFile = fileInput.files.length > 0;
     const version = $('otaVersion').value.trim();
     const versionNum = $('otaVersionNum').value.trim();
     const actionName = pendingOtaAction.includes('upload') ? '☁️ Upload + JSON' : '📡 Send OTA';
 
-    log('info', `${actionName}: ${deviceId} (${file.name}, ${(file.size / 1024).toFixed(1)} KB)`);
+    // Determine data source: user-selected file OR firmwareBuffer
+    let bytes, fileName;
+    if (hasFile) {
+        const file = fileInput.files[0];
+        fileName = file.name;
+        bytes = new Uint8Array(await file.arrayBuffer());
+    } else if (firmwareBuffer) {
+        fileName = $('infoFile').textContent || 'DaiVietIoT.bin';
+        bytes = firmwareBuffer;
+    } else {
+        log('error', '❌ Không có firmware!');
+        return;
+    }
+
+    log('info', `${actionName}: ${deviceId} (${fileName}, ${(bytes.length / 1024).toFixed(1)} KB)`);
     otaShowProgress(true, 10, 'Đang đọc file...');
     otaShowResult('loading', `⏳ ${actionName} cho <strong>${deviceId}</strong>...`);
 
     try {
-        // Read file → base64
+        // Encode → base64
         otaShowProgress(true, 20, 'Đang encode base64...');
-        const arrayBuf = await file.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuf);
         let binary = '';
         for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
         const fileBase64 = btoa(binary);
 
         otaShowProgress(true, 40, 'Đang upload lên Firebase Storage...');
 
-        const payload = { deviceId, fileBase64, fileName: file.name };
+        const payload = { deviceId, fileBase64, fileName };
         if (version) payload.version = version;
         if (versionNum) payload.versionNum = versionNum;
 
