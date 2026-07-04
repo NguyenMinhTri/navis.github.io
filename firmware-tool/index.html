@@ -217,7 +217,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
     </div>
 
     <!-- Flashed Devices & QR List -->
-    <div class="card">
+    <div class="card" id="flashedHistoryCard">
         <div class="card-title">📱 Lịch sử thiết bị đã Flash & In QR</div>
         <div id="flashedList" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
         <div class="btn-row">
@@ -249,7 +249,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
     </div>
 
     <!-- Flash & Monitor -->
-    <div class="card">
+    <div class="card" id="flashMonitorCard">
         <div class="card-title">⚡ Flash & Monitor</div>
         <div class="btn-row">
             <button class="btn btn-green" id="flashBtn" onclick="startFlash()" disabled>
@@ -283,7 +283,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
     </div>
 
     <!-- Serial Monitor (standalone) -->
-    <div class="card">
+    <div class="card" id="serialMonitorCard">
         <div class="card-title">📟 Serial Monitor</div>
         <div class="btn-row">
             <button class="btn btn-accent" id="standaloneMonitorBtn" onclick="toggleMonitor()">
@@ -439,6 +439,9 @@ function getPortLabel(vid, pid, comNum) {
 }
 
 async function selectPort() {
+    if (!('serial' in navigator)) {
+        throw new Error('Web Serial API không được hỗ trợ trên trình duyệt này!');
+    }
     const ports = await navigator.serial.getPorts();
     const savedVid = localStorage.getItem('last_com_vid');
     const savedPid = localStorage.getItem('last_com_pid');
@@ -476,6 +479,10 @@ async function selectPort() {
 }
 
 async function updateSavedPortUI() {
+    if (!('serial' in navigator)) {
+        $('savedPortInfo').style.display = 'none';
+        return;
+    }
     const savedVid = localStorage.getItem('last_com_vid');
     const savedPid = localStorage.getItem('last_com_pid');
     const savedComNum = localStorage.getItem('last_com_num');
@@ -1534,8 +1541,22 @@ window.getDeviceState = async function() {
     }
 };
 
+// Check if mobile or Web Serial is not supported
+const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || !('serial' in navigator);
+if (isMobileDevice) {
+    // Hide flasher, serial monitor & QR print history cards on mobile/no-serial
+    const cardsToHide = ['flashedHistoryCard', 'flashMonitorCard', 'serialMonitorCard'];
+    cardsToHide.forEach(id => {
+        const el = $(id);
+        if (el) el.style.display = 'none';
+    });
+    // Update subtitle to be relevant for mobile
+    const subTitle = document.querySelector('.header p');
+    if (subTitle) subTitle.textContent = 'Cập nhật firmware từ xa (OTA) trực tiếp từ điện thoại';
+}
+
 autoLoadFirmware();
-log('info', '🚀 Navis Firmware Flasher ready');
+log('info', isMobileDevice ? '📱 Mobile Mode: OTA Update ready' : '🚀 Desktop Mode: Flasher & OTA ready');
 log('info', '📋 Nhập Device ID (hoặc để trống = tự MAC) → Flash');
 </script>
 </div><!-- /appContent -->
