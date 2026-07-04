@@ -411,11 +411,9 @@ const FLASH_OFFSETS = {
     app: 0x10000,
 };
 
-// ===== Browser check =====
-if (!("serial" in navigator)) {
-    $('mainContent').style.display = 'none';
-    $('unsupported').style.display = 'block';
-}
+// ===== Browser check (Safe for mobile OTA) =====
+// Không block mainContent trên mobile để người dùng có thể sử dụng OTA Update.
+// Việc ẩn các card Serial/Flash không tương thích đã được xử lý ở cuối file.
 
 // ===== Port Memory helper =====
 const USB_CHIP_NAMES = {
