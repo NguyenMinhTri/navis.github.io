@@ -168,7 +168,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
 
 <div id="appContent" style="display:none;">
 <div class="header">
-    <h1>⚡ <span>Navis Firmware Flasher</span> <span style="font-size: 11px; font-weight: normal; color: var(--text2); background: var(--bg3); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle; display: inline-block;">Web v2.7 (04/07/2026)</span></h1>
+    <h1>⚡ <span>Navis Firmware Flasher</span> <span style="font-size: 11px; font-weight: normal; color: var(--text2); background: var(--bg3); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle; display: inline-block;">Web v2.8 (06/07/2026)</span></h1>
     <p>Flash ESP32 firmware trực tiếp từ trình duyệt qua USB</p>
 </div>
 
@@ -1437,7 +1437,9 @@ window.confirmOTA = async function() {
             log('info', `✏️ Patching Device ID: "${originalDeviceId}" → "${deviceId}"`);
             if (!patchDeviceId(patchedBuffer, originalDeviceId, deviceId)) {
                 otaShowProgress(false);
-                otaShowResult('error', `❌ Không patch được Device ID trong firmware!`);
+                const errMsg = `❌ Không patch được Device ID! ID mới "${deviceId}" (${deviceId.length} ký tự) dài hơn ID gốc trong file "${originalDeviceId}" (${originalDeviceId.length} ký tự).`;
+                log('error', errMsg);
+                otaShowResult('error', errMsg);
                 return;
             }
             await recalcChecksum(patchedBuffer, originalDeviceId, deviceId);
