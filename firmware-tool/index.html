@@ -168,7 +168,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
 
 <div id="appContent" style="display:none;">
 <div class="header">
-    <h1>⚡ <span>Navis Firmware Flasher</span> <small style="font-size: 11px; font-weight: normal; color: var(--text2); background: var(--bg3); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle; display: inline-block;">Web v3.4 (06/07/2026)</small></h1>
+    <h1>⚡ <span>Navis Firmware Flasher</span> <small style="font-size: 11px; font-weight: normal; color: var(--text2); background: var(--bg3); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle; display: inline-block;">Web v3.5 (06/07/2026)</small></h1>
     <p>Flash ESP32 firmware trực tiếp từ trình duyệt qua USB</p>
 </div>
 
@@ -1463,12 +1463,13 @@ window.confirmOTA = async function() {
 
         otaShowProgress(true, 40, 'Đang upload lên Firebase Storage...');
 
+        const isSendAction = pendingOtaAction === '/api/ota-send-web';
+        const targetAction = isSendAction ? '/api/ota-upload-web' : pendingOtaAction;
+
         const payload = { deviceId, fileBase64, fileName };
         if (version) payload.version = version;
         if (versionNum) payload.versionNum = versionNum;
-
-        const isSendAction = pendingOtaAction === '/api/ota-send-web';
-        const targetAction = isSendAction ? '/api/ota-upload-web' : pendingOtaAction;
+        if (isSendAction) payload.skipJson = true;
 
         const resp = await fetch(API_V3_BASE + targetAction, {
             method: 'POST',
