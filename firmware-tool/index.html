@@ -168,7 +168,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
 
 <div id="appContent" style="display:none;">
 <div class="header">
-    <h1>⚡ <span>Navis Firmware Flasher</span> <span style="font-size: 11px; font-weight: normal; color: var(--text2); background: var(--bg3); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle; display: inline-block;">Web v2.9 (06/07/2026)</span></h1>
+    <h1>⚡ <span>Navis Firmware Flasher</span> <span style="font-size: 11px; font-weight: normal; color: var(--text2); background: var(--bg3); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle; display: inline-block;">Web v3.0 (06/07/2026)</span></h1>
     <p>Flash ESP32 firmware trực tiếp từ trình duyệt qua USB</p>
 </div>
 
@@ -360,7 +360,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
         <div class="confirm-id" id="otaConfirmDeviceId"></div>
         <div class="confirm-info" id="otaConfirmUrl" style="word-break:break-all;font-size:11px;color:var(--text2);"></div>
         <div class="btn-row" style="justify-content:center;margin-top:20px;">
-            <button class="btn btn-accent" onclick="confirmOTA()">📡 Gửi OTA</button>
+            <button class="btn btn-accent" onclick="confirmOTA()" id="otaConfirmBtn">📡 Gửi OTA</button>
             <button class="btn" style="background:var(--bg);color:var(--text2);border:1px solid var(--border);" onclick="cancelOTA()">Hủy</button>
         </div>
     </div>
@@ -1342,6 +1342,7 @@ async function otaDoUpload(endpoint) {
     if (!hasFile && !hasFirmwareBuffer && existingUrl && endpoint === '/api/ota-send-web') {
         $('otaConfirmDeviceId').textContent = deviceId;
         $('otaConfirmUrl').textContent = 'URL: ' + existingUrl;
+        $('otaConfirmBtn').textContent = '🚀 Xác nhận gửi OTA ngay';
         $('otaConfirmDialog').style.display = 'flex';
         pendingOtaUrl = existingUrl;
         pendingOtaAction = 'send-only';
@@ -1370,6 +1371,7 @@ async function otaDoUpload(endpoint) {
     $('otaConfirmUrl').textContent = `File: ${fileName} (${(fileSize / 1024).toFixed(1)} KB)` +
         (version ? ` | FW: ${version}` : '') +
         (versionNum ? ` | NUM: ${versionNum}` : '');
+    $('otaConfirmBtn').textContent = endpoint.includes('upload') ? '☁️ Bắt đầu upload và lưu JSON' : '📡 Bắt đầu upload firmware';
     $('otaConfirmDialog').style.display = 'flex';
     pendingOtaUrl = '';
     pendingOtaAction = endpoint;
@@ -1465,7 +1467,10 @@ window.confirmOTA = async function() {
         if (version) payload.version = version;
         if (versionNum) payload.versionNum = versionNum;
 
-        const resp = await fetch(API_V3_BASE + pendingOtaAction, {
+        const isSendAction = pendingOtaAction === '/api/ota-send-web';
+        const targetAction = isSendAction ? '/api/ota-upload-web' : pendingOtaAction;
+
+        const resp = await fetch(API_V3_BASE + targetAction, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-FW-Key': FW_AUTH_KEY },
             body: JSON.stringify(payload)
@@ -1486,14 +1491,28 @@ window.confirmOTA = async function() {
 
             $('otaFwUrl').value = data.firmware_url;
 
-            let resultHtml = `✅ <strong>${actionName}</strong> thành công!<br>`;
-            resultHtml += `<span style="font-size:12px;color:var(--text);">• Device: ${data.device_id}</span><br>`;
-            resultHtml += `<span style="font-size:12px;color:var(--text);">• File: ${data.filename}</span><br>`;
-            resultHtml += `<span style="font-size:12px;color:var(--text);">• Version NUM: ${data.version_num}</span><br>`;
-            if (data.json_url) resultHtml += `<span style="font-size:11px;word-break:break-all;color:var(--accent2);">📋 JSON: ${data.json_url}</span><br>`;
-            resultHtml += `<span style="font-size:11px;word-break:break-all;color:var(--text2);">${data.firmware_url}</span>`;
-
-            otaShowResult('success', resultHtml);
+            if (isSendAction) {
+                // If it was a send OTA action, now show the final confirmation dialog with the real URL
+                pendingOtaUrl = data.firmware_url;
+                pendingOtaAction = 'send-only';
+                
+                $('otaConfirmDeviceId').textContent = deviceId;
+                $('otaConfirmUrl').textContent = 'Xác nhận URL file bin vừa upload: ' + data.firmware_url;
+                $('otaConfirmBtn').textContent = '🚀 Xác nhận gửi OTA ngay';
+                $('otaConfirmDialog').style.display = 'flex';
+                
+                log('info', '📋 Vui lòng xác nhận URL file bin vừa upload để gửi OTA.');
+                otaShowResult('success', `✅ Upload thành công. Vui lòng bấm xác nhận URL trên Popup để gửi OTA tới <strong>${deviceId}</strong>.`);
+            } else {
+                // Just upload & JSON
+                let resultHtml = `✅ <strong>${actionName}</strong> thành công!<br>`;
+                resultHtml += `<span style="font-size:12px;color:var(--text);">• Device: ${data.device_id}</span><br>`;
+                resultHtml += `<span style="font-size:12px;color:var(--text);">• File: ${data.filename}</span><br>`;
+                resultHtml += `<span style="font-size:12px;color:var(--text);">• Version NUM: ${data.version_num}</span><br>`;
+                if (data.json_url) resultHtml += `<span style="font-size:11px;word-break:break-all;color:var(--accent2);">📋 JSON: ${data.json_url}</span><br>`;
+                resultHtml += `<span style="font-size:11px;word-break:break-all;color:var(--text2);">${data.firmware_url}</span>`;
+                otaShowResult('success', resultHtml);
+            }
         } else {
             throw new Error(data.error || 'Unknown error');
         }
