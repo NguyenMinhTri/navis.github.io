@@ -214,6 +214,13 @@ if (sessionStorage.getItem('fw_auth') === '1') {
             Tối đa 23 ký tự. Nếu để trống, tự đọc MAC address từ ESP32 → <strong>NM03-XXXXXXXXXXXX</strong>
         </div>
         <div id="idHistory" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+        <!-- QR Preview realtime -->
+        <div id="qrPreview" style="display:none;margin-top:14px;text-align:center;padding:14px;background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.2);border-radius:8px;">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">📱 Mã QR thiết bị:</div>
+            <div id="qrPreviewCode" style="display:inline-block;padding:8px;background:#fff;border-radius:6px;image-rendering:pixelated;"></div>
+            <div style="font-size:14px;font-weight:700;color:var(--accent2);margin-top:6px;font-family:monospace;" id="qrPreviewLabel"></div>
+            <button class="btn" id="qrDownloadBtn" onclick="downloadQR()" style="margin-top:8px;padding:6px 14px;font-size:12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">📥 Tải ảnh QR</button>
+        </div>
     </div>
 
     <!-- Flashed Devices & QR List -->
@@ -274,12 +281,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
             <span>💡 Không nhận cổng COM?</span>
             <a href="DRIVER-CAP.zip" download style="color:var(--accent2);text-decoration:none;font-weight:600;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">📥 Tải Driver USB-Serial (DRIVER-CAP.zip)</a>
         </div>
-        <!-- QR Code của thiết bị vừa flash thành công -->
-        <div id="flashSuccessQR" style="display:none;margin-top:16px;text-align:center;padding:16px;background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2);border-radius:8px;">
-            <div style="font-size:13px;color:var(--green);font-weight:600;margin-bottom:8px;">✅ Flash thành công! Mã QR thiết bị:</div>
-            <div id="successQRCode" style="display:inline-block;padding:8px;background:#fff;border-radius:6px;image-rendering:pixelated;"></div>
-            <div style="font-size:14px;font-weight:700;color:var(--accent2);margin-top:8px;font-family:monospace;" id="successQRLabel"></div>
-        </div>
+        <!-- QR block removed - now using realtime QR preview in Device ID card -->
     </div>
 
     <!-- Serial Monitor (standalone) -->
@@ -753,8 +755,7 @@ async function loadStaticBin(url) {
 }
 
 window.startFlash = async function() {
-    if (!firmwareBuffer) { log('error', 'Firmware chưa load!'); return; }
-    $('flashSuccessQR').style.display = 'none';
+    if (!firmwareBuffer) { log('error', 'Firmware chưa load!'); return; }\r\n    
     
     // Stop monitor first if running
     if (monitoring) {
@@ -894,17 +895,8 @@ window.confirmFlash = async function() {
         log('success', `✅ Flash hoàn tất! Device ID: ${newId}`);
         $('statusText').textContent = `✅ Flash thành công! Device ID: ${newId}`;
         
-        // Hiển thị QR Code của thiết bị vừa flash thành công
-        try {
-            const qr = qrcode(0, 'M');
-            qr.addData(`add#${newId}#master`);
-            qr.make();
-            $('successQRCode').innerHTML = qr.createImgTag(4, 0);
-            $('successQRLabel').textContent = newId;
-            $('flashSuccessQR').style.display = 'block';
-        } catch(qre) {
-            log('error', `Không thể tạo mã QR: ${qre.message}`);
-        }
+        // QR đã hiện sẵn từ lúc nhập ID, chỉ cần scroll lên cho user thấy
+        updateQRPreview(newId);
         
         // Thêm thiết bị vào danh sách lịch sử đã flash
         addFlashedDevice(newId);
@@ -1081,7 +1073,7 @@ function saveHistory(id) {
 function renderHistory() {
     const h = JSON.parse(localStorage.getItem('flash_history') || '[]');
     $('idHistory').innerHTML = h.map(id =>
-        `<button class="btn btn-sm" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);font-family:monospace;" onclick="document.getElementById('deviceIdInput').value='${id}'">${id}</button>`
+        `<button class="btn btn-sm" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);font-family:monospace;" onclick="document.getElementById('deviceIdInput').value='${id}';updateQRPreview('${id}');document.getElementById('otaDeviceIdDisplay').textContent='${id}'">${id}</button>`
     ).join('');
 }
 
@@ -1301,12 +1293,70 @@ const FW_AUTH_KEY = 'admin:13520918';
 let pendingOtaUrl = '';
 let pendingOtaAction = '';
 
-// Sync OTA Device ID display from main Device ID input
+// Sync OTA Device ID display + QR preview from main Device ID input
 $('deviceIdInput').addEventListener('input', () => {
-    $('otaDeviceIdDisplay').textContent = $('deviceIdInput').value.trim() || '—';
+    const id = $('deviceIdInput').value.trim();
+    $('otaDeviceIdDisplay').textContent = id || '—';
+    updateQRPreview(id);
 });
 // Init on load
 $('otaDeviceIdDisplay').textContent = $('deviceIdInput').value.trim() || '—';
+updateQRPreview($('deviceIdInput').value.trim());
+
+function updateQRPreview(id) {
+    if (!id) {
+        $('qrPreview').style.display = 'none';
+        return;
+    }
+    try {
+        const qr = qrcode(0, 'M');
+        qr.addData(`add#${id}#master`);
+        qr.make();
+        $('qrPreviewCode').innerHTML = qr.createImgTag(5, 0);
+        $('qrPreviewLabel').textContent = id;
+        $('qrPreview').style.display = 'block';
+    } catch(e) {
+        $('qrPreview').style.display = 'none';
+    }
+}
+
+function downloadQR() {
+    const id = $('qrPreviewLabel').textContent;
+    if (!id) return;
+    const qr = qrcode(0, 'M');
+    qr.addData(`add#${id}#master`);
+    qr.make();
+    // Create a canvas to render QR with label
+    const imgSize = 200;
+    const padding = 20;
+    const labelH = 30;
+    const totalW = imgSize + padding * 2;
+    const totalH = imgSize + padding * 2 + labelH;
+    const canvas = document.createElement('canvas');
+    canvas.width = totalW;
+    canvas.height = totalH;
+    const ctx = canvas.getContext('2d');
+    // White background
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, totalW, totalH);
+    // Draw QR
+    const qrImg = new Image();
+    qrImg.src = qr.createDataURL(10, 0);
+    qrImg.onload = () => {
+        ctx.drawImage(qrImg, padding, padding, imgSize, imgSize);
+        // Draw label
+        ctx.fillStyle = '#000';
+        ctx.font = 'bold 16px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(id, totalW / 2, imgSize + padding + labelH - 5);
+        // Download
+        const link = document.createElement('a');
+        link.download = `QR_${id}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    };
+}
+window.downloadQR = downloadQR;
 
 function otaShowProgress(show, percent, text) {
     const el = $('otaProgress');
