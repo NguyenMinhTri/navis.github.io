@@ -55,12 +55,12 @@ input[type="file"] { display: none; }
 /* Form */
 .field { margin-bottom: 14px; }
 .field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-.field input {
+.field input, .field select {
     width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border);
     border-radius: 8px; color: var(--text); font-size: 15px; font-family: 'Inter', monospace;
     font-weight: 600; transition: border-color 0.2s;
 }
-.field input:focus { outline: none; border-color: var(--accent); }
+.field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .info-item { background: var(--bg); border-radius: 8px; padding: 10px 14px; }
 .info-item .label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -168,7 +168,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
 
 <div id="appContent" style="display:none;">
 <div class="header">
-    <h1>⚡ <span>Navis Firmware Flasher</span> <small style="font-size: 11px; font-weight: normal; color: var(--text2); background: var(--bg3); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle; display: inline-block;">Web v3.5 (06/07/2026)</small></h1>
+    <h1>⚡ <span>Navis Firmware Flasher</span> <small style="font-size: 11px; font-weight: normal; color: var(--text2); background: var(--bg3); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle; display: inline-block;">Web v3.6 (04/08/2026)</small></h1>
     <p>Flash ESP32 firmware trực tiếp từ trình duyệt qua USB</p>
 </div>
 
@@ -214,11 +214,20 @@ if (sessionStorage.getItem('fw_auth') === '1') {
             Tối đa 23 ký tự. Nếu để trống, tự đọc MAC address từ ESP32 → <strong>NM03-XXXXXXXXXXXX</strong>
         </div>
         <div id="idHistory" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+        <div class="field" style="margin:14px 0 0;">
+            <label>Định dạng QR — áp dụng cho xem trước, tải ảnh và in A4</label>
+            <select id="qrModeSelect" onchange="onQRModeChange()">
+                <option value="app-link">🔗 App Link — mở Navis · Master · vô thời hạn</option>
+                <option value="legacy">📟 Legacy — add#DeviceID#master</option>
+            </select>
+            <div id="qrModeHelp" style="font-size:11px;color:var(--text2);margin-top:6px;line-height:1.5;"></div>
+        </div>
         <!-- QR Preview realtime -->
         <div id="qrPreview" style="display:none;margin-top:14px;text-align:center;padding:14px;background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.2);border-radius:8px;">
             <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">📱 Mã QR thiết bị:</div>
             <div id="qrPreviewCode" style="display:inline-block;padding:8px;background:#fff;border-radius:6px;image-rendering:pixelated;"></div>
             <div style="font-size:14px;font-weight:700;color:var(--accent2);margin-top:6px;font-family:monospace;" id="qrPreviewLabel"></div>
+            <div style="font-size:10px;color:var(--green);margin-top:3px;font-weight:700;letter-spacing:.4px;" id="qrPreviewType"></div>
             <button class="btn" id="qrDownloadBtn" onclick="downloadQR()" style="margin-top:8px;padding:6px 14px;font-size:12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">📥 Tải ảnh QR</button>
         </div>
     </div>
@@ -1138,6 +1147,64 @@ async function autoLoadFirmware() {
 }
 
 // ===== Flashed Devices History & QR Code =====
+const QR_MODE_STORAGE_KEY = 'firmware_tool_qr_mode';
+const QR_MODE_APP_LINK = 'app-link';
+const QR_MODE_LEGACY = 'legacy';
+
+function encodeNavisQRSegment(value) {
+    const bytes = new TextEncoder().encode(String(value));
+    let binary = '';
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    const encoded = btoa(binary);
+    return encoded.substring(1) + encoded.charAt(0);
+}
+
+function getSelectedQRMode() {
+    return $('qrModeSelect')?.value === QR_MODE_LEGACY
+        ? QR_MODE_LEGACY
+        : QR_MODE_APP_LINK;
+}
+
+function buildDeviceQRContent(deviceId, mode = getSelectedQRMode()) {
+    if (mode === QR_MODE_LEGACY) return `add#${deviceId}#master`;
+    const payload = `${encodeNavisQRSegment(deviceId)}~${encodeNavisQRSegment('master')}`;
+    return `https://navis-app.web.app/app#${payload}`;
+}
+
+function getQRModeMeta(mode = getSelectedQRMode()) {
+    return mode === QR_MODE_LEGACY
+        ? 'MASTER · LEGACY'
+        : 'MASTER · APP LINK · ∞';
+}
+
+function updateQRModeHelp() {
+    const appLinkMode = getSelectedQRMode() === QR_MODE_APP_LINK;
+    $('qrModeHelp').innerHTML = appLinkMode
+        ? 'Quét bằng camera thường sẽ mở Navis. Quyền <strong>Master</strong>, không có ngày hết hạn. Thiết bị thường vẫn cần chủ thiết bị duyệt.'
+        : 'Định dạng nội bộ cũ <strong>add#DeviceID#master</strong>, chỉ dùng khi quét trực tiếp trong Navis.';
+}
+
+function onQRModeChange() {
+    localStorage.setItem(QR_MODE_STORAGE_KEY, getSelectedQRMode());
+    updateQRModeHelp();
+    updateQRPreview($('deviceIdInput').value.trim());
+    log('info', `📱 Đã chọn định dạng QR: ${getQRModeMeta()}`);
+}
+
+function initializeQRMode() {
+    const savedMode = localStorage.getItem(QR_MODE_STORAGE_KEY);
+    $('qrModeSelect').value = savedMode === QR_MODE_LEGACY
+        ? QR_MODE_LEGACY
+        : QR_MODE_APP_LINK;
+    updateQRModeHelp();
+}
+
+function escapeQRLabel(value) {
+    return String(value).replace(/[&<>'"]/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    })[char]);
+}
+
 function addFlashedDevice(id) {
     if (!id) return;
     let list = JSON.parse(localStorage.getItem('flashed_devices_list') || '[]');
@@ -1183,20 +1250,22 @@ function clearFlashedHistory() {
 function printFlashedQR() {
     const list = JSON.parse(localStorage.getItem('flashed_devices_list') || '[]');
     if (list.length === 0) return;
-    
-    const summary = `Danh sách đã flash (${list.length} thiết bị)`;
+
+    const qrMode = getSelectedQRMode();
+    const qrMeta = getQRModeMeta(qrMode);
+    const summary = `Danh sách đã flash (${list.length} thiết bị) · ${qrMeta}`;
     
     // Generate QR items
     const qrItems = list.map(id => {
         const qr = qrcode(0, 'M');
-        qr.addData(`add#${id}#master`);
+        qr.addData(buildDeviceQRContent(id, qrMode));
         qr.make();
-        return { id, img: qr.createDataURL(4, 0) };
+        return { id, img: qr.createDataURL(4, 0), meta: qrMeta };
     });
     
     const win = window.open('', '_blank');
     const qrGridHtml = qrItems.map(q => 
-        '<div class="qr-item"><img src="' + q.img + '"><div class="label">' + q.id + '</div></div>'
+        '<div class="qr-item"><img src="' + q.img + '"><div class="label">' + escapeQRLabel(q.id) + '</div><div class="meta">' + escapeQRLabel(q.meta) + '</div></div>'
     ).join('');
     
     win.document.write(`<!DOCTYPE html><html><head>
@@ -1220,6 +1289,7 @@ function printFlashedQR() {
             font-size: 9px; font-weight: bold; margin-top: 3px;
             text-align: center; word-break: break-all;
         }
+        .qr-item .meta { font-size: 6px; color: #555; margin-top: 2px; text-align: center; }
         .page-title {
             text-align: center; font-size: 11px; color: #666;
             margin-bottom: 8px; padding-bottom: 4px;
@@ -1239,7 +1309,7 @@ function printFlashedQR() {
     </div>
     </body></html>`);
     win.document.close();
-    log('success', `📱 Mở trang in QR cho ${list.length} thiết bị`);
+    log('success', `📱 Mở trang in ${list.length} QR · ${qrMeta}`);
 }
 
 function addManualQR() {
@@ -1282,8 +1352,10 @@ window.removeFlashedDevice = removeFlashedDevice;
 window.clearFlashedHistory = clearFlashedHistory;
 window.printFlashedQR = printFlashedQR;
 window.addManualQR = addManualQR;
+window.onQRModeChange = onQRModeChange;
 
 // Initialize flashed list UI
+initializeQRMode();
 renderFlashedList();
 
 // ===== OTA Update (via HttpPostRequestV3) =====
@@ -1309,11 +1381,13 @@ function updateQRPreview(id) {
         return;
     }
     try {
+        const qrMode = getSelectedQRMode();
         const qr = qrcode(0, 'M');
-        qr.addData(`add#${id}#master`);
+        qr.addData(buildDeviceQRContent(id, qrMode));
         qr.make();
         $('qrPreviewCode').innerHTML = qr.createImgTag(5, 0);
         $('qrPreviewLabel').textContent = id;
+        $('qrPreviewType').textContent = getQRModeMeta(qrMode);
         $('qrPreview').style.display = 'block';
     } catch(e) {
         $('qrPreview').style.display = 'none';
@@ -1323,13 +1397,15 @@ function updateQRPreview(id) {
 function downloadQR() {
     const id = $('qrPreviewLabel').textContent;
     if (!id) return;
+    const qrMode = getSelectedQRMode();
+    const qrMeta = getQRModeMeta(qrMode);
     const qr = qrcode(0, 'M');
-    qr.addData(`add#${id}#master`);
+    qr.addData(buildDeviceQRContent(id, qrMode));
     qr.make();
     // Create a canvas to render QR with label
     const imgSize = 200;
     const padding = 20;
-    const labelH = 30;
+    const labelH = 48;
     const totalW = imgSize + padding * 2;
     const totalH = imgSize + padding * 2 + labelH;
     const canvas = document.createElement('canvas');
@@ -1348,7 +1424,10 @@ function downloadQR() {
         ctx.fillStyle = '#000';
         ctx.font = 'bold 16px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(id, totalW / 2, imgSize + padding + labelH - 5);
+        ctx.fillText(id, totalW / 2, imgSize + padding + 20);
+        ctx.fillStyle = '#555';
+        ctx.font = 'bold 10px Arial';
+        ctx.fillText(qrMeta, totalW / 2, imgSize + padding + 38);
         // Download
         const link = document.createElement('a');
         link.download = `QR_${id}.png`;
