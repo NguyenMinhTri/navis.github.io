@@ -358,7 +358,13 @@ if (sessionStorage.getItem('fw_auth') === '1') {
 
     <!-- Console -->
     <div class="card">
-        <div class="card-title">📋 Console <button class="btn btn-sm" style="margin-left:auto;background:var(--bg);color:var(--text2);border:1px solid var(--border);" onclick="clearConsole()">Clear</button></div>
+        <div class="card-title" style="display:flex;align-items:center;">
+            📋 Console 
+            <div style="margin-left:auto;display:flex;gap:8px;">
+                <button class="btn btn-sm" style="background:var(--bg);color:var(--text2);border:1px solid var(--border);" onclick="saveConsoleToTxt()">💾 Save TXT</button>
+                <button class="btn btn-sm" style="background:var(--bg);color:var(--text2);border:1px solid var(--border);" onclick="clearConsole()">Clear</button>
+            </div>
+        </div>
         <div class="console" id="console"></div>
     </div>
 </div>
@@ -539,10 +545,27 @@ function log(cls, text) {
     div.textContent = `[${ts}] ${text}`;
     consoleEl.appendChild(div);
     consoleEl.scrollTop = consoleEl.scrollHeight;
-    while (consoleEl.children.length > 500) consoleEl.removeChild(consoleEl.firstChild);
+    // Không giới hạn số dòng (MAXIMUM)
 }
+
+function saveConsoleToTxt() {
+    let text = "";
+    const lines = consoleEl.querySelectorAll('.line');
+    lines.forEach(line => {
+        text += line.textContent + "\n";
+    });
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `console_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
 function clearConsole() { consoleEl.innerHTML = ''; }
 window.clearConsole = clearConsole;
+window.saveConsoleToTxt = saveConsoleToTxt;
 
 // ===== File Upload =====
 const dropZone = $('dropZone');
