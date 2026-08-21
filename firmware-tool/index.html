@@ -168,7 +168,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
 
 <div id="appContent" style="display:none;">
 <div class="header">
-    <h1>⚡ <span>Navis Firmware Flasher</span> <small style="font-size: 11px; font-weight: normal; color: var(--text2); background: var(--bg3); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle; display: inline-block;">Web v3.6 (04/08/2026)</small></h1>
+    <h1>⚡ <span>Navis Firmware Flasher</span> <small style="font-size: 11px; font-weight: normal; color: var(--text2); background: var(--bg3); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; margin-left: 10px; vertical-align: middle; display: inline-block;">Web v3.7 (21/08/2026)</small></h1>
     <p>Flash ESP32 firmware trực tiếp từ trình duyệt qua USB</p>
 </div>
 
@@ -217,6 +217,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
         <div class="field" style="margin:14px 0 0;">
             <label>Định dạng QR — áp dụng cho xem trước, tải ảnh và in A4</label>
             <select id="qrModeSelect" onchange="onQRModeChange()">
+                <option value="factory-auto">🏭 Factory App Link — Master · quét vào thẳng · vô thời hạn</option>
                 <option value="app-link">🔗 App Link — mở Navis · Master · vô thời hạn</option>
                 <option value="legacy">📟 Legacy — add#DeviceID#master</option>
             </select>
@@ -375,6 +376,13 @@ if (sessionStorage.getItem('fw_auth') === '1') {
         <h3>📡 Xác nhận OTA Update</h3>
         <div class="confirm-info">Gửi lệnh cập nhật firmware OTA tới thiết bị:</div>
         <div class="confirm-id" id="otaConfirmDeviceId"></div>
+        <div class="field" id="otaTargetDeviceField" style="text-align:left;margin:12px 0;">
+            <label>Device ID đích nhận lệnh OTA</label>
+            <input type="text" id="otaTargetDeviceId" placeholder="Nhập Device ID cần gửi OTA" autocomplete="off">
+            <div style="font-size:10px;color:var(--text2);margin-top:5px;line-height:1.4;">
+                Có thể khác Device ID dùng để patch/upload firmware ở trên.
+            </div>
+        </div>
         <div class="confirm-info" id="otaConfirmUrl" style="word-break:break-all;font-size:11px;color:var(--text2);"></div>
         <div class="btn-row" style="justify-content:center;margin-top:20px;">
             <button class="btn btn-accent" onclick="confirmOTA()" id="otaConfirmBtn">📡 Gửi OTA</button>
@@ -1171,8 +1179,11 @@ async function autoLoadFirmware() {
 
 // ===== Flashed Devices History & QR Code =====
 const QR_MODE_STORAGE_KEY = 'firmware_tool_qr_mode';
+const QR_MODE_FACTORY_AUTO = 'factory-auto';
 const QR_MODE_APP_LINK = 'app-link';
 const QR_MODE_LEGACY = 'legacy';
+const factoryLinkCache = new Map();
+let qrPreviewRequestId = 0;
 
 function encodeNavisQRSegment(value) {
     const bytes = new TextEncoder().encode(String(value));
@@ -1183,9 +1194,9 @@ function encodeNavisQRSegment(value) {
 }
 
 function getSelectedQRMode() {
-    return $('qrModeSelect')?.value === QR_MODE_LEGACY
-        ? QR_MODE_LEGACY
-        : QR_MODE_APP_LINK;
+    const mode = $('qrModeSelect')?.value;
+    if (mode === QR_MODE_LEGACY || mode === QR_MODE_APP_LINK) return mode;
+    return QR_MODE_FACTORY_AUTO;
 }
 
 function buildDeviceQRContent(deviceId, mode = getSelectedQRMode()) {
@@ -1195,16 +1206,42 @@ function buildDeviceQRContent(deviceId, mode = getSelectedQRMode()) {
 }
 
 function getQRModeMeta(mode = getSelectedQRMode()) {
-    return mode === QR_MODE_LEGACY
-        ? 'MASTER · LEGACY'
-        : 'MASTER · APP LINK · ∞';
+    if (mode === QR_MODE_LEGACY) return 'MASTER · LEGACY';
+    if (mode === QR_MODE_FACTORY_AUTO) return 'MASTER · FACTORY AUTO · ∞';
+    return 'MASTER · APP LINK · ∞';
+}
+
+async function fetchFactoryLinks(deviceIds) {
+    const missingIds = [...new Set(deviceIds)].filter(id => id && !factoryLinkCache.has(id));
+    if (missingIds.length > 0) {
+        const response = await fetch(API_V3_BASE + '/api/factory-share-links', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-FW-Key': FW_AUTH_KEY },
+            body: JSON.stringify({ deviceIds: missingIds }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || `HTTP ${response.status}`);
+        Object.entries(data.links || {}).forEach(([id, link]) => factoryLinkCache.set(id, link));
+    }
+    return Object.fromEntries(deviceIds.map(id => [id, factoryLinkCache.get(id)]));
+}
+
+async function getDeviceQRContent(deviceId, mode = getSelectedQRMode()) {
+    if (mode !== QR_MODE_FACTORY_AUTO) return buildDeviceQRContent(deviceId, mode);
+    const links = await fetchFactoryLinks([deviceId]);
+    if (!links[deviceId]) throw new Error(`Không tạo được Factory App Link cho ${deviceId}`);
+    return links[deviceId];
 }
 
 function updateQRModeHelp() {
-    const appLinkMode = getSelectedQRMode() === QR_MODE_APP_LINK;
-    $('qrModeHelp').innerHTML = appLinkMode
-        ? 'Quét bằng camera thường sẽ mở Navis. Quyền <strong>Master</strong>, không có ngày hết hạn. Thiết bị thường vẫn cần chủ thiết bị duyệt.'
-        : 'Định dạng nội bộ cũ <strong>add#DeviceID#master</strong>, chỉ dùng khi quét trực tiếp trong Navis.';
+    const mode = getSelectedQRMode();
+    if (mode === QR_MODE_FACTORY_AUTO) {
+        $('qrModeHelp').innerHTML = 'QR nhà máy được Functions xác thực. Quét bằng camera sẽ mở Navis và thêm ngay quyền <strong>Master</strong>, không cần duyệt, không hết hạn.';
+    } else if (mode === QR_MODE_APP_LINK) {
+        $('qrModeHelp').innerHTML = 'Quét bằng camera thường sẽ mở Navis. Quyền <strong>Master</strong>, không có ngày hết hạn. Thiết bị thường vẫn cần chủ thiết bị duyệt.';
+    } else {
+        $('qrModeHelp').innerHTML = 'Định dạng nội bộ cũ <strong>add#DeviceID#master</strong>, chỉ dùng khi quét trực tiếp trong Navis.';
+    }
 }
 
 function onQRModeChange() {
@@ -1216,9 +1253,9 @@ function onQRModeChange() {
 
 function initializeQRMode() {
     const savedMode = localStorage.getItem(QR_MODE_STORAGE_KEY);
-    $('qrModeSelect').value = savedMode === QR_MODE_LEGACY
-        ? QR_MODE_LEGACY
-        : QR_MODE_APP_LINK;
+    $('qrModeSelect').value = [QR_MODE_FACTORY_AUTO, QR_MODE_APP_LINK, QR_MODE_LEGACY].includes(savedMode)
+        ? savedMode
+        : QR_MODE_FACTORY_AUTO;
     updateQRModeHelp();
 }
 
@@ -1270,18 +1307,32 @@ function clearFlashedHistory() {
     }
 }
 
-function printFlashedQR() {
+async function printFlashedQR() {
     const list = JSON.parse(localStorage.getItem('flashed_devices_list') || '[]');
     if (list.length === 0) return;
 
     const qrMode = getSelectedQRMode();
     const qrMeta = getQRModeMeta(qrMode);
     const summary = `Danh sách đã flash (${list.length} thiết bị) · ${qrMeta}`;
-    
+
+    let factoryLinks = {};
+    if (qrMode === QR_MODE_FACTORY_AUTO) {
+        try {
+            log('info', `🏭 Đang tạo ${list.length} Factory App Link...`);
+            factoryLinks = await fetchFactoryLinks(list);
+        } catch (error) {
+            log('error', `❌ Không tạo được Factory QR: ${error.message}`);
+            alert(`Không tạo được Factory QR: ${error.message}`);
+            return;
+        }
+    }
+
     // Generate QR items
     const qrItems = list.map(id => {
         const qr = qrcode(0, 'M');
-        qr.addData(buildDeviceQRContent(id, qrMode));
+        qr.addData(qrMode === QR_MODE_FACTORY_AUTO
+            ? factoryLinks[id]
+            : buildDeviceQRContent(id, qrMode));
         qr.make();
         return { id, img: qr.createDataURL(4, 0), meta: qrMeta };
     });
@@ -1387,6 +1438,20 @@ const FW_AUTH_KEY = 'admin:13520918';
 
 let pendingOtaUrl = '';
 let pendingOtaAction = '';
+let pendingOtaTargetId = '';
+
+function prepareOtaTargetField(defaultDeviceId, visible = true) {
+    $('otaTargetDeviceField').style.display = visible ? 'block' : 'none';
+    if (visible) $('otaTargetDeviceId').value = pendingOtaTargetId || defaultDeviceId;
+}
+
+function readOtaTargetDeviceId(defaultDeviceId) {
+    const targetId = $('otaTargetDeviceId').value.trim() || defaultDeviceId;
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(targetId)) {
+        throw new Error('Device ID đích không hợp lệ. Chỉ dùng chữ, số, dấu gạch ngang hoặc gạch dưới.');
+    }
+    return targetId;
+}
 
 // Sync OTA Device ID display + QR preview from main Device ID input
 $('deviceIdInput').addEventListener('input', () => {
@@ -1398,33 +1463,48 @@ $('deviceIdInput').addEventListener('input', () => {
 $('otaDeviceIdDisplay').textContent = $('deviceIdInput').value.trim() || '—';
 updateQRPreview($('deviceIdInput').value.trim());
 
-function updateQRPreview(id) {
+async function updateQRPreview(id) {
+    const requestId = ++qrPreviewRequestId;
     if (!id) {
         $('qrPreview').style.display = 'none';
         return;
     }
     try {
         const qrMode = getSelectedQRMode();
+        $('qrPreview').style.display = 'block';
+        $('qrPreviewCode').innerHTML = '<div style="width:150px;height:150px;display:grid;place-items:center;color:#666;font-size:12px;">Đang tạo QR...</div>';
+        const qrContent = await getDeviceQRContent(id, qrMode);
+        if (requestId !== qrPreviewRequestId) return;
         const qr = qrcode(0, 'M');
-        qr.addData(buildDeviceQRContent(id, qrMode));
+        qr.addData(qrContent);
         qr.make();
         $('qrPreviewCode').innerHTML = qr.createImgTag(5, 0);
         $('qrPreviewLabel').textContent = id;
         $('qrPreviewType').textContent = getQRModeMeta(qrMode);
         $('qrPreview').style.display = 'block';
     } catch(e) {
-        $('qrPreview').style.display = 'none';
+        if (requestId !== qrPreviewRequestId) return;
+        $('qrPreviewCode').innerHTML = `<div style="width:150px;min-height:90px;display:grid;place-items:center;color:#dc2626;font-size:11px;padding:10px;">${escapeQRLabel(e.message)}</div>`;
+        $('qrPreviewLabel').textContent = id;
+        $('qrPreviewType').textContent = 'KHÔNG TẠO ĐƯỢC QR';
+        log('error', `❌ QR ${id}: ${e.message}`);
     }
 }
 
-function downloadQR() {
+async function downloadQR() {
     const id = $('qrPreviewLabel').textContent;
     if (!id) return;
     const qrMode = getSelectedQRMode();
     const qrMeta = getQRModeMeta(qrMode);
     const qr = qrcode(0, 'M');
-    qr.addData(buildDeviceQRContent(id, qrMode));
-    qr.make();
+    try {
+        qr.addData(await getDeviceQRContent(id, qrMode));
+        qr.make();
+    } catch (error) {
+        log('error', `❌ Không tải được QR: ${error.message}`);
+        alert(`Không tạo được QR: ${error.message}`);
+        return;
+    }
     // Create a canvas to render QR with label
     const imgSize = 200;
     const padding = 20;
@@ -1493,6 +1573,8 @@ async function otaDoUpload(endpoint) {
     // If no file selected but URL exists, use Send OTA with URL only
     if (!hasFile && !hasFirmwareBuffer && existingUrl && endpoint === '/api/ota-send-web') {
         $('otaConfirmDeviceId').textContent = deviceId;
+        pendingOtaTargetId = deviceId;
+        prepareOtaTargetField(deviceId, true);
         $('otaConfirmUrl').textContent = 'URL: ' + existingUrl;
         $('otaConfirmBtn').textContent = '🚀 Xác nhận gửi OTA ngay';
         $('otaConfirmDialog').style.display = 'flex';
@@ -1520,6 +1602,8 @@ async function otaDoUpload(endpoint) {
 
     // Show confirm dialog
     $('otaConfirmDeviceId').textContent = deviceId;
+    pendingOtaTargetId = deviceId;
+    prepareOtaTargetField(deviceId, endpoint === '/api/ota-send-web');
     $('otaConfirmUrl').textContent = `File: ${fileName} (${(fileSize / 1024).toFixed(1)} KB)` +
         (version ? ` | FW: ${version}` : '') +
         (versionNum ? ` | NUM: ${versionNum}` : '');
@@ -1533,26 +1617,35 @@ window.otaUploadJSON = function() { otaDoUpload('/api/ota-upload-web'); };
 window.otaSendOTA = function() { otaDoUpload('/api/ota-send-web'); };
 
 window.confirmOTA = async function() {
-    $('otaConfirmDialog').style.display = 'none';
     const deviceId = $('deviceIdInput').value.trim();
+    if (pendingOtaAction === 'send-only' || pendingOtaAction === '/api/ota-send-web') {
+        try {
+            pendingOtaTargetId = readOtaTargetDeviceId(deviceId);
+        } catch (error) {
+            alert(error.message);
+            return;
+        }
+    }
+    $('otaConfirmDialog').style.display = 'none';
 
     // Case 1: Send OTA command only (no file upload, use existing URL)
     if (pendingOtaAction === 'send-only') {
-        log('info', `📡 Đang gửi OTA tới ${deviceId}...`);
-        otaShowResult('loading', `⏳ Đang gửi lệnh OTA tới <strong>${deviceId}</strong>...`);
+        const targetDeviceId = pendingOtaTargetId || deviceId;
+        log('info', `📡 Đang gửi OTA tới ${targetDeviceId}...`);
+        otaShowResult('loading', `⏳ Đang gửi lệnh OTA tới <strong>${targetDeviceId}</strong>...`);
         try {
             const resp = await fetch(API_V3_BASE + '/api/send-command', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    deviceId: deviceId,
+                    deviceId: targetDeviceId,
                     data: '{"ota_url_update": ' + pendingOtaUrl
                 })
             });
             const respText = await resp.text();
             if (resp.ok) {
-                log('success', `✅ OTA command sent to ${deviceId}!`);
-                otaShowResult('success', `✅ Đã gửi OTA tới <strong>${deviceId}</strong>!<br><span style="font-size:11px;color:var(--text2);">Thiết bị sẽ tự download firmware.</span>`);
+                log('success', `✅ OTA command sent to ${targetDeviceId}!`);
+                otaShowResult('success', `✅ Đã gửi OTA tới <strong>${targetDeviceId}</strong>!<br><span style="font-size:11px;color:var(--text2);">Thiết bị sẽ tự download firmware.</span>`);
             } else { throw new Error(`HTTP ${resp.status}: ${respText}`); }
         } catch (e) {
             log('error', `❌ OTA failed: ${e.message}`);
@@ -1649,13 +1742,15 @@ window.confirmOTA = async function() {
                 pendingOtaUrl = data.firmware_url;
                 pendingOtaAction = 'send-only';
                 
-                $('otaConfirmDeviceId').textContent = deviceId;
+                const targetDeviceId = pendingOtaTargetId || deviceId;
+                $('otaConfirmDeviceId').textContent = targetDeviceId;
+                prepareOtaTargetField(targetDeviceId, true);
                 $('otaConfirmUrl').textContent = 'Xác nhận URL file bin vừa upload: ' + data.firmware_url;
                 $('otaConfirmBtn').textContent = '🚀 Xác nhận gửi OTA ngay';
                 $('otaConfirmDialog').style.display = 'flex';
                 
                 log('info', '📋 Vui lòng xác nhận URL file bin vừa upload để gửi OTA.');
-                otaShowResult('success', `✅ Upload thành công. Vui lòng bấm xác nhận URL trên Popup để gửi OTA tới <strong>${deviceId}</strong>.`);
+                otaShowResult('success', `✅ Upload thành công. Vui lòng bấm xác nhận URL trên Popup để gửi OTA tới <strong>${targetDeviceId}</strong>.`);
             } else {
                 // Just upload & JSON
                 let resultHtml = `✅ <strong>${actionName}</strong> thành công!<br>`;
