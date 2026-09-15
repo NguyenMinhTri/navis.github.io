@@ -181,7 +181,7 @@ if (sessionStorage.getItem('fw_auth') === '1') {
                 <div class="info-item"><div class="label">Target Chip</div><div class="value" id="infoChip">ESP32-S3 (4MB)</div></div>
                 <div class="info-item"><div class="label">FW Version</div><div class="value" id="infoVersion">—</div></div>
                 <div class="info-item"><div class="label">Size</div><div class="value" id="infoSize">—</div></div>
-                <div class="info-item"><div class="label">Build Info</div><div class="value" id="infoBuild">—</div></div>
+                <div class="info-item"><div class="label">Thời gian cập nhật / Build</div><div class="value" id="infoBuild" style="color:var(--green);font-weight:600;">—</div></div>
                 <div class="info-item"><div class="label">Flash Offsets</div><div class="value" id="infoOffsets">0x0, 0x8K, 0x11K, 0x20K</div></div>
             </div>
         </div>
@@ -647,12 +647,12 @@ function analyzeFirmware() {
         const magic = (firmwareBuffer[0x20]) | (firmwareBuffer[0x21] << 8) | (firmwareBuffer[0x22] << 16) | (firmwareBuffer[0x23] << 24);
         if (magic === 0xabcd5432) {
             appDescFound = true;
-            appVersion = extractString(firmwareBuffer, 0x28, 32);
-            projName = extractString(firmwareBuffer, 0x48, 32);
-            const timeStr = extractString(firmwareBuffer, 0x68, 16);
-            const dateStr = extractString(firmwareBuffer, 0x78, 16);
-            buildDate = `${dateStr} ${timeStr}`;
-            idfVersion = extractString(firmwareBuffer, 0x88, 32);
+            appVersion = extractString(firmwareBuffer, 0x30, 32);
+            projName = extractString(firmwareBuffer, 0x50, 32);
+            const timeStr = extractString(firmwareBuffer, 0x70, 16);
+            const dateStr = extractString(firmwareBuffer, 0x80, 16);
+            buildDate = `${dateStr} ${timeStr}`.trim();
+            idfVersion = extractString(firmwareBuffer, 0x90, 32);
             log('success', `📦 App Header: ${projName} v${appVersion} (${buildDate}) on IDF ${idfVersion}`);
         }
     }
@@ -690,7 +690,19 @@ function analyzeFirmware() {
     // Update UI info
     $('infoSize').textContent = `${(firmwareBuffer.length / 1024).toFixed(1)} KB`;
     $('infoVersion').textContent = `v${appVersion} (NUM: ${versionNum})`;
-    $('infoBuild').textContent = buildDate ? buildDate : idfVersion;
+
+    let updateDisplay = buildDate;
+    if (serverFwMeta && serverFwMeta.update_time) {
+        updateDisplay = `${serverFwMeta.update_time} (Build: ${buildDate || idfVersion})`;
+        $('fwBadge').textContent = `Cập nhật: ${serverFwMeta.update_time}`;
+    } else if (buildDate) {
+        updateDisplay = `${buildDate} (${idfVersion})`;
+        $('fwBadge').textContent = `Ready · ${buildDate}`;
+    } else {
+        updateDisplay = idfVersion;
+        $('fwBadge').textContent = 'Ready';
+    }
+    $('infoBuild').textContent = updateDisplay;
     
     if (appVersion) $('otaVersion').value = appVersion;
     if (versionNum) $('otaVersionNum').value = versionNum;
@@ -1118,11 +1130,24 @@ async function decryptFirmware(encData) {
     return new Uint8Array(decrypted);
 }
 
+let serverFwMeta = null;
+
 // ===== Auto-load firmware từ server (encrypted) =====
 async function autoLoadFirmware() {
     log('info', '📥 Đang nạp firmware NM04 mặc định...');
     $('fwBadge').textContent = 'Loading...';
     $('fwBadge').className = 'badge badge-warn';
+    
+    // Fetch version metadata if available
+    try {
+        const vResp = await fetch('firmware/version.json?t=' + Date.now());
+        if (vResp.ok) {
+            serverFwMeta = await vResp.json();
+            if (serverFwMeta && serverFwMeta.update_time) {
+                log('info', `🕒 Thời gian cập nhật firmware: ${serverFwMeta.update_time}`);
+            }
+        }
+    } catch(e) {}
     
     // First try encrypted
     try {
