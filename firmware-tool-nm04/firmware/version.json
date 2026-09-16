@@ -1,10 +1,10 @@
 {
   "project": "ESP32-S3-GATEWAY-PLC",
-  "version": "1.0.5",
-  "build_date": "Sep 16 2026 15:55:51",
-  "update_time": "16/09/2026 15:57:50",
+  "version": "1.0.7",
+  "build_date": "Sep 16 2026 22:03:24",
+  "update_time": "16/09/2026 22:05:24",
   "idf_version": "v5.5.4",
   "file": "ESP32-S3-GATEWAY-PLC.bin",
-  "size_bytes": 1404976,
-  "size_kb": 1372.0
+  "size_bytes": 1406800,
+  "size_kb": 1373.8
 }
